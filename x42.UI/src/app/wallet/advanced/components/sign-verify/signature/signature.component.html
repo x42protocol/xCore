@@ -1,0 +1,33 @@
+<div class="modal-body">
+  <form>
+    <div class="form-group">
+      <label>Signature value</label>
+      <code style="word-break: break-all;" class="form-control">{{ content }}</code>
+    </div>
+    <div>
+      <button type="button" class="btn-block" ngxClipboard [cbContent]="content" (click)="onCopiedClick()" icon="pi pi-copy" label="Copy signature value" pButton></button>
+    </div>
+    <div class="form-group">
+      <label>Address</label>
+      <code style="word-break: break-all;" class="form-control">{{ address }}</code>
+    </div>
+    <div>
+      <button type="button" class="btn-block" ngxClipboard [cbContent]="address" (click)="onCopiedClick()" icon="pi pi-copy" label="Copy address" pButton></button>
+    </div>
+    <div class="form-group">
+      <label>Message</label>
+      <code style="word-break: break-all;" class="form-control">{{ message }}</code>
+    </div>
+    <div>
+      <button type="button" class="btn-block" ngxClipboard [cbContent]="message" (click)="onCopiedClick()" icon="pi pi-copy" label="Copy message" pButton></button>
+    </div>
+  </form>
+  <div *ngIf="copied" class="alert alert-success alert-dismissible fade show mt-3 mb-0" role="alert">
+    Copied to your clipboard
+  </div>
+
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn-block" (click)="activeModal.close('Close click')" label="OK" pButton></button>
+</div>
+<!-- /MODAL RECEIVE -->

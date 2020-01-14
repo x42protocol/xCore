@@ -1,0 +1,11 @@
+<div class="modal-body">
+  <h4 *ngIf="isvalid" class="text-success">
+    <span class="lnr lnr-checkmark-circle"></span> The signature is valid
+  </h4>
+  <h4 *ngIf="!isvalid" class="text-danger">
+    <span class="lnr lnr-cross-circle"></span> The signature is invalid
+  </h4>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn-block" (click)="activeModal.close('Close click')" label="OK" pButton></button>
+</div>

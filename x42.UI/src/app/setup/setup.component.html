@@ -1,0 +1,14 @@
+<main-menu [isUnLocked]="false"></main-menu>
+<p-panel header="Setup" [style]="{'margin-top':'20px','margin':'auto','width':'90%','padding':'20px'}">
+  If you would like to create a new wallet, please click <strong>Create</strong>.
+  <br />
+  If you have used the wallet before, please select <strong>Restore</strong> to recover your old wallet.
+  <p-footer>
+    <form novalidate>
+      <button type="button" class="btn-outline-primary" (click)="onRecoverClicked()" label="Restore" pButton style="width: 200px; height: 200px;"></button>
+      <button type="button" class="btn-primary" (click)="onCreateClicked()" label="Create" pButton style="width: 200px; height: 200px;"></button>
+      <br />
+      <button type="button" class="ui-button-rounded" (click)="onBackClicked()" icon="pi pi-arrow-left" label="Back" pButton></button>
+    </form>
+  </p-footer>
+</p-panel>

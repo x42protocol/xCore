@@ -1,0 +1,59 @@
+<section id="content">
+  <section class="mt-3">
+    <p-tabView>
+      <p-tabPanel header="Sign" leftIcon="pi pi-pencil">
+        <form [formGroup]="signatureForm">
+          <div class="form-group">
+            <label>Signature address</label>
+            <p-dropdown [options]="allAddresses" placeholder="Choose a address" formControlName="address" autoWidth="false" [style]="{'width':'100%'}" filter="true">
+              <ng-template let-item pTemplate="selectedItem">
+                ({{item.title}}) <span style="vertical-align:middle; margin-left: .5em">{{item.value}}</span>
+              </ng-template>
+              <ng-template let-address pTemplate="item">
+                <div class="ui-helper-clearfix" style="position: relative;height: 25px;">
+                  ({{address.title}}) <span style="vertical-align:middle; margin-left: .5em">{{address.value}}</span>
+                </div>
+              </ng-template>
+            </p-dropdown>
+            <div *ngIf="signatureFormErrors.address" class="invalid-feedback">{{ signatureFormErrors.address }}</div>
+          </div>
+          <div class="form-group">
+            <label>Message</label>
+            <textarea class="form-control" style="height: 100px;" placeholder="Enter the message that you want to sign" formControlName="message" [class.is-invalid]="signatureFormErrors.message" [class.is-valid]="!signatureFormErrors.message && signatureForm.get('message').valid" pInputTextarea></textarea>
+            <div *ngIf="signatureFormErrors.message" class="invalid-feedback">{{ signatureFormErrors.message }}</div>
+          </div>
+          <div class="form-group">
+            <label>Wallet password</label>
+            <input class="form-control" type="password" formControlName="password" [class.is-invalid]="signatureFormErrors.password" [class.is-valid]="!signatureFormErrors.password && signatureForm.get('password').valid" pInputText/>
+            <div *ngIf="signatureFormErrors.password" class="invalid-feedback">{{ signatureFormErrors.password }}</div>
+          </div>
+          <div class="form-group">
+            <button type="button" class="btn-block" (click)="onSignButtonClick($event.target)" [disabled]="!signatureForm.valid" label="Sign" pButton></button>
+          </div>
+        </form>
+      </p-tabPanel>
+      <p-tabPanel header="Verify" leftIcon="pi pi-check-circle">
+        <form [formGroup]="verifyForm">
+          <div class="form-group">
+            <label>Signature address</label>
+            <input class="form-control" formControlName="address" [class.is-invalid]="verifyFormErrors.address" [class.is-valid]="!verifyFormErrors.address && verifyForm.get('address').valid" placeholder="Enter the address of the signature" pInputText/>
+            <div *ngIf="verifyFormErrors.address" class="invalid-feedback">{{ verifyFormErrors.address }}</div>
+          </div>
+          <div class="form-group">
+            <label>Message</label>
+            <textarea class="form-control" style="height: 100px;" placeholder="Enter the message that you want to verify" formControlName="message" [class.is-invalid]="verifyFormErrors.message" [class.is-valid]="!verifyFormErrors.message && verifyForm.get('message').valid" pInputTextarea></textarea>
+            <div *ngIf="verifyFormErrors.message" class="invalid-feedback">{{ verifyFormErrors.message }}</div>
+          </div>
+          <div class="form-group">
+            <label>Signature value</label>
+            <input type="text" class="form-control" placeholder="Enter the signature value that you want to verify" formControlName="signature" [class.is-invalid]="verifyFormErrors.signatureValue" [class.is-valid]="!verifyFormErrors.signature && verifyForm.get('signature').valid" pInputText/>
+            <div *ngIf="verifyFormErrors.signature" class="invalid-feedback">{{ verifyFormErrors.signature }}</div>
+          </div>
+          <div class="form-group">
+            <button type="button" class="btn-block" (click)="onVerifyButtonClick($event.target)" [disabled]="!verifyForm.valid" label="Verify" pButton></button>
+          </div>
+        </form>
+      </p-tabPanel>
+    </p-tabView>
+  </section>
+</section>
