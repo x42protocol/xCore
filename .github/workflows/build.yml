@@ -49,11 +49,15 @@ jobs:
       with:
         node-version: ${{ matrix.node_version }}
 
-    - name: Variables
+    - name: Package NPM Variables
       run: |
         cd ${{ env.UI_PATH }}
         echo "::set-env name=NAME::$(npm run name --silent)"
         echo "::set-env name=VERSION::$(npm run version --silent)"
+        
+    - name: Release Variables
+      run: |
+        cd ${{ env.UI_PATH }}
         echo "::set-env name=RELEASE_CONFIGURATION::${{ matrix.runtime }}"
         echo "::set-env name=RELEASE_NAME::${{ env.NAME }}-v${{ env.VERSION }}-${{ matrix.runtime }}${{ matrix.extension }}"
 
