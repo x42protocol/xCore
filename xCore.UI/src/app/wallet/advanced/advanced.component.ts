@@ -10,9 +10,9 @@ import { MenuItem } from 'primeng/api';
 
 export class AdvancedComponent implements OnInit, OnDestroy {
 
-  constructor(private router: Router) {
-  }
-  private items: MenuItem[];
+  constructor(private router: Router) { }
+
+  public items: MenuItem[];
 
   ngOnInit() {
     this.items = [{

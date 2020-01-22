@@ -26,18 +26,20 @@ export class MainMenuComponent implements OnInit, OnDestroy {
 
   @Input() public isUnLocked: boolean = false;
 
-  private generalWalletInfoSubscription: Subscription;
-  private stakingInfoSubscription: Subscription;
-  private nodeStatusSubscription: Subscription;
   public lastBlockSyncedHeight: number;
   public chainTip: number;
-  private isChainSynced: boolean;
+  public isChainSynced: boolean;
   public connectedNodes: number = 0;
-  private percentSyncedNumber: number = 0;
   public percentSynced: string;
   public stakingEnabled: boolean;
   public sidechainsEnabled: boolean;
   public settingsMenu: boolean;
+
+  private generalWalletInfoSubscription: Subscription;
+  private stakingInfoSubscription: Subscription;
+  private nodeStatusSubscription: Subscription;
+  private percentSyncedNumber: number = 0;
+
 
   toolTip = '';
   connectedNodesTooltip = '';

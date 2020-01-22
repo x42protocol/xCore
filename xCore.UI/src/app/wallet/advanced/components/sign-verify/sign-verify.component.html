@@ -46,7 +46,7 @@
           </div>
           <div class="form-group">
             <label>Signature value</label>
-            <input type="text" class="form-control" placeholder="Enter the signature value that you want to verify" formControlName="signature" [class.is-invalid]="verifyFormErrors.signatureValue" [class.is-valid]="!verifyFormErrors.signature && verifyForm.get('signature').valid" pInputText/>
+            <input type="text" class="form-control" placeholder="Enter the signature value that you want to verify" formControlName="signature" [class.is-invalid]="verifyFormErrors.signature" [class.is-valid]="!verifyFormErrors.signature && verifyForm.get('signature').valid" pInputText/>
             <div *ngIf="verifyFormErrors.signature" class="invalid-feedback">{{ verifyFormErrors.signature }}</div>
           </div>
           <div class="form-group">

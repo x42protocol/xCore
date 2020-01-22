@@ -13,11 +13,12 @@ import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/api';
 })
 export class SendConfirmationComponent implements OnInit {
 
-  private transaction: any;
-  private transactionFee: any;
+  public transaction: any;
+  public transactionFee: any;
+  public opReturnAmount: number;
+  public hasOpReturn: boolean;
+  
   private sidechainEnabled: boolean;
-  private opReturnAmount: number;
-  private hasOpReturn: boolean;
   constructor(private globalService: GlobalService, public ref: DynamicDialogRef, public config: DynamicDialogConfig) { }
 
   public showDetails: boolean = false;

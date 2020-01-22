@@ -14,14 +14,14 @@ import { TransactionInfo } from '../../shared/models/transaction-info';
   styleUrls: ['./transaction-details.component.css']
 })
 export class TransactionDetailsComponent implements OnInit, OnDestroy {
-  
-  private transaction: TransactionInfo;
-  constructor(private FullNodeApiService: FullNodeApiService, private globalService: GlobalService, public ref: DynamicDialogRef, public config: DynamicDialogConfig) {}
+  constructor(private FullNodeApiService: FullNodeApiService, private globalService: GlobalService, public ref: DynamicDialogRef, public config: DynamicDialogConfig) { }
 
+  public transaction: TransactionInfo;
   public copied: boolean = false;
   public coinUnit: string;
   public confirmations: number;
   public copyType: SelectItem[];
+
   private generalWalletInfoSubscription: Subscription;
   private lastBlockSyncedHeight: number;
 
@@ -47,7 +47,7 @@ export class TransactionDetailsComponent implements OnInit, OnDestroy {
     let walletInfo = new WalletInfo(this.globalService.getWalletName())
     this.generalWalletInfoSubscription = this.FullNodeApiService.getGeneralInfo(walletInfo)
       .subscribe(
-        response =>  {
+        response => {
           let generalWalletInfoResponse = response;
           this.lastBlockSyncedHeight = generalWalletInfoResponse.lastBlockSyncedHeight;
           this.getConfirmations(this.transaction);
@@ -74,7 +74,7 @@ export class TransactionDetailsComponent implements OnInit, OnDestroy {
   }
 
   private cancelSubscriptions() {
-    if(this.generalWalletInfoSubscription) {
+    if (this.generalWalletInfoSubscription) {
       this.generalWalletInfoSubscription.unsubscribe();
     }
   };
