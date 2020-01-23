@@ -9,7 +9,7 @@
 				<p-dropdown [options]="wallets" placeholder="Choose a wallet" optionLabel="value" formControlName="selectWallet" autoWidth="false" [style]="{'width':'100%'}"></p-dropdown>
 			</div>
 				<div class="form-group mt-3">
-					<input *ngIf="walletSelected" type="password" class="form-control" id="Password" [class.is-invalid]="formErrors.password" [class.is-valid]="!formErrors.password && openWalletForm.get('password').valid" id="Password" formControlName="password" autofocus placeholder="Enter your password." (keyup.enter)="onEnter()" pInputText>
+					<input *ngIf="walletSelected" type="password" class="form-control" id="Password" [class.is-invalid]="formErrors.password" [class.is-valid]="!formErrors.password && openWalletForm.get('password').valid" formControlName="password" autofocus placeholder="Enter your password." (keyup.enter)="onEnter()" pInputText>
 					<div *ngIf="formErrors.password" class="invalid-feedback">{{ formErrors.password }}</div>
 				</div>
 		</form>
