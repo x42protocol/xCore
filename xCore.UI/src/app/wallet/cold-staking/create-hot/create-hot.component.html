@@ -58,11 +58,11 @@
   </form>
 
   <div class="modal-footer" *ngIf="acknowledgeWarning">
-    <button type="button" class="btn-block" (click)="ref.close('Close click')" label="OK" pButton></button>
+    <button type="button" class="btn-block" (click)="activeModal.close('Close click')" label="OK" pButton></button>
   </div>
 
   <div class="modal-footer" *ngIf="!acknowledgeWarning">
-    <button type="button" class="btn-block ui-button-success" (click)="ref.close('Close click')" label="Cancel" pButton></button>
+    <button type="button" class="btn-block ui-button-success" (click)="activeModal.close('Close click')" label="Cancel" pButton></button>
   </div>
 
 </div>

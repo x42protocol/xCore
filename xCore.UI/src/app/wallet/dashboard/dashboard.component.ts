@@ -35,11 +35,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public unconfirmedBalance: number;
   public spendableBalance: number;
   public latestTransactions: TransactionInfo[];
-  private stakingForm: FormGroup;
-  private walletBalanceSubscription: Subscription;
-  private walletHotBalanceSubscription: Subscription;
-  private walletHistorySubscription: Subscription;
-  private stakingInfoSubscription: Subscription;
   public stakingEnabled: boolean;
   public stakingActive: boolean;
   public stakingWeight: number;
@@ -55,9 +50,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public confirmedHotBalance: number = 0;
   public unconfirmedHotBalance: number;
   public spendableHotBalance: number;
-
   public nullBoxitems: MenuItem[];
   public hotStakingAccount: string = "coldStakingHotAddresses";
+  public stakingForm: FormGroup;
+
+  private walletBalanceSubscription: Subscription;
+  private walletHotBalanceSubscription: Subscription;
+  private walletHistorySubscription: Subscription;
+  private stakingInfoSubscription: Subscription;
 
   ngOnInit() {
     this.sidechainEnabled = this.globalService.getSidechainEnabled();
@@ -221,7 +221,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  private startStaking() {
+  public startStaking() {
     this.isStarting = true;
     this.isStopping = false;
     const walletData = {
@@ -245,7 +245,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       ;
   }
 
-  private stopStaking() {
+  public stopStaking() {
     this.isStopping = true;
     this.isStarting = false;
     this.apiService.stopStaking()

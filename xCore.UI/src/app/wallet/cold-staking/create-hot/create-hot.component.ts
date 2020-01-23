@@ -32,6 +32,7 @@ export class ColdStakingCreateHotComponent {
   public isSending: boolean = false;
   public address: string;
   public acknowledgeWarning = false;
+  public addressCopied: Boolean = false;
 
   private buildSendForm(): void {
     this.copyType = [
@@ -60,6 +61,10 @@ export class ColdStakingCreateHotComponent {
     }
 
     this.apiError = "";
+  }
+
+  public onCopiedClick() {
+    this.addressCopied = true;
   }
 
   sendFormErrors = {

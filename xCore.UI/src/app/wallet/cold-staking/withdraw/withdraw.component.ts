@@ -4,6 +4,7 @@ import { DynamicDialogRef, DynamicDialogConfig, DialogService } from 'primeng/ap
 
 import { FullNodeApiService } from '../../../shared/services/fullnode.api.service';
 import { GlobalService } from '../../../shared/services/global.service';
+import { ThemeService } from '../../../shared/services/theme.service';
 import { CoinNotationPipe } from '../../../shared/pipes/coin-notation.pipe';
 import { ColdStakingService } from "../../../shared/services/coldstaking.service";
 
@@ -32,7 +33,8 @@ export class ColdStakingWithdrawComponent implements OnInit, OnDestroy {
   feeTypes: FeeType[] = [];
   selectedFeeType: FeeType;
 
-  constructor(private apiService: FullNodeApiService, private globalService: GlobalService, public activeModal: DynamicDialogRef, public config: DynamicDialogConfig, public dialogService: DialogService, private fb: FormBuilder, private stakingService: ColdStakingService) {
+  constructor(private apiService: FullNodeApiService, private globalService: GlobalService, public activeModal: DynamicDialogRef, public config: DynamicDialogConfig, public dialogService: DialogService, private fb: FormBuilder, private stakingService: ColdStakingService, private themeService: ThemeService) {
+    this.isDarkTheme = themeService.getCurrentTheme().themeType == 'dark';
     this.setCoinUnit();
     this.setFeeTypes();
     this.buildSendForm();
@@ -50,6 +52,8 @@ export class ColdStakingWithdrawComponent implements OnInit, OnDestroy {
   public secondTitle: string;
   public opReturnAmount: number = 0;
   public isColdStaking: boolean;
+  public isDarkTheme = false;
+
   private transactionHex: string;
   private walletBalanceSubscription: Subscription;
   private coldStakingAccount: string = "coldStakingColdAddresses";

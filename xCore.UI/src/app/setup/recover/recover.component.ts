@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { GlobalService } from '../../shared/services/global.service';
 import { FullNodeApiService } from '../../shared/services/fullnode.api.service';
 import { ModalService } from '../../shared/services/modal.service';
+import { ThemeService } from '../../shared/services/theme.service';
 
 import { WalletRecovery } from '../../shared/models/wallet-recovery';
 
@@ -17,8 +18,9 @@ import { DynamicDialogRef, Message } from 'primeng/api';
 })
 export class RecoverComponent implements OnInit {
 
-  constructor(private globalService: GlobalService, private apiService: FullNodeApiService, private genericModalService: ModalService, private router: Router, private fb: FormBuilder, public ref: DynamicDialogRef) {
+  constructor(private globalService: GlobalService, private apiService: FullNodeApiService, private genericModalService: ModalService, private router: Router, private fb: FormBuilder, public ref: DynamicDialogRef, private themeService: ThemeService) {
     this.buildRecoverForm();
+    this.isDarkTheme = themeService.getCurrentTheme().themeType == 'dark';
   }
 
   public recoverWalletForm: FormGroup;
@@ -26,9 +28,11 @@ export class RecoverComponent implements OnInit {
   public isRecovering: boolean = false;
   public minDate = new Date("2009-08-09");
   public maxDate = new Date();
-  private walletRecovery: WalletRecovery;
+  public isDarkTheme = false;
   public resultMessage: Message[] = [];
   public walletRestored: boolean = false;
+
+  private walletRecovery: WalletRecovery;
 
   ngOnInit() {
 

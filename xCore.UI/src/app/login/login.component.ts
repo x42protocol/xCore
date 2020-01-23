@@ -30,7 +30,7 @@ export class LoginComponent implements OnInit {
   public wallets: SelectItem[] = [];
   public walletSelected: boolean = false;
   public noWalletsFound: Message[] = [{ severity: 'info', summary: 'Create or restore wallet', detail: '<br>' + 'Please use one of the menu items at the top to create or restore a wallet' }];
-  private openWalletForm: FormGroup;
+  public openWalletForm: FormGroup;
 
   ngOnInit() {
     this.isWalletLoading = true;
