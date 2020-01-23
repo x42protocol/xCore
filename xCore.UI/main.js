@@ -131,22 +131,25 @@ electron_1.app.on('activate', function () {
 });
 function shutdownDaemon(portNumber) {
     var http = require('http');
-    var body = JSON.stringify({});
-    var request = new http.ClientRequest({
-        method: 'POST',
+    var options = {
         hostname: 'localhost',
         port: portNumber,
         path: '/api/node/shutdown',
-        headers: {
-            "Content-Type": "application/json",
-            "Content-Length": Buffer.byteLength(body)
+        method: 'POST'
+    };
+    var req = http.request(options);
+    req.on('response', function (res) {
+        if (res.statusCode === 200) {
+            console.log('Request to shutdown xServer daemon returned HTTP success code.');
+        }
+        else {
+            console.log('Request to shutdown xServer daemon returned HTTP failure code: ' + res.statusCode);
         }
     });
-    request.write('true');
-    request.on('error', function (e) { });
-    request.on('timeout', function (e) { request.abort(); });
-    request.on('uncaughtException', function (e) { request.abort(); });
-    request.end(body);
+    req.on('error', function (err) { });
+    req.setHeader('content-type', 'application/json-patch+json');
+    req.write('true');
+    req.end();
 }
 ;
 function startDaemon(daemonName) {
