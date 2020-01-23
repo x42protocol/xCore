@@ -55,7 +55,7 @@ function createWindow() {
     frame: true,
     minWidth: 1150,
     minHeight: 800,
-    title: "x42",
+    title: "xCore",
     webPreferences: {
       nodeIntegration: true
     }
