@@ -12,6 +12,8 @@ import { ThemeService } from './shared/services/theme.service';
 
 import { NodeStatus } from './shared/models/node-status';
 
+import { MenuItem } from 'primeng/api';
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -20,6 +22,8 @@ import { NodeStatus } from './shared/models/node-status';
 
 export class AppComponent implements OnInit, OnDestroy {
   constructor(private router: Router, private themeService: ThemeService, private FullNodeApiService: FullNodeApiService, private globalService: GlobalService, private titleService: Title, private electronService: ElectronService) { }
+
+  public contextMenuItems: MenuItem[];
 
   private subscription: Subscription;
   private readonly MaxRetryCount = 50;
@@ -35,6 +39,13 @@ export class AppComponent implements OnInit, OnDestroy {
     this.setTitle();
     this.themeService.setTheme();
     this.tryStartNode();
+
+    this.contextMenuItems = [
+      {
+        label: 'x42 xCore ' + this.globalService.getApplicationVersion(),
+        icon: 'pi pi-fw pi-question-circle'
+      }
+    ];
   }
 
   ngOnDestroy() {

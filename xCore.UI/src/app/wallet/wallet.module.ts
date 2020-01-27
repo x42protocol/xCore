@@ -57,6 +57,7 @@ import { SlideMenuModule } from 'primeng/slidemenu';
 import { TabViewModule } from 'primeng/tabview';
 import { CheckboxModule } from 'primeng/checkbox';
 import { InputTextareaModule } from 'primeng/inputtextarea';
+import { ContextMenuModule } from 'primeng/contextmenu';
 
 @NgModule({
   imports: [
@@ -84,7 +85,8 @@ import { InputTextareaModule } from 'primeng/inputtextarea';
     SlideMenuModule,
     TabViewModule,
     CheckboxModule,
-    InputTextareaModule
+    InputTextareaModule,
+    ContextMenuModule
   ],
   declarations: [
     WalletComponent,

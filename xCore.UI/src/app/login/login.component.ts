@@ -9,7 +9,7 @@ import { ModalService } from '../shared/services/modal.service';
 import { WalletLoad } from '../shared/models/wallet-load';
 import { ThemeService } from '../shared/services/theme.service';
 
-import { SelectItem, Message } from 'primeng/api';
+import { SelectItem, Message, MenuItem } from 'primeng/api';
 
 @Component({
   selector: 'app-login',
@@ -28,6 +28,7 @@ export class LoginComponent implements OnInit {
   public isDecrypting = false;
   public isDarkTheme = false;
   public wallets: SelectItem[] = [];
+  public contextMenuItems: MenuItem[];
   public walletSelected: boolean = false;
   public noWalletsFound: Message[] = [{ severity: 'info', summary: 'Create or restore wallet', detail: '<br>' + 'Please use one of the menu items at the top to create or restore a wallet' }];
   public openWalletForm: FormGroup;
@@ -36,6 +37,13 @@ export class LoginComponent implements OnInit {
     this.isWalletLoading = true;
     this.getWalletFiles();
     this.getCurrentNetwork();
+
+    this.contextMenuItems = [
+      {
+        label: 'x42 xCore ' + this.globalService.getApplicationVersion(),
+        icon: 'pi pi-fw pi-question-circle'
+      }
+    ];
   }
 
   private buildDecryptForm(): void {
