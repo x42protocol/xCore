@@ -52,7 +52,7 @@ function createWindow() {
         frame: true,
         minWidth: 1150,
         minHeight: 800,
-        title: "x42",
+        title: "xCore",
         webPreferences: {
             nodeIntegration: true
         }
@@ -82,6 +82,8 @@ function createWindow() {
         // when you should delete the corresponding element.
         mainWindow = null;
     });
+    // Remove menu, new from Electron 5
+    mainWindow.removeMenu();
 }
 ;
 // This method will be called when Electron has finished
