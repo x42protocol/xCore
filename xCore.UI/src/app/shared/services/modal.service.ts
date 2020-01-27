@@ -6,7 +6,7 @@ import { GenericModalComponent } from '../components/generic-modal/generic-modal
   providedIn: 'root'
 })
 export class ModalService {
-  constructor(public dialogService: DialogService) {}
+  constructor(public dialogService: DialogService) { }
 
   public openModal(title, message) {
 
@@ -23,7 +23,8 @@ export class ModalService {
       {
         header: title,
         data: modalData,
-        showHeader: showHeader
+        showHeader: showHeader,
+        dismissableMask: true
       }
     );
   }
