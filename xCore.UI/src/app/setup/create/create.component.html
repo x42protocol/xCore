@@ -2,8 +2,8 @@
   <p-messages [value]="resultMessage" [closable]="false"></p-messages>
 </div>
 
-<div class="formrow" *ngIf="!walletCreated">
-  <form class="mx-auto d-flex align-content-center flex-wrap" [formGroup]="createWalletForm">
+<div class="formrow">
+  <form class="mx-auto d-flex align-content-center flex-wrap" [formGroup]="createWalletForm" *ngIf="!walletCreated">
     <div class="form-group col-12">
       <label for="walletName">Name</label>
       <input type="text" class="form-control" [class.is-invalid]="formErrors.walletName" [class.is-valid]="!formErrors.walletName && createWalletForm.get('walletName').valid" formControlName="walletName" id="walletName" placeholder="Enter a wallet name." pInputText>
@@ -40,9 +40,12 @@
       </div>
     </div>
     <div class="modal-footer col-12">
-      <button pButton type="button" class="btn-block" label="Create {{name}} wallet" [disabled]="!createWalletForm.valid" (click)="onContinueClicked()"></button>
+      <button pButton type="button" class="btn-block" label="Create {{createWalletForm.get('walletName').value}} wallet" [disabled]="!createWalletForm.valid" (click)="onContinueClicked()"></button>
     </div>
   </form>
+  <div class="modal-footer col-12">
+    <button *ngIf="walletCreated" pButton type="button" class="btn-block" label="OK" (click)="onClose()"></button>
+  </div>
   <!-- /form -->
 </div>
 <!-- /row -->

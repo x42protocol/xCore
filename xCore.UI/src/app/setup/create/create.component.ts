@@ -10,7 +10,7 @@ import { PasswordValidationDirective } from '../../shared/directives/password-va
 
 import { WalletCreation } from '../../shared/models/wallet-creation';
 
-import { Message } from 'primeng/api';
+import { DynamicDialogRef, Message } from 'primeng/api';
 
 @Component({
   selector: 'create-component',
@@ -19,7 +19,7 @@ import { Message } from 'primeng/api';
 })
 
 export class CreateComponent implements OnInit {
-  constructor(private globalService: GlobalService, private apiService: FullNodeApiService, private genericModalService: ModalService, private router: Router, private fb: FormBuilder) { }
+  constructor(private apiService: FullNodeApiService, private router: Router, private fb: FormBuilder, public ref: DynamicDialogRef) { }
 
   @Input() name: string;
   @Input() filename: string;
@@ -111,6 +111,10 @@ export class CreateComponent implements OnInit {
 
   public onBackClicked() {
     this.router.navigate(["/setup"]);
+  }
+
+  public onClose() {
+    this.ref.close();
   }
 
   public onContinueClicked() {
