@@ -3,6 +3,11 @@
   display: none;
 }
 
+.goat-icon {
+  background: url(./assets/images/goat.png) no-repeat !important;
+  height: 16px !important;
+  width: 16px !important;
+}
 
 /*!
  * Bootstrap v4.0.0-beta.2 (https://getbootstrap.com)

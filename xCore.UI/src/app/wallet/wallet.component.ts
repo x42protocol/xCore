@@ -15,7 +15,7 @@ export class WalletComponent implements OnInit {
     this.contextMenuItems = [
       {
         label: 'x42 xCore ' + this.globalService.getApplicationVersion(),
-        icon: 'pi pi-fw pi-question-circle'
+        icon: 'pi goat-icon'
       }
     ];
   }
