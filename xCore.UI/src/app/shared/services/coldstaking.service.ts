@@ -44,10 +44,11 @@ export class ColdStakingService {
     );
   }
 
-  getAddress(walletName: string, isColdWalletAddress: boolean): Observable<ColdStakingCreateAddressResponse> {
+  getAddress(walletName: string, isColdWalletAddress: boolean, isSegwit: boolean = false): Observable<ColdStakingCreateAddressResponse> {
     const params = new HttpParams()
       .set('walletName', walletName)
-      .set('isColdWalletAddress', isColdWalletAddress.toString().toLowerCase());
+      .set('isColdWalletAddress', isColdWalletAddress.toString().toLowerCase())
+      .set('Segwit', isSegwit.toString().toLowerCase());
 
     return this.http.get<ColdStakingCreateAddressResponse>(this.x42ApiUrl + '/coldstaking/cold-staking-address', { params }).pipe(
       catchError(err => this.handleHttpError(err))

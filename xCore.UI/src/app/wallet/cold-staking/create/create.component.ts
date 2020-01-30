@@ -213,50 +213,58 @@ export class ColdStakingCreateComponent implements OnInit, OnDestroy {
     const accountName = "account 0";
     const fee = this.estimatedFee;
 
-    this.stakingService.createColdStakingAccount(walletName, walletPassword, true)
-      .subscribe(
-        createColdStakingAccountResponse => {
-          this.stakingService.getAddress(walletName, true).subscribe(getAddressResponse => {
-            this.stakingService.createColdstaking(new ColdStakingSetup(
-              hotWalletAddress,
-              getAddressResponse.address,
-              amount,
-              walletName,
-              walletPassword,
-              accountName,
-              fee
-            ))
-              .subscribe(
-                createColdstakingResponse => {
-                  const transaction = new TransactionSending(createColdstakingResponse.transactionHex);
-                  this.apiService
-                    .sendTransaction(transaction)
-                    .subscribe(
-                      sendTransactionResponse => {
-                        this.deligatedTransactionSent(sendTransactionResponse.transactionId)
-                      },
-                      error => {
-                        this.isSending = false;
-                        this.apiError = error.error.errors[0].message;
-                      }
-                    );
-                },
+    this.apiService.validateAddress(hotWalletAddress).subscribe(
+      address => {
+        this.stakingService.createColdStakingAccount(walletName, walletPassword, true)
+          .subscribe(
+            createColdStakingAccountResponse => {
+              this.stakingService.getAddress(walletName, true, address.iswitness).subscribe(getAddressResponse => {
+                this.stakingService.createColdstaking(new ColdStakingSetup(
+                  hotWalletAddress,
+                  getAddressResponse.address,
+                  amount,
+                  walletName,
+                  walletPassword,
+                  accountName,
+                  fee
+                ))
+                  .subscribe(
+                    createColdstakingResponse => {
+                      const transaction = new TransactionSending(createColdstakingResponse.transactionHex);
+                      this.apiService
+                        .sendTransaction(transaction)
+                        .subscribe(
+                          sendTransactionResponse => {
+                            this.deligatedTransactionSent(sendTransactionResponse.transactionId)
+                          },
+                          error => {
+                            this.isSending = false;
+                            this.apiError = error.error.errors[0].message;
+                          }
+                        );
+                    },
+                    error => {
+                      this.isSending = false;
+                      this.apiError = error.error.errors[0].message;
+                    }
+                  );
+              },
                 error => {
                   this.isSending = false;
                   this.apiError = error.error.errors[0].message;
-                }
-              );
-          },
+                });
+            },
             error => {
               this.isSending = false;
               this.apiError = error.error.errors[0].message;
-            });
-        },
-        error => {
-          this.isSending = false;
-          this.apiError = error.error.errors[0].message;
-        }
-      );
+            },
+          )
+      },
+      error => {
+        this.isSending = false;
+        this.apiError = error.error.errors[0].message;
+      }
+    );
   }
 
 

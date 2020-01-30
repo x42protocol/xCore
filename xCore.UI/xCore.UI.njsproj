@@ -448,6 +448,7 @@
     <TypeScriptCompile Include="src\app\shared\models\coldstakingsetup.ts" />
     <TypeScriptCompile Include="src\app\shared\models\coldstakingsetupresponse.ts" />
     <TypeScriptCompile Include="src\app\shared\models\coldstakingwithdrawalrequest.ts" />
+    <TypeScriptCompile Include="src\app\shared\models\validateaddressresponse.ts" />
     <TypeScriptCompile Include="src\app\shared\models\coldstakingwithdrawalresponse.ts" />
     <TypeScriptCompile Include="src\app\shared\models\split-coins.ts" />
     <TypeScriptCompile Include="src\app\shared\models\wallet-rescan.ts">
