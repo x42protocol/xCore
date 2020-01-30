@@ -35,7 +35,6 @@ jobs:
     runs-on: ${{ matrix.os }}
     
     env:
-      BLOCKCORE_DAEMON_VERSION: '1.2.23'
       UI_PATH: './xCore.UI/'
       ARCH: 'x64'
 
@@ -54,6 +53,7 @@ jobs:
         cd ${{ env.UI_PATH }}
         echo "::set-env name=NAME::$(npm run name --silent)"
         echo "::set-env name=VERSION::$(npm run version --silent)"
+        echo "::set-env name=BLOCKCORE_DAEMON_VERSION::$(npm run blockcore_version --silent)"
         
     - name: Release Variables
       run: |
