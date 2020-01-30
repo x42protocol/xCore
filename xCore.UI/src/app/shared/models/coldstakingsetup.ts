@@ -1,12 +1,12 @@
 export class ColdStakingSetup {
   constructor(
-      hotWalletAddress: string,
-      coldWalletAddress: string,
-      amount: number,
-      walletName: string,
-      walletPassword: string,
-      walletAccount: string,
-      fees: number
+    hotWalletAddress: string,
+    coldWalletAddress: string,
+    amount: number,
+    walletName: string,
+    walletPassword: string,
+    walletAccount: string,
+    fees: number
   ) {
     this.hotWalletAddress = hotWalletAddress;
     this.coldWalletAddress = coldWalletAddress;

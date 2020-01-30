@@ -107,6 +107,10 @@ export class RecoverComponent implements OnInit {
     this.ref.close();
   }
 
+  public onClose() {
+    this.ref.close();
+  }
+
   public onRecoverClicked() {
     this.isRecovering = true;
 
