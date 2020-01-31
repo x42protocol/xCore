@@ -1,7 +1,7 @@
 <p-menubar [model]="menuItems">
   <img id="logo" src="./assets/images/{{logoFileName}}" style="height:32px;" />
-  <div class="status-custom">
-    <status-bar *ngIf="isUnLocked"></status-bar>
+  <div>
+    <status-bar [isUnLocked]="isUnLocked"></status-bar>
     <button pButton icon="pi pi-cog" type="button" (click)="settingsMenu = true"></button>
   </div>
 </p-menubar>

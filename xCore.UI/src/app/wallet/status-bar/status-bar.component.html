@@ -1,5 +1,5 @@
 <!-- STATUSBAR -->
-<ul class="list-inline align-self-center row">
+<ul class="status-custom">
   <li *ngIf="!(percentSynced == '100%')" class="list-inline-item mx-1" placement="top" pTooltip="{{toolTip}}">
     <i class="lnr lnr-cloud-sync text-warning"></i>
     <small class="text-warning">{{ percentSynced }}</small>
@@ -12,10 +12,10 @@
     <i class="lnr lnr-earth text-black"></i>
     <small class="text-black">{{ connectedNodes }}</small>
   </li>
-  <li *ngIf="!stakingEnabled && !sidechainsEnabled" class="list-inline-item mx-1" placement="top" pTooltip="Not staking">
+  <li *ngIf="!stakingEnabled && !sidechainsEnabled && isUnLocked" class="list-inline-item mx-1" placement="top" pTooltip="Not staking">
     <i class="lnr lnr-lock text-danger"></i>
   </li>
-  <li *ngIf="stakingEnabled && !sidechainsEnabled" class="list-inline-item mx-1" placement="top" pTooltip="Staking">
+  <li *ngIf="stakingEnabled && !sidechainsEnabled && isUnLocked" class="list-inline-item mx-1" placement="top" pTooltip="Staking">
     <i class="lnr lnr-lock text-success"></i>
   </li>
 </ul>
