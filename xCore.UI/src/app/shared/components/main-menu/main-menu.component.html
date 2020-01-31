@@ -1,6 +1,9 @@
 <p-menubar [model]="menuItems">
   <img id="logo" src="./assets/images/{{logoFileName}}" style="height:32px;" />
-  <button pButton icon="pi pi-cog" type="button" (click)="settingsMenu = true"></button>
+  <div class="status-custom">
+    <status-bar *ngIf="isUnLocked"></status-bar>
+    <button pButton icon="pi pi-cog" type="button" (click)="settingsMenu = true"></button>
+  </div>
 </p-menubar>
 
 <p-sidebar [(visible)]="settingsMenu" position="right" [baseZIndex]="10000">
@@ -16,9 +19,6 @@
   <div *ngIf="!isChainSynced" class="text-success">
     Block: {{ lastBlockSyncedHeight }}
   </div>
-  <br />
-  <div *ngIf="stakingEnabled" class="lnr lnr-lock text-success">Staking</div>
-  <div *ngIf="!stakingEnabled" class="lnr lnr-lock text-danger">Not staking</div>
 
   <br /><br />
   <h3 style="font-weight:normal">Look and feel</h3>

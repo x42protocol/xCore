@@ -18,7 +18,7 @@ import { DynamicDialogModule } from 'primeng/dynamicdialog';
 
 @NgModule({
   imports: [CommonModule, ButtonModule, DynamicDialogModule],
-  declarations: [CoinNotationPipe, AutoFocusDirective, PasswordValidationDirective, GenericModalComponent],
+  declarations: [CoinNotationPipe, AutoFocusDirective, PasswordValidationDirective, GenericModalComponent,],
   exports: [CommonModule, ReactiveFormsModule, FormsModule, NgbModule, NgxElectronModule, NgxQRCodeModule, NgxPaginationModule, ClipboardModule, GenericModalComponent, CoinNotationPipe, AutoFocusDirective, PasswordValidationDirective],
   entryComponents: [GenericModalComponent],
   providers: [DialogService]
