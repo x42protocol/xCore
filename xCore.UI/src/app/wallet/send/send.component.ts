@@ -17,7 +17,7 @@ import { SendConfirmationComponent } from './send-confirmation/send-confirmation
 import { Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 
-import { DialogService, DynamicDialogRef } from 'primeng/api';
+import { DialogService, DynamicDialogRef, DynamicDialogConfig } from 'primeng/api';
 
 @Component({
   selector: 'send-component',
@@ -27,7 +27,7 @@ import { DialogService, DynamicDialogRef } from 'primeng/api';
 
 export class SendComponent implements OnInit, OnDestroy {
   private address: string;
-  constructor(private FullNodeApiService: FullNodeApiService, private globalService: GlobalService, private fb: FormBuilder, public dialogService: DialogService, public ref: DynamicDialogRef, private themeService: ThemeService) {
+  constructor(private FullNodeApiService: FullNodeApiService, private globalService: GlobalService, private fb: FormBuilder, public dialogService: DialogService, public ref: DynamicDialogRef, public config: DynamicDialogConfig, private themeService: ThemeService) {
     this.buildSendForm();
     this.buildSendToSidechainForm();
     this.isDarkTheme = themeService.getCurrentTheme().themeType == 'dark';
@@ -63,7 +63,8 @@ export class SendComponent implements OnInit, OnDestroy {
     }
     this.startSubscriptions();
     this.coinUnit = this.globalService.getCoinUnit();
-    if (this.address) {
+    if (this.config.data !== undefined) {
+      this.address = this.config.data.address;
       this.sendForm.patchValue({ 'address': this.address })
     }
   }

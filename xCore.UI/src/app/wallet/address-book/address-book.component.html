@@ -25,8 +25,9 @@
     <ng-template pTemplate="header">
       <tr>
         <th style="width: 100px;"></th>
-        <th>
+        <th [pSortableColumn]="'label'">
           Name
+          <p-sortIcon [field]="'label'"></p-sortIcon>
         </th>
         <th>
           Address
