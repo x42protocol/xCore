@@ -109,7 +109,7 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
 
   onColdSetup() {
     this.dialogService.open(ColdStakingCreateComponent, {
-      header: 'Delegated staking setup',
+      header: 'Delegated Cold Staking',
       width: '540px',
       dismissableMask: true
     });
