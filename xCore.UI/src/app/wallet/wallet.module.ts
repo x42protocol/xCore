@@ -13,6 +13,7 @@ import { AddressBookComponent } from './address-book/address-book.component';
 import { AddNewAddressComponent } from './address-book/modals/add-new-address/add-new-address.component';
 import { ExtPubkeyComponent } from './advanced/components/ext-pubkey/ext-pubkey.component';
 import { AboutComponent } from './advanced/components/about/about.component';
+import { SettingsComponent } from './advanced/components/settings/settings.component';
 import { SignVerifyComponent } from './advanced/components/sign-verify/sign-verify.component';
 import { SignatureComponent } from './advanced/components/sign-verify/signature/signature.component';
 import { VerifyComponent } from './advanced/components/sign-verify/verify/verify.component';
@@ -102,6 +103,7 @@ import { ContextMenuModule } from 'primeng/contextmenu';
     AddNewAddressComponent,
     ExtPubkeyComponent,
     AboutComponent,
+    SettingsComponent,
     SignVerifyComponent,
     SignatureComponent,
     VerifyComponent,

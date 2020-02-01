@@ -68,6 +68,7 @@ export class MainMenuComponent implements OnInit {
 
   ngOnInit() {
     this.themeService.setTheme();
+    this.themeService.logoFileName.subscribe(x => this.logoFileName = x);
     this.setLogoPath();
     if (this.isUnLocked) {
       this.setUnlockedMenuItems()

@@ -26,6 +26,13 @@ export class AdvancedComponent implements OnInit, OnDestroy {
           }
         },
         {
+          label: 'Settings',
+          icon: 'pi pi-cog',
+          command: (event: Event) => {
+            this.router.navigate(['/wallet/advanced/settings']);
+          }
+        },
+        {
           label: 'Sign & Verify',
           icon: 'pi pi-pencil',
           command: (event: Event) => {

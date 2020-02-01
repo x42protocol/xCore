@@ -1,13 +1,13 @@
-import { Component, OnInit, Injectable } from '@angular/core';
-import { Http, Response, Headers } from '@angular/http';
+import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { Theme } from '../theme';
 import { Themes } from '../themes';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, BehaviorSubject } from 'rxjs';
 
 @Injectable()
 export class ThemeService {
+  public logoFileName = new BehaviorSubject<string>("logo_black.png");
   themes: Themes = new Themes();
   selectedTheme: string;
   private theme$: Subject<Theme>;
@@ -55,6 +55,8 @@ export class ThemeService {
 
     var b = document.getElementById('pageBody')
     b.setAttribute('style', this.buildStyle(this.getAppPageHeaderDivStyle()));
+
+    this.logoFileName.next(this.getLogo());
 
     localStorage.setItem('theme', theme);
   }

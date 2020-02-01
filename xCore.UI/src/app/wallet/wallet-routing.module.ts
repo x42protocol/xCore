@@ -6,6 +6,7 @@ import { HistoryComponent } from './history/history.component';
 import { ColdStakingOverviewComponent } from './cold-staking/overview.component';
 import { AdvancedComponent } from './advanced/advanced.component';
 import { AboutComponent } from './advanced/components/about/about.component';
+import { SettingsComponent } from './advanced/components/settings/settings.component';
 import { SignVerifyComponent } from './advanced/components/sign-verify/sign-verify.component';
 import { ExtPubkeyComponent } from './advanced/components/ext-pubkey/ext-pubkey.component';
 import { GenerateAddressesComponent } from './advanced/components/generate-addresses/generate-addresses.component';
@@ -25,6 +26,7 @@ const routes: Routes = [
         children: [
           { path: '', redirectTo: 'about', pathMatch: 'full' },
           { path: 'about', component: AboutComponent },
+          { path: 'settings', component: SettingsComponent },
           { path: 'sign', component: SignVerifyComponent },
           { path: 'extpubkey', component: ExtPubkeyComponent },
           { path: 'generate-addresses', component: GenerateAddressesComponent },

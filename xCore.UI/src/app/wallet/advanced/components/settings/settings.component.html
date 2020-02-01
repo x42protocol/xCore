@@ -1,0 +1,23 @@
+<div class="p-4">
+  <p-panel header="Settings">
+    <div style="min-height:200px;">
+      <div>
+        <p-fieldset>
+          <p-header>Wallet Settings</p-header>
+        </p-fieldset>
+      </div>
+      <div>
+        <p-fieldset>
+          <p-header>Global Settings</p-header>
+          <h5 style="font-weight:normal">Look and feel</h5>
+          <p-dropdown [options]="groupedThemes" [(ngModel)]="selectedTheme" placeholder="Select a Theme" [group]="true" (onChange)="onThemeChange($event)">
+            <ng-template let-group pTemplate="group">
+              <i class="{{group.value}}" aria-hidden="true" style="width:20px;vertical-align:middle"></i>
+              <span style="margin-left:.25em">{{group.label}}</span>
+            </ng-template>
+          </p-dropdown>
+        </p-fieldset>
+      </div>
+    </div>
+  </p-panel>
+</div>

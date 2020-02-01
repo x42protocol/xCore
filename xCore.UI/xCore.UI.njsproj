@@ -50,6 +50,8 @@
     <Content Include="src\app\setup\create\create.component.html" />
     <Content Include="src\app\shared\components\main-menu\main-menu.component.css" />
     <Content Include="src\app\shared\components\main-menu\main-menu.component.html" />
+    <Content Include="src\app\wallet\advanced\components\settings\settings.component.css" />
+    <Content Include="src\app\wallet\advanced\components\settings\settings.component.html" />
     <Content Include="src\app\wallet\advanced\components\sign-verify\sign-verify.component.css" />
     <Content Include="src\app\wallet\advanced\components\sign-verify\sign-verify.component.html" />
     <Content Include="src\app\wallet\advanced\components\sign-verify\signature\signature.component.css" />
@@ -457,6 +459,8 @@
     <TypeScriptCompile Include="src\app\shared\models\wallet-signmessagerequest.ts" />
     <TypeScriptCompile Include="src\app\shared\models\wallet-verifyrequest.ts" />
     <TypeScriptCompile Include="src\app\shared\services\coldstaking.service.ts" />
+    <TypeScriptCompile Include="src\app\wallet\advanced\components\settings\settings.component.spec.ts" />
+    <TypeScriptCompile Include="src\app\wallet\advanced\components\settings\settings.component.ts" />
     <TypeScriptCompile Include="src\app\wallet\advanced\components\sign-verify\sign-verify.component.spec.ts" />
     <TypeScriptCompile Include="src\app\wallet\advanced\components\sign-verify\sign-verify.component.ts" />
     <TypeScriptCompile Include="src\app\wallet\advanced\components\sign-verify\signature\signature.component.spec.ts" />
@@ -584,6 +588,7 @@
     <Folder Include="src\app\setup\create\" />
     <Folder Include="src\app\setup\create\confirm-mnemonic\" />
     <Folder Include="src\app\shared\components\main-menu\" />
+    <Folder Include="src\app\wallet\advanced\components\settings\" />
     <Folder Include="src\app\wallet\advanced\components\sign-verify\" />
     <Folder Include="src\app\wallet\advanced\components\sign-verify\signature\" />
     <Folder Include="src\app\wallet\advanced\components\sign-verify\verify\" />
