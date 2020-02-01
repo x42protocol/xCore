@@ -52,7 +52,11 @@ export class StatusBarComponent implements OnInit, OnDestroy {
             this.lastBlockSyncedHeight = statusResponse.blockStoreHeight;
             this.chainTip = statusResponse.bestPeerHeight;
 
-            const processedText = `Processed ${this.lastBlockSyncedHeight} out of ${this.chainTip} blocks.`;
+            let processedText = `Processed ${this.lastBlockSyncedHeight} out of ${this.chainTip} blocks.`;
+            if (this.chainTip == null) {
+              processedText = `Waiting for peer connections to start.`;
+            }
+
             this.toolTip = `Synchronizing.  ${processedText}`;
 
             if (this.connectedNodes == 1) {
@@ -61,10 +65,9 @@ export class StatusBarComponent implements OnInit, OnDestroy {
               this.connectedNodesTooltip = `${this.connectedNodes} connections`;
             }
 
-            if (this.lastBlockSyncedHeight < this.chainTip) {
+            if (this.chainTip == null || this.lastBlockSyncedHeight > this.chainTip) {
               this.percentSynced = "syncing...";
-            }
-            else {
+            } else {
               this.percentSyncedNumber = ((this.lastBlockSyncedHeight / this.chainTip) * 100);
               if (this.percentSyncedNumber.toFixed(0) === "100" && this.lastBlockSyncedHeight != this.chainTip) {
                 this.percentSyncedNumber = 99;
@@ -102,7 +105,7 @@ export class StatusBarComponent implements OnInit, OnDestroy {
               this.connectedNodesTooltip = `${this.connectedNodes} connections`;
             }
 
-            if (!this.isChainSynced) {
+            if (this.chainTip == null || this.lastBlockSyncedHeight > this.chainTip) {
               this.percentSynced = "syncing...";
             }
             else {

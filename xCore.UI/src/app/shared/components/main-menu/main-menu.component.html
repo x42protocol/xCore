@@ -10,15 +10,10 @@
   <h1 style="font-weight:normal">Settings</h1>
   <br /><br />
 
-
-  <h3 style="font-weight:normal">Connection Info</h3>
-  Node Connections: {{ connectedNodes }}
+  <h3 style="font-weight:normal">Network</h3>
+  <span *ngIf="!isTestnet">Mainnet</span>
+  <span *ngIf="isTestnet">Testnet</span>
   <br />
-
-  <div *ngIf="isChainSynced" class="text-success">Block: {{ lastBlockSyncedHeight }}</div>
-  <div *ngIf="!isChainSynced" class="text-success">
-    Block: {{ lastBlockSyncedHeight }}
-  </div>
 
   <br /><br />
   <h3 style="font-weight:normal">Look and feel</h3>
