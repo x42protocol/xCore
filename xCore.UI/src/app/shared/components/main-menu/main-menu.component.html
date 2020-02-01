@@ -2,11 +2,12 @@
   <img id="logo" src="./assets/images/{{logoFileName}}" style="height:32px;" />
   <div>
     <status-bar [isUnLocked]="isUnLocked"></status-bar>
-    <button pButton icon="pi pi-cog" type="button" (click)="settingsMenu = true"></button>
+    <button pButton icon="pi pi-cog" type="button" (click)="settingsMenu = true" *ngIf="!isUnLocked"></button>
+    <button pButton icon="pi pi-cog" type="button" (click)="openAdvanced()" *ngIf="isUnLocked"></button>
   </div>
 </p-menubar>
 
-<p-sidebar [(visible)]="settingsMenu" position="right" [baseZIndex]="10000">
+<p-sidebar [(visible)]="settingsMenu" position="right" [baseZIndex]="10000" *ngIf="!isUnLocked">
   <h1 style="font-weight:normal">Settings</h1>
   <br /><br />
 
