@@ -2,10 +2,12 @@
   <p-panel header="Settings">
     <div style="min-height:200px;">
       <div>
-        <p-fieldset>
-          <p-header>Wallet Settings</p-header>
-
-
+        <p-fieldset legend="Wallet Settings">
+          <div class="form-group">
+            <h5 style="font-weight:normal">Cold Staking Wallet Type</h5>
+            <p-selectButton [options]="coldWalletTypeOptions" [(ngModel)]="isColdHotWallet" (onChange)="onColdWalletTypeChange($event)"></p-selectButton>
+            <label *ngIf="isColdHotWallet">Using a hot wallet will allow you to stake on behalf of cold funds. <a class="text-primary" (click)="openColdHotSetup()"><u class="mr-1">Read the setup guide here.</u> <i class="fa fa-external-link"></i></a></label>
+          </div>
         </p-fieldset>
       </div>
       <div>

@@ -6,6 +6,7 @@ import { catchError, startWith, switchMap} from 'rxjs/operators';
 
 import { GlobalService } from './global.service';
 import { ModalService } from './modal.service';
+import { AddressType } from '../models/address-type';
 
 import { ColdStakingSetup } from "../models/coldstakingsetup";
 import { ColdStakingSetupResponse } from "../models/coldstakingsetupresponse";
@@ -20,7 +21,7 @@ import { ColdStakingWithdrawalRequest } from "../models/coldstakingwithdrawalreq
   providedIn: 'root'
 })
 export class ColdStakingService {
-  constructor(private http: HttpClient, private globalService: GlobalService, private modalService: ModalService, private router: Router) {
+  constructor(private http: HttpClient, private globalService: GlobalService, private modalService: ModalService, private router: Router, private addressType: AddressType) {
     this.setApiUrl();
   }
 
@@ -44,11 +45,14 @@ export class ColdStakingService {
     );
   }
 
-  getAddress(walletName: string, isColdWalletAddress: boolean, isSegwit: boolean = false): Observable<ColdStakingCreateAddressResponse> {
+  getAddress(walletName: string, isColdWalletAddress: boolean, isSegwit: string = ""): Observable<ColdStakingCreateAddressResponse> {
+    if (isSegwit == "") {
+      isSegwit = this.addressType.IsSegwit();
+    }
     const params = new HttpParams()
       .set('walletName', walletName)
       .set('isColdWalletAddress', isColdWalletAddress.toString().toLowerCase())
-      .set('Segwit', isSegwit.toString().toLowerCase());
+      .set('Segwit', isSegwit);
 
     return this.http.get<ColdStakingCreateAddressResponse>(this.x42ApiUrl + '/coldstaking/cold-staking-address', { params }).pipe(
       catchError(err => this.handleHttpError(err))

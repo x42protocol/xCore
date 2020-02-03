@@ -42,7 +42,7 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
   public loadingMessage: Message[] = [];
   public setupColdMessage: Message[] = [];
   public hotMessage: Message[] = [];
-
+  public isColdHotWallet: boolean;
   public coinUnit: string;
 
   public confirmedColdBalance: number = 0;
@@ -73,6 +73,14 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
     this.loadingMessage = [{ severity: 'info', summary: '', detail: 'Detecting wallet type, Please wait...' }];
     this.setupColdMessage = [{ severity: 'info', summary: '', detail: 'The Delegated Wallet has no access to your coins and you can withdraw to your spendable addresses balance at any time.' }];
     this.hotMessage = [{ severity: 'info', summary: '', detail: 'The hot balance reflects what has been deligated, this wallet does not have access to these funds.' }];
+
+    this.apiService
+      .getColdHotState(this.globalService.getWalletName())
+      .subscribe(
+        isHot => {
+          this.isColdHotWallet = isHot;
+        }
+      );
   }
 
   ngOnDestroy() {

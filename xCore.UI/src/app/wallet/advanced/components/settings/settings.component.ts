@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ElectronService } from 'ngx-electron';
 import { ThemeService } from '../../../../shared/services/theme.service';
 import { FullNodeApiService } from '../../../../shared/services/fullnode.api.service';
+import { GlobalService } from '../../../../shared/services/global.service';
 import { AddressType, AddressTypes } from '../../../../shared/models/address-type';
 import { SelectItemGroup, SelectItem } from 'primeng/api';
 
@@ -12,11 +13,13 @@ import { SelectItemGroup, SelectItem } from 'primeng/api';
 })
 export class SettingsComponent implements OnInit {
 
-  constructor(private nodeApiService: FullNodeApiService, private themeService: ThemeService, private electronService: ElectronService, private addressType: AddressType) { }
+  constructor(private nodeApiService: FullNodeApiService, private globalService: GlobalService, private themeService: ThemeService, private electronService: ElectronService, private addressType: AddressType) { }
 
   public groupedThemes: SelectItemGroup[];
   public addressTypeOptions: SelectItem[];
+  public coldWalletTypeOptions: SelectItem[];
   public selectedAddressType: AddressTypes;
+  public isColdHotWallet: boolean;
   public logoFileName: string;
   public selectedTheme: string;
 
@@ -47,8 +50,20 @@ export class SettingsComponent implements OnInit {
       { label: 'Classic ', value: AddressTypes.Classic, icon: 'fa fa-address-card-o' }
     ];
 
+    this.coldWalletTypeOptions = [
+      { label: 'Cold (Default)', value: false, icon: 'fa fa-shield' },
+      { label: 'Hot', value: true, icon: 'fa fa-fire' }
+    ];
+
     this.selectedAddressType = this.addressType.Type;
 
+    this.nodeApiService
+      .getColdHotState(this.globalService.getWalletName())
+      .subscribe(
+        isHot => {
+          this.isColdHotWallet = isHot;
+        }
+      );
   }
 
   isAddressTypeSegwit(): boolean {
@@ -64,11 +79,21 @@ export class SettingsComponent implements OnInit {
     this.logoFileName = this.themeService.getLogo();
   }
 
+  onColdWalletTypeChange(event) {
+    this.nodeApiService
+      .toggleColdHotState(this.globalService.getWalletName(), event.value)
+      .subscribe();
+  }
+
   onAddressTypeChange(event) {
     this.addressType.changeType(event.value);
   }
 
   public openSegwit() {
     this.electronService.shell.openExternal("https://en.bitcoin.it/wiki/Segregated_Witness");
+  }
+
+  public openColdHotSetup() {
+    this.electronService.shell.openExternal("https://github.com/x42protocol/documentation/blob/master/xCore-ColdStakingHotSetup.md");
   }
 }

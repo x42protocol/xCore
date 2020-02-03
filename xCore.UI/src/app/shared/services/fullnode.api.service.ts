@@ -76,6 +76,22 @@ export class FullNodeApiService {
     );
   }
 
+  getColdHotState(walletName: string): Observable<boolean> {
+    let params = new HttpParams().set('Name', walletName);
+    return this.http.get<boolean>(this.x42ApiUrl + '/wallet/getcoldhotstate', { params }).pipe(
+      catchError(err => this.handleHttpError(err))
+    );
+  }
+
+  toggleColdHotState(walletName: string, isColdHotWallet: boolean): Observable<any> {
+    let params = new HttpParams()
+      .set('Name', walletName)
+      .set('isColdHotWallet', isColdHotWallet.toString().toLowerCase());
+    return this.http.get(this.x42ApiUrl + '/wallet/toggle-cold', { params }).pipe(
+      catchError(err => this.handleHttpError(err))
+    );
+  }
+
   /**
    * Gets available wallets at the default path
    */
