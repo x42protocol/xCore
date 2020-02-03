@@ -68,7 +68,7 @@ export class SettingsComponent implements OnInit {
     this.addressType.changeType(event.value);
   }
 
-  public openSupport() {
+  public openSegwit() {
     this.electronService.shell.openExternal("https://en.bitcoin.it/wiki/Segregated_Witness");
   }
 }
