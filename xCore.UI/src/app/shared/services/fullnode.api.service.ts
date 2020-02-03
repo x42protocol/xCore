@@ -21,13 +21,14 @@ import { SignMessageRequest } from '../models/wallet-signmessagerequest';
 import { VerifyRequest } from '../models/wallet-verifyrequest';
 import { SplitCoins } from '../models/split-coins';
 import { ValidateAddressResponse } from "../models/validateaddressresponse";
+import { AddressType } from '../models/address-type';
 
 @Injectable({
   providedIn: 'root'
 })
 
 export class FullNodeApiService {
-  constructor(private http: HttpClient, private globalService: GlobalService, private modalService: ModalService) {
+  constructor(private http: HttpClient, private globalService: GlobalService, private modalService: ModalService, private addressType: AddressType) {
     this.setApiUrl();
   }
 
@@ -214,7 +215,9 @@ export class FullNodeApiService {
   getUnusedReceiveAddress(data: WalletInfo): Observable<any> {
     let params = new HttpParams()
       .set('walletName', data.walletName)
-      .set('accountName', "account 0");
+      .set('accountName', "account 0")
+      .set('Segwit', this.addressType.IsSegwit());
+    console.log(params);
     return this.http.get(this.x42ApiUrl + '/wallet/unusedaddress', { params }).pipe(
       catchError(err => this.handleHttpError(err))
     );
@@ -227,7 +230,9 @@ export class FullNodeApiService {
     let params = new HttpParams()
       .set('walletName', data.walletName)
       .set('accountName', "account 0")
-      .set('count', count);
+      .set('count', count)
+      .set('Segwit', this.addressType.IsSegwit());
+    console.log(params);
     return this.http.get(this.x42ApiUrl + '/wallet/unusedaddresses', { params }).pipe(
       catchError(err => this.handleHttpError(err))
     );
@@ -239,7 +244,9 @@ export class FullNodeApiService {
   getAllAddresses(data: WalletInfo): Observable<any> {
     let params = new HttpParams()
       .set('walletName', data.walletName)
-      .set('accountName', data.accountName);
+      .set('accountName', data.accountName)
+      .set('Segwit', this.addressType.IsSegwit());
+    console.log(params);
     return this.http.get(this.x42ApiUrl + '/wallet/addresses', { params }).pipe(
       catchError(err => this.handleHttpError(err))
     );

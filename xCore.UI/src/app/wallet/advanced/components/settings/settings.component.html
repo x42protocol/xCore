@@ -4,18 +4,27 @@
       <div>
         <p-fieldset>
           <p-header>Wallet Settings</p-header>
+
+
         </p-fieldset>
       </div>
       <div>
-        <p-fieldset>
-          <p-header>Global Settings</p-header>
-          <h5 style="font-weight:normal">Look and feel</h5>
-          <p-dropdown [options]="groupedThemes" [(ngModel)]="selectedTheme" placeholder="Select a Theme" [group]="true" (onChange)="onThemeChange($event)">
-            <ng-template let-group pTemplate="group">
-              <i class="{{group.value}}" aria-hidden="true" style="width:20px;vertical-align:middle"></i>
-              <span style="margin-left:.25em">{{group.label}}</span>
-            </ng-template>
-          </p-dropdown>
+        <p-fieldset legend="Global Settings">
+          <div class="form-group">
+            <h5 style="font-weight:normal">Addresses</h5>
+            <p-selectButton [options]="addressTypeOptions" [(ngModel)]="selectedAddressType" (onChange)="onAddressTypeChange($event)"></p-selectButton>
+            <label *ngIf="!isAddressTypeSegwit()">Classic address is the legacy address for x42. Use this option when needing to accept transactions from exchanges and services that have not implemented segwit.</label>
+            <label *ngIf="isAddressTypeSegwit()">Segwit is the improved address used with x42, introduced wtih xCore. <a class="text-primary" (click)="openSegwit()"><u class="mr-1">Read more about segwit</u> <i class="fa fa-external-link"></i></a></label>
+          </div>
+          <div class="form-group">
+            <h5 style="font-weight:normal">Look and feel</h5>
+            <p-dropdown [options]="groupedThemes" [(ngModel)]="selectedTheme" placeholder="Select a Theme" [group]="true" (onChange)="onThemeChange($event)">
+              <ng-template let-group pTemplate="group">
+                <i class="{{group.value}}" aria-hidden="true" style="width:20px;vertical-align:middle"></i>
+                <span style="margin-left:.25em">{{group.label}}</span>
+              </ng-template>
+            </p-dropdown>
+          </div>
         </p-fieldset>
       </div>
     </div>

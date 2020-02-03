@@ -5,7 +5,7 @@
       <div class="mx-auto mb-2">
         <ngx-qrcode [qrc-value]="qrString" qrc-class="aclass" qrc-errorCorrectionLevel="L"></ngx-qrcode>
       </div>
-      <div class="col-9 mx-auto mb-4">
+      <div class="col-10 mx-auto mb-4">
         <code class="d-inline-block">{{ address }}</code>
         <p-selectButton [options]="copyType" ngxClipboard [cbContent]="address" icon="pi pi-copy" (click)="onCopiedClick()"></p-selectButton>
       </div>

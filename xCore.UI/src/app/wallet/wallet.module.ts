@@ -3,6 +3,7 @@ import { SharedModule } from '../shared/shared.module';
 import { WalletRoutingModule } from './wallet-routing.module';
 import { SmartContractsModule } from './smart-contracts/smart-contracts.module';
 import { MainMenuModule } from '../shared/components/main-menu/main-menu.module';
+import { AddressType } from '../shared/models/address-type';
 
 import { WalletComponent } from './wallet.component';
 import { MenuComponent } from './menu/menu.component';
@@ -119,7 +120,8 @@ import { ContextMenuModule } from 'primeng/contextmenu';
   ],
   providers: [
     MessageService,
-    DialogService
+    DialogService,
+    AddressType
   ],
   entryComponents: [
     SendComponent,
