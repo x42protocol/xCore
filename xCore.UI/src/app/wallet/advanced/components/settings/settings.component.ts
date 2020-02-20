@@ -5,6 +5,7 @@ import { FullNodeApiService } from '../../../../shared/services/fullnode.api.ser
 import { GlobalService } from '../../../../shared/services/global.service';
 import { AddressType, AddressTypes } from '../../../../shared/models/address-type';
 import { SelectItemGroup, SelectItem } from 'primeng/api';
+import { ColdHotStateRequest } from '../../../../shared/models/coldhotstaterequest';
 
 @Component({
   selector: 'app-about',
@@ -80,8 +81,9 @@ export class SettingsComponent implements OnInit {
   }
 
   onColdWalletTypeChange(event) {
+    let requestData = new ColdHotStateRequest(this.globalService.getWalletName(), event.value);
     this.nodeApiService
-      .toggleColdHotState(this.globalService.getWalletName(), event.value)
+      .toggleColdHotState(requestData)
       .subscribe();
   }
 

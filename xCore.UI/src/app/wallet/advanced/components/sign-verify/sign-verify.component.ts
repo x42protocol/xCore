@@ -11,6 +11,7 @@ import { SignatureComponent } from './signature/signature.component';
 import { VerifyComponent } from './verify/verify.component';
 
 import { debounceTime } from 'rxjs/operators';
+import { SignMessageResponse } from '../../../../shared/models/signmessageresponse';
 
 @Component({
   selector: 'app-sign-verify',
@@ -52,11 +53,11 @@ export class SignVerifyComponent implements OnInit {
     this.verifyMessage(button);
   }
 
-  public openSignatureDialog(signature: string) {
+  public openSignatureDialog(signMessageResponse: SignMessageResponse) {
     let modalData = {
       "message": this.signatureForm.get("message").value,
-      "address": this.signatureForm.get("address").value,
-      "content": signature,
+      "address": signMessageResponse.signedAddress,
+      "content": signMessageResponse.signature,
     };
 
     this.dialogService.open(SignatureComponent,

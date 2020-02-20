@@ -22,6 +22,8 @@ import { VerifyRequest } from '../models/wallet-verifyrequest';
 import { SplitCoins } from '../models/split-coins';
 import { ValidateAddressResponse } from "../models/validateaddressresponse";
 import { AddressType } from '../models/address-type';
+import { ColdHotStateRequest } from '../models/coldhotstaterequest';
+import { SignMessageResponse } from '../models/signmessageresponse';
 
 @Injectable({
   providedIn: 'root'
@@ -83,11 +85,8 @@ export class FullNodeApiService {
     );
   }
 
-  toggleColdHotState(walletName: string, isColdHotWallet: boolean): Observable<any> {
-    let params = new HttpParams()
-      .set('Name', walletName)
-      .set('isColdHotWallet', isColdHotWallet.toString().toLowerCase());
-    return this.http.get(this.x42ApiUrl + '/wallet/toggle-cold', { params }).pipe(
+  toggleColdHotState(data: ColdHotStateRequest): Observable<any> {
+    return this.http.post(this.x42ApiUrl + '/wallet/setcoldhotstate', JSON.stringify(data)).pipe(
       catchError(err => this.handleHttpError(err))
     );
   }
@@ -351,8 +350,8 @@ export class FullNodeApiService {
   /**
  * Sign the given message with the private key of the given address
  */
-  signMessage(data: SignMessageRequest): Observable<any> {
-    return this.http.post(this.x42ApiUrl + '/wallet/signmessage', JSON.stringify(data)).pipe(
+  signMessage(data: SignMessageRequest): Observable<SignMessageResponse> {
+    return this.http.post<SignMessageResponse>(this.x42ApiUrl + '/wallet/signmessage', JSON.stringify(data)).pipe(
       catchError(err => this.handleHttpError(err))
     );
   }
