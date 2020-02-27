@@ -8,7 +8,7 @@ export class AddressType {
     let savedAddressType: string = localStorage.getItem('addressType');
 
     if (savedAddressType === undefined || savedAddressType == null || savedAddressType == "") {
-      let defaultType = AddressTypes.Segwit;
+      let defaultType = AddressTypes.Classic;
       this.changeType(defaultType);
       this.Type = defaultType;
     } else {
