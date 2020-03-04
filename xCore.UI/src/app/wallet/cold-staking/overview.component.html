@@ -65,7 +65,7 @@
   <section class="col-12" *ngIf="coldWalletAccountExists || hotWalletAccountExists">
     <div class="row" *ngIf="hasColdTransaction || hasHotTransaction">
       <!-- COLD TRANSACTIONS -->
-      <p-table [responsive]="true" [value]="coldTransactions" [style]="{'margin-top':'20px'}" *ngIf="!isColdHotWallet && hasHotTransaction" [paginator]="true" [rows]="10">
+      <p-table [responsive]="true" [value]="coldTransactions" [style]="{'margin-top':'20px'}" *ngIf="!isColdHotWallet" [paginator]="true" [rows]="10">
         <ng-template pTemplate="caption">
           Cold Transaction History
         </ng-template>
@@ -110,7 +110,7 @@
       </p-table>
 
       <!-- HOT TRANSACTIONS -->
-      <p-table [responsive]="true" [value]="hotTransactions" [style]="{'margin-top':'20px'}" *ngIf="isColdHotWallet && hasColdTransaction" [paginator]="true" [rows]="10">
+      <p-table [responsive]="true" [value]="hotTransactions" [style]="{'margin-top':'20px'}" *ngIf="isColdHotWallet" [paginator]="true" [rows]="10">
         <ng-template pTemplate="caption">
           Hot Transaction History
         </ng-template>

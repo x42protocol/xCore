@@ -46,6 +46,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public isStopping: boolean;
   public isDarkTheme = false;
   public hasBalance: boolean = false;
+  public hasTX: boolean = false;
   public hasHotBalance: boolean = false;
   public confirmedHotBalance: number = 0;
   public unconfirmedHotBalance: number;
@@ -207,6 +208,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     if (this.latestTransactions !== undefined && this.latestTransactions.length > 0) {
+      this.hasTX = true;
       if (this.stakingEnabled) {
         this.makeLatestTxListSmall();
       } else {
