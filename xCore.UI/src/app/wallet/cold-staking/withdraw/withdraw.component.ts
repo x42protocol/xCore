@@ -161,7 +161,7 @@ export class ColdStakingWithdrawComponent implements OnInit, OnDestroy {
           this.apiError = error.error.errors[0].message;
         },
         () => {
-          this.sendForm.patchValue({ amount: +new CoinNotationPipe().transform(balanceResponse.maxSpendableAmount) });
+          this.sendForm.patchValue({ amount: +new CoinNotationPipe().transform(this.spendableBalance) });
           this.estimatedFee = balanceResponse.fee;
         }
       )
