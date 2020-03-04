@@ -12,7 +12,7 @@ export class GenericModalComponent implements OnInit, AfterViewInit {
 
   constructor(public ref: DynamicDialogRef, public config: DynamicDialogConfig) { }
 
-  @ViewChild('closeButton', { static: false }) focusElement: ElementRef;
+  @ViewChild('closeButton') focusElement: ElementRef;
 
   ngOnInit() {
     this.message = this.config.data.message;

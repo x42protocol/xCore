@@ -1,8 +1,10 @@
+import { Injectable } from "@angular/core";
 export enum AddressTypes {
   Classic = 1,
   Segwit = 2
 }
 
+@Injectable()
 export class AddressType {
   constructor() {
     let savedAddressType: string = localStorage.getItem('addressType');
