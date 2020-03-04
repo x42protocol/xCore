@@ -47,8 +47,8 @@ export class SettingsComponent implements OnInit {
     this.selectedTheme = this.themeService.getCurrentTheme().name;
 
     this.addressTypeOptions = [
-      { label: 'Segwit (Default)', value: AddressTypes.Segwit, icon: 'fa fa-address-card' },
-      { label: 'Classic ', value: AddressTypes.Classic, icon: 'fa fa-address-card-o' }
+      { label: 'Classic', value: AddressTypes.Classic, icon: 'fa fa-address-card-o' },
+      { label: 'Segwit', value: AddressTypes.Segwit, icon: 'fa fa-address-card' }
     ];
 
     this.coldWalletTypeOptions = [
