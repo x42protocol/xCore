@@ -110,7 +110,7 @@ export class StatusBarComponent implements OnInit, OnDestroy {
             }
             else {
               this.percentSyncedNumber = ((this.lastBlockSyncedHeight / this.chainTip) * 100);
-              if (this.percentSyncedNumber.toFixed(0) === "100" && this.lastBlockSyncedHeight != this.chainTip) {
+              if (this.percentSyncedNumber.toFixed(0) === "100" && this.lastBlockSyncedHeight != this.chainTip && !this.isChainSynced) {
                 this.percentSyncedNumber = 99;
               }
 
