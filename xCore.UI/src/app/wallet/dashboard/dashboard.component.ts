@@ -54,6 +54,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public nullBoxitems: MenuItem[];
   public hotStakingAccount: string = "coldStakingHotAddresses";
   public stakingForm: FormGroup;
+  public apps: any[];
 
   private walletBalanceSubscription: Subscription;
   private walletHotBalanceSubscription: Subscription;
@@ -66,6 +67,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.coinUnit = this.globalService.getCoinUnit();
     this.startSubscriptions();
     this.setupNullBoxMenu();
+
+    this.apps = [
+      { "name": "Search For Apps", "image": "https://cdn1.iconfinder.com/data/icons/hawcons/32/698628-icon-112-search-plus-512.png"}
+    ]
   };
 
   ngOnDestroy() {

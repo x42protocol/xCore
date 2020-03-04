@@ -40,6 +40,41 @@
   }
 
 
+.ui-carousel .ui-carousel-content .ui-carousel-item .apps-details > .p-grid {
+  margin: 0.3em;
+  text-align: center;
+}
+
+.ui-carousel .ui-carousel-content .ui-carousel-item .apps-data .apps-title {
+  font-weight: 200;
+  font-size: 15px;
+}
+
+.ui-carousel .ui-carousel-content .ui-carousel-item .apps-data .apps-subtitle {
+  margin: 0.25em 0 2em 0;
+}
+
+.ui-carousel .ui-carousel-content .ui-carousel-item .apps-data button {
+  margin-left: 0.5em;
+}
+
+  .ui-carousel .ui-carousel-content .ui-carousel-item .apps-data button:first-child {
+    margin-left: 0;
+  }
+
+.ui-carousel.custom-carousel .ui-carousel-dot-icon {
+  width: 16px !important;
+  height: 16px !important;
+  border-radius: 50%;
+}
+
+.ui-carousel-dots-container {
+  display: none !important;
+}
+
+.ui-carousel-container button {
+  width: 100%;
+}
 /*!
  * Bootstrap v4.0.0-beta.2 (https://getbootstrap.com)
  * Copyright 2011-2017 The Bootstrap Authors
@@ -47,9 +82,7 @@
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
  */
 @media print {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     text-shadow: none !important;
     box-shadow: none !important;
   }
