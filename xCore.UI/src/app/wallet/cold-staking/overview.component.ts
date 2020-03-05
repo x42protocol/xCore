@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { DialogService, Message } from 'primeng/api';
+import { Message } from 'primeng/api';
+import { DialogService } from 'primeng/dynamicdialog';
 
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 

@@ -9,7 +9,8 @@ import { ThemeService } from '../../shared/services/theme.service';
 
 import { WalletRecovery } from '../../shared/models/wallet-recovery';
 
-import { DynamicDialogRef, Message } from 'primeng/api';
+import { Message } from 'primeng/api';
+import { DynamicDialogRef } from 'primeng/dynamicdialog';
 
 @Component({
   selector: 'app-recover',

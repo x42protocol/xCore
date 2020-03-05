@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { DynamicDialogRef, DynamicDialogConfig, SelectItem } from 'primeng/api';
+import { SelectItem } from 'primeng/api';
+import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { Subscription } from 'rxjs';
 
 import { FullNodeApiService } from '../../shared/services/fullnode.api.service';

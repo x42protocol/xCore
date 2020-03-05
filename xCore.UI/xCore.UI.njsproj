@@ -35,6 +35,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include=".editorconfig" />
+    <Content Include=".eslintrc.js" />
     <Content Include=".snyk" />
     <Content Include="angular.json" />
     <Content Include="e2e\tsconfig.e2e.json" />
@@ -423,7 +424,6 @@
     <Content Include="src\tsconfig.spec.json" />
     <Content Include="tsconfig-serve.json" />
     <Content Include="tsconfig.json" />
-    <Content Include="tslint.json" />
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="e2e\app.e2e-spec.ts" />

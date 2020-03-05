@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, Validators, FormBuilder } from '@angular/forms';
-import { DialogService, SelectItem } from 'primeng/api';
+import { SelectItem } from 'primeng/api';
+import { DialogService } from 'primeng/dynamicdialog';
 
 import { FullNodeApiService } from '../../../../shared/services/fullnode.api.service';
 import { GlobalService } from '../../../../shared/services/global.service';

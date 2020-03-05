@@ -13,7 +13,7 @@ import { ThemeService } from './shared/services/theme.service';
 import { MainMenuModule } from './shared/components/main-menu/main-menu.module';
 
 // PrimeNG Components.
-import { MessageService, DialogService } from 'primeng/api';
+import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { StepsModule } from 'primeng/steps';
 import { InputTextModule } from 'primeng/inputtext';
@@ -26,7 +26,7 @@ import { MessagesModule } from 'primeng/messages';
 import { MessageModule } from 'primeng/message';
 import { BlockUIModule } from 'primeng/blockui';
 import { PanelModule } from 'primeng/panel';
-import { DynamicDialogModule } from 'primeng/dynamicdialog';
+import { DynamicDialogModule, DialogService } from 'primeng/dynamicdialog';
 import { TableModule } from 'primeng/table';
 import { CalendarModule } from 'primeng/calendar';
 import { SplitButtonModule } from 'primeng/splitbutton';

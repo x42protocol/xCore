@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/api';
+import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
 
 @Component({
   selector: 'signature',

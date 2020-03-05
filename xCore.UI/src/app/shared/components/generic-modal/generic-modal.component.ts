@@ -1,5 +1,5 @@
 import { Component, OnInit, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
-import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/api';
+import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
 
 @Component({
   selector: 'app-generic-modal',

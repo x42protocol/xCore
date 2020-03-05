@@ -9,7 +9,7 @@ import { ConfirmMnemonicComponent } from './create/confirm-mnemonic/confirm-mnem
 import { MainMenuModule } from '../shared/components/main-menu/main-menu.module';
 
 // PrimeNG Components.
-import { MessageService, DialogService } from 'primeng/api';
+import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { MenubarModule } from 'primeng/menubar';
@@ -21,7 +21,7 @@ import { MessagesModule } from 'primeng/messages';
 import { MessageModule } from 'primeng/message';
 import { BlockUIModule } from 'primeng/blockui';
 import { PanelModule } from 'primeng/panel';
-import { DynamicDialogModule } from 'primeng/dynamicdialog';
+import { DynamicDialogModule, DialogService } from 'primeng/dynamicdialog';
 import { TableModule } from 'primeng/table';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { MenuModule } from 'primeng/menu';

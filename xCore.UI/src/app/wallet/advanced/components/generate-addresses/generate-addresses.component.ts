@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms';
+import { FormGroup, Validators, FormBuilder } from '@angular/forms';
 
 import { FullNodeApiService } from '../../../../shared/services/fullnode.api.service';
 import { GlobalService } from '../../../../shared/services/global.service';
@@ -14,7 +14,7 @@ import { SelectItem } from 'primeng/api';
   styleUrls: ['./generate-addresses.component.css']
 })
 export class GenerateAddressesComponent implements OnInit {
-  constructor(private FullNodeApiService: FullNodeApiService, private globalService: GlobalService, private genericModalService: ModalService, private fb: FormBuilder) {
+  constructor(private FullNodeApiService: FullNodeApiService, private globalService: GlobalService, private fb: FormBuilder) {
     this.buildGenerateAddressesForm();
   }
 

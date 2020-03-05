@@ -10,7 +10,8 @@ import { PasswordValidationDirective } from '../../shared/directives/password-va
 
 import { WalletCreation } from '../../shared/models/wallet-creation';
 
-import { DynamicDialogRef, Message } from 'primeng/api';
+import { Message } from 'primeng/api';
+import { DynamicDialogRef } from 'primeng/dynamicdialog';
 
 @Component({
   selector: 'create-component',

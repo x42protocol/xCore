@@ -1,5 +1,5 @@
-import { Component, OnInit, OnDestroy, Input } from '@angular/core';
-import { DynamicDialogRef, DialogService } from 'primeng/api';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { DynamicDialogRef, DialogService } from 'primeng/dynamicdialog';
 import { FormGroup, Validators, FormBuilder, AbstractControl } from '@angular/forms';
 
 import { GlobalService } from '../../../shared/services/global.service';

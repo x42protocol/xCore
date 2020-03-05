@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { FormGroup, Validators, FormBuilder } from '@angular/forms';
-import { DialogService, MenuItem } from 'primeng/api';
+import { MenuItem } from 'primeng/api';
+import { DialogService } from 'primeng/dynamicdialog';
 
 import { FullNodeApiService } from '../../shared/services/fullnode.api.service';
 import { GlobalService } from '../../shared/services/global.service';
@@ -69,7 +70,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.setupNullBoxMenu();
 
     this.apps = [
-      { "name": "Search For Apps", "image": "https://cdn1.iconfinder.com/data/icons/hawcons/32/698628-icon-112-search-plus-512.png"}
+      { "name": "Search For Apps", "image": "https://cdn1.iconfinder.com/data/icons/hawcons/32/698628-icon-112-search-plus-512.png" }
     ]
   };
 

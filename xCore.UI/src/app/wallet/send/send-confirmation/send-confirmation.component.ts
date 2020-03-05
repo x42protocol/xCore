@@ -4,7 +4,7 @@ import { GlobalService } from '../../../shared/services/global.service';
 
 import { CoinNotationPipe } from '../../../shared/pipes/coin-notation.pipe';
 
-import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/api';
+import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
 
 @Component({
   selector: 'app-send-confirmation',
@@ -17,7 +17,7 @@ export class SendConfirmationComponent implements OnInit {
   public transactionFee: any;
   public opReturnAmount: number;
   public hasOpReturn: boolean;
-  
+
   private sidechainEnabled: boolean;
   constructor(private globalService: GlobalService, public ref: DynamicDialogRef, public config: DynamicDialogConfig) { }
 
