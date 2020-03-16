@@ -157,9 +157,9 @@ function shutdownDaemon(portNumber) {
 
   req.on('response', function (res) {
     if (res.statusCode === 200) {
-      console.log('Request to shutdown xServer daemon returned HTTP success code.');
+      console.log('Request to shutdown xCore daemon returned HTTP success code.');
     } else {
-      console.log('Request to shutdown xServer daemon returned HTTP failure code: ' + res.statusCode);
+      console.log('Request to shutdown xCore daemon returned HTTP failure code: ' + res.statusCode);
     }
   });
 

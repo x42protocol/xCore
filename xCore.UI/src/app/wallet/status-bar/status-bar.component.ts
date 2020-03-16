@@ -6,6 +6,7 @@ import { FullNodeApiService } from '../../shared/services/fullnode.api.service';
 import { GlobalService } from '../../shared/services/global.service';
 import { ModalService } from '../../shared/services/modal.service';
 import { NodeStatus } from '../../shared/models/node-status';
+import { XServerStatus } from '../../shared/models/xserver-status';
 
 import { WalletInfo } from '../../shared/models/wallet-info';
 
@@ -19,18 +20,25 @@ export class StatusBarComponent implements OnInit, OnDestroy {
   private generalWalletInfoSubscription: Subscription;
   private stakingInfoSubscription: Subscription;
   private nodeStatusSubscription: Subscription;
+  private xServerStatusSubscription: Subscription;
+  private connectedNodesTooltip = '';
+  private connectedXServerTooltip = '';
+  private isChainSynced: boolean;
+  private percentSyncedNumber: number = 0;
+
   public lastBlockSyncedHeight: number;
   public chainTip: number;
-  private isChainSynced: boolean;
   public connectedNodes: number = 0;
-  private percentSyncedNumber: number = 0;
+  public connectedXServers: number = 0;
   public percentSynced: string;
   public stakingEnabled: boolean;
   public sidechainsEnabled: boolean;
-  @Input() public isUnLocked: boolean = false;
-  toolTip = '';
-  connectedNodesTooltip = '';
+  public connectionsTooltip = '';
+  public connectedTooltip = '';
+  public toolTip = '';
 
+  @Input() public isUnLocked: boolean = false;
+  
   constructor(private FullNodeApiService: FullNodeApiService, private globalService: GlobalService, private genericModalService: ModalService) { }
 
   ngOnInit() {
@@ -42,12 +50,38 @@ export class StatusBarComponent implements OnInit, OnDestroy {
     this.cancelSubscriptions();
   }
 
+  private updateConnectionToolTip() {
+    this.connectionsTooltip = `Connections:\n${this.connectedNodesTooltip}\n${this.connectedXServerTooltip}`;
+    console.log(this.connectionsTooltip);
+  }
+
+  private getGeneralxServerInfo() {
+    this.xServerStatusSubscription = this.FullNodeApiService.getxServerStatusInterval()
+      .subscribe(
+        (data: XServerStatus) => {
+          let statusResponse = data;
+          this.connectedXServers = statusResponse.connected;
+
+          if (statusResponse.connected == 1) {
+            this.connectedXServerTooltip = "1 xServer";
+          } else if (statusResponse.connected >= 0) {
+            this.connectedXServerTooltip = `${statusResponse.connected} xServers`;
+          }
+          this.updateConnectionToolTip();
+        },
+        error => {
+          this.cancelSubscriptions();
+          this.startSubscriptions();
+        }
+      );
+  }
+
   private getGeneralWalletInfo() {
     if (this.globalService.getWalletName() == "") {
       this.nodeStatusSubscription = this.FullNodeApiService.getNodeStatusInterval()
         .subscribe(
           (data: NodeStatus) => {
-            let statusResponse = data
+            let statusResponse = data;
             this.connectedNodes = statusResponse.inboundPeers.length + statusResponse.outboundPeers.length;
             this.lastBlockSyncedHeight = statusResponse.blockStoreHeight;
             this.chainTip = statusResponse.bestPeerHeight;
@@ -60,10 +94,11 @@ export class StatusBarComponent implements OnInit, OnDestroy {
             this.toolTip = `Synchronizing.  ${processedText}`;
 
             if (this.connectedNodes == 1) {
-              this.connectedNodesTooltip = "1 connection";
+              this.connectedNodesTooltip = "1 node";
             } else if (this.connectedNodes >= 0) {
-              this.connectedNodesTooltip = `${this.connectedNodes} connections`;
+              this.connectedNodesTooltip = `${this.connectedNodes} nodes`;
             }
+            this.updateConnectionToolTip();
 
             if (this.chainTip == null || this.lastBlockSyncedHeight > this.chainTip) {
               this.percentSynced = "syncing...";
@@ -100,10 +135,11 @@ export class StatusBarComponent implements OnInit, OnDestroy {
             this.toolTip = `Synchronizing.  ${processedText}`;
 
             if (this.connectedNodes == 1) {
-              this.connectedNodesTooltip = "1 connection";
+              this.connectedNodesTooltip = "1 node";
             } else if (this.connectedNodes >= 0) {
-              this.connectedNodesTooltip = `${this.connectedNodes} connections`;
+              this.connectedNodesTooltip = `${this.connectedNodes} nodes`;
             }
+            this.updateConnectionToolTip();
 
             if (this.chainTip == null || this.lastBlockSyncedHeight > this.chainTip) {
               this.percentSynced = "syncing...";
@@ -167,10 +203,15 @@ export class StatusBarComponent implements OnInit, OnDestroy {
     if (this.nodeStatusSubscription) {
       this.nodeStatusSubscription.unsubscribe();
     }
+
+    if (this.xServerStatusSubscription) {
+      this.xServerStatusSubscription.unsubscribe();
+    }
   };
 
   private startSubscriptions() {
     this.getGeneralWalletInfo();
+    this.getGeneralxServerInfo();
     if (!this.sidechainsEnabled) {
       this.getStakingInfo();
     }

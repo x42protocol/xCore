@@ -16,6 +16,7 @@ import { FeeEstimation } from '../models/fee-estimation';
 import { TransactionBuilding } from '../models/transaction-building';
 import { TransactionSending } from '../models/transaction-sending';
 import { NodeStatus } from '../models/node-status';
+import { XServerStatus } from '../models/xserver-status';
 import { WalletRescan } from '../models/wallet-rescan';
 import { SignMessageRequest } from '../models/wallet-signmessagerequest';
 import { VerifyRequest } from '../models/wallet-verifyrequest';
@@ -53,6 +54,14 @@ export class FullNodeApiService {
     return this.pollingInterval.pipe(
       startWith(0),
       switchMap(() => this.http.get<NodeStatus>(this.x42ApiUrl + '/node/status')),
+      catchError(err => this.handleHttpError(err))
+    )
+  }
+
+  getxServerStatusInterval(): Observable<XServerStatus> {
+    return this.pollingInterval.pipe(
+      startWith(0),
+      switchMap(() => this.http.get<XServerStatus>(this.x42ApiUrl + '/XServer/getxserverstats')),
       catchError(err => this.handleHttpError(err))
     )
   }

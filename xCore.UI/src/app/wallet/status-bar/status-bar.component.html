@@ -8,9 +8,17 @@
     <i class="lnr lnr-cloud-check text-success"></i>
     <small class="text-success">{{ percentSynced }}</small>
   </li>
-  <li class="list-inline-item mx-1" placement="top" pTooltip="{{ connectedNodesTooltip }}">
+  <li *ngIf="connectedNodes == 0 && connectedXServers == 0" class="list-inline-item mx-1" placement="top" pTooltip="{{ connectionsTooltip }}">
     <i class="lnr lnr-earth text-black"></i>
-    <small class="text-black">{{ connectedNodes }}</small>
+    <small class="text-black">0</small>
+  </li>
+  <li *ngIf="(connectedNodes == 0 && connectedXServers > 0) || (connectedNodes > 0 && connectedXServers == 0)" class="list-inline-item mx-1" placement="top" pTooltip="{{ connectionsTooltip }}">
+    <i class="lnr lnr-earth text-warning"></i>
+    <small class="text-warning">Partial</small>
+  </li>
+  <li *ngIf="connectedNodes >= 1 && connectedXServers >= 1" class="list-inline-item mx-1" placement="top" pTooltip="{{ connectionsTooltip }}">
+    <i class="lnr lnr-earth text-success"></i>
+    <small class="text-success">Full</small>
   </li>
   <li *ngIf="!stakingEnabled && !sidechainsEnabled && isUnLocked" class="list-inline-item mx-1" placement="top" pTooltip="Not staking">
     <i class="lnr lnr-lock text-danger"></i>
