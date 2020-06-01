@@ -38,7 +38,7 @@ export class XServerComponent implements OnInit, OnDestroy {
   public serverId: string;
   public selectedTier: string;
   public walletPassword: string;
-
+  
   ngOnInit() {
     this.tiers = [
       { label: 'Tier 1', value: "1000" },
@@ -73,6 +73,14 @@ export class XServerComponent implements OnInit, OnDestroy {
           this.startSubscriptions();
         }
       );
+  }
+
+  public getTierCost(): number {
+    if (this.selectedTier == "") {
+      return 0;
+    }
+
+    return Number(this.selectedTier);
   }
 
   private cancelSubscriptions() {

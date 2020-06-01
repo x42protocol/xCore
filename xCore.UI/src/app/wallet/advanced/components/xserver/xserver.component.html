@@ -40,9 +40,11 @@
         <div class="col blockText">
           <p-selectButton [options]="tiers" [(ngModel)]="selectedTier"></p-selectButton>
         </div>
-        <div class="col blockText" *ngIf="confirmedBalance < selectedTier">
+        <div class="col blockText" *ngIf="confirmedBalance < getTierCost()">
           <span style="font-weight: bold; color: red;">Not enough confirmed {{ coinUnit }} to register xServer. You need {{ selectedTier }} {{ coinUnit }}</span>
         </div>
+      </div>
+      <div class="form-group">
         <div class="col blockText">
           <div class="col-12 blockLabel">
             Wallet Password:
