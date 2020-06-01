@@ -9,6 +9,6 @@
     x42 Protocol wallet, run your decentralized applications, and much more.
   </p>
   <p align="center">
-      <a href="https://github.com/x42protocol/xServer/actions"><img src="https://github.com/x42protocol/xServer/workflows/Build/badge.svg" /></a>
+      <a href="https://github.com/x42protocol/xCore/actions"><img src="https://github.com/x42protocol/xCore/workflows/Build/badge.svg" /></a>
   </p>
 </p>
