@@ -1,0 +1,84 @@
+<div class="modal-body">
+  <div>
+    <span class="text-danger" style="font-weight: bold;"><span class="lnr lnr-warning"></span> Setup will need to be restarted if this window is closed.</span>
+    <br />
+    <span class="text-warning"><span class="lnr lnr-warning"></span> Be sure the xServer you are setting up is online during this process.</span>
+  </div>
+  <div class="mt-4">
+    <p-accordion [activeIndex]="currentStep">
+      <p-accordionTab>
+        <p-header>
+          Collateral
+          <i class="pi pi-check-circle text-success" *ngIf="currentStep >= 1"></i>
+          <i class="pi pi-exclamation-circle text-error" *ngIf="currentStep == -2"></i>
+        </p-header>
+        <div *ngIf="currentStep < 0">
+          <i class="pi pi-clock text-warning"></i>
+          Not started.
+        </div>
+        <div *ngIf="currentStep == 0">
+          <i class="pi pi-spin pi-spinner text-info"></i>
+          Locking collateral.
+          <br />
+          {{ confirmations }} of 6 confirmations
+        </div>
+        <div *ngIf="currentStep > 0">
+          <i class="pi pi-thumbs-up text-success"></i>
+          Collateral successfully locked!
+        </div>
+      </p-accordionTab>
+      <p-accordionTab>
+        <p-header>
+          Verify and sign setup request
+          <i class="pi pi-check-circle text-success" *ngIf="currentStep >= 2"></i>
+          <i class="pi pi-exclamation-circle text-error" *ngIf="currentStep == -2"></i>
+        </p-header>
+        <div *ngIf="currentStep < 1">
+          <i class="pi pi-clock text-warning"></i>
+          Not started.
+        </div>
+        <div *ngIf="currentStep == 1">
+          <i class="pi pi-spin pi-spinner text-info"></i>
+          Signing the setup request.
+        </div>
+        <div *ngIf="currentStep > 1">
+          <i class="pi pi-thumbs-up text-success"></i>
+          Signing request sucess!
+        </div>
+      </p-accordionTab>
+      <p-accordionTab>
+        <p-header>
+          Finalize
+          <i class="pi pi-check-circle text-success" *ngIf="currentStep >= 3"></i>
+          <i class="pi pi-exclamation-circle text-error" *ngIf="currentStep == -2"></i>
+        </p-header>
+        <div *ngIf="currentStep < 2">
+          <i class="pi pi-clock text-warning"></i>
+          Not started.
+        </div>
+        <div *ngIf="currentStep == 2">
+          <i class="pi pi-spin pi-spinner text-info"></i>
+          Broadcasting the setup request.
+        </div>
+        <div *ngIf="currentStep > 2">
+          <i class="pi pi-thumbs-up text-success"></i>
+          Broadcast sucess!
+        </div>
+      </p-accordionTab>
+    </p-accordion>
+  </div>
+  <div class="mt-3 col-12 text-center" *ngIf="currentStep == 3">
+    <span class="text-success" style="font-weight: bold;">Success!</span>
+  </div>
+  <div class="mt-3 col-12 text-center" *ngIf="errorMessage != ''">
+    <span class="text-danger" style="font-weight: bold;">Failed - {{errorMessage}}</span>
+  </div>
+  <div class="mt-5">
+    <p-progressBar [value]="collateralProgress"></p-progressBar>
+  </div>
+</div>
+<div class="modal-footer">
+  <button *ngIf="currentStep >= -1 && currentStep < 3" type="button" class="btn-block ui-button-danger" (click)="Cancel()" label="Cancel" pButton></button>
+  <button *ngIf="currentStep == 3 || currentStep == -2" type="button" class="btn-block" (click)="Close()" label="Close" pButton></button>
+</div>
+<!-- /MODAL RECEIVE -->

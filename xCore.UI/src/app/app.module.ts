@@ -32,6 +32,7 @@ import { CalendarModule } from 'primeng/calendar';
 import { SplitButtonModule } from 'primeng/splitbutton';
 import { SlideMenuModule } from 'primeng/slidemenu';
 import { ContextMenuModule } from 'primeng/contextmenu';
+import { ProgressBarModule } from 'primeng/progressbar';
 
 @NgModule({
   imports: [
@@ -60,7 +61,8 @@ import { ContextMenuModule } from 'primeng/contextmenu';
     CalendarModule,
     SplitButtonModule,
     SlideMenuModule,
-    ContextMenuModule
+    ContextMenuModule,
+    ProgressBarModule
   ],
   declarations: [
     AppComponent,

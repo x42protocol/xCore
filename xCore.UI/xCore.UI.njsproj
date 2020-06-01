@@ -51,6 +51,8 @@
     <Content Include="src\app\setup\create\create.component.html" />
     <Content Include="src\app\shared\components\main-menu\main-menu.component.css" />
     <Content Include="src\app\shared\components\main-menu\main-menu.component.html" />
+    <Content Include="src\app\wallet\advanced\components\xserver\register\register.component.css" />
+    <Content Include="src\app\wallet\advanced\components\xserver\register\register.component.html" />
     <Content Include="src\app\wallet\advanced\components\xserver\xserver.component.css" />
     <Content Include="src\app\wallet\advanced\components\xserver\xserver.component.html" />
     <Content Include="src\app\wallet\advanced\components\settings\settings.component.css" />
@@ -448,6 +450,10 @@
     <TypeScriptCompile Include="src\app\shared\models\coldstakingcreateaccountrequest.ts" />
     <TypeScriptCompile Include="src\app\shared\models\coldstakingcreateaccountresponse.ts" />
     <TypeScriptCompile Include="src\app\shared\models\coldstakingcreateaddressresponse.ts" />
+    <TypeScriptCompile Include="src\app\shared\models\serveridresponse.ts" />
+    <TypeScriptCompile Include="src\app\shared\models\transaction-output.ts" />
+    <TypeScriptCompile Include="src\app\shared\models\xserver-registration-response.ts" />
+    <TypeScriptCompile Include="src\app\shared\models\xserver-registration-request.ts" />
     <TypeScriptCompile Include="src\app\shared\models\xserver-status.ts" />
     <TypeScriptCompile Include="src\app\shared\models\signmessageresponse.ts" />
     <TypeScriptCompile Include="src\app\shared\models\coldstakinggetinforesponse.ts" />
@@ -465,6 +471,8 @@
     <TypeScriptCompile Include="src\app\shared\models\wallet-signmessagerequest.ts" />
     <TypeScriptCompile Include="src\app\shared\models\wallet-verifyrequest.ts" />
     <TypeScriptCompile Include="src\app\shared\services\coldstaking.service.ts" />
+    <TypeScriptCompile Include="src\app\wallet\advanced\components\xserver\register\register.component.spec.ts" />
+    <TypeScriptCompile Include="src\app\wallet\advanced\components\xserver\register\register.component.ts" />
     <TypeScriptCompile Include="src\app\wallet\advanced\components\xserver\xserver.component.spec.ts" />
     <TypeScriptCompile Include="src\app\wallet\advanced\components\xserver\xserver.component.ts" />
     <TypeScriptCompile Include="src\app\wallet\advanced\components\settings\settings.component.spec.ts" />
@@ -601,6 +609,7 @@
     <Folder Include="src\app\wallet\advanced\components\sign-verify\" />
     <Folder Include="src\app\wallet\advanced\components\sign-verify\signature\" />
     <Folder Include="src\app\wallet\advanced\components\sign-verify\verify\" />
+    <Folder Include="src\app\wallet\advanced\components\xserver\register\" />
     <Folder Include="src\app\wallet\cold-staking\" />
     <Folder Include="src\app\wallet\cold-staking\create-address\" />
     <Folder Include="src\app\wallet\cold-staking\create-hot\" />

@@ -43,6 +43,7 @@ export class StatusBarComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.sidechainsEnabled = this.globalService.getSidechainEnabled();
+    this.setDefaultConnectionToolTip();
     this.startSubscriptions();
   }
 
@@ -52,7 +53,12 @@ export class StatusBarComponent implements OnInit, OnDestroy {
 
   private updateConnectionToolTip() {
     this.connectionsTooltip = `Connections:\n${this.connectedNodesTooltip}\n${this.connectedXServerTooltip}`;
-    console.log(this.connectionsTooltip);
+  }
+
+  private setDefaultConnectionToolTip() {
+    this.connectedXServerTooltip = "0 xServers";
+    this.connectedNodesTooltip = "0 nodes";
+    this.updateConnectionToolTip();
   }
 
   private getGeneralxServerInfo() {

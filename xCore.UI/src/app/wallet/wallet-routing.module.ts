@@ -11,6 +11,7 @@ import { SignVerifyComponent } from './advanced/components/sign-verify/sign-veri
 import { ExtPubkeyComponent } from './advanced/components/ext-pubkey/ext-pubkey.component';
 import { GenerateAddressesComponent } from './advanced/components/generate-addresses/generate-addresses.component';
 import { ResyncComponent } from './advanced/components/resync/resync.component';
+import { XServerComponent } from './advanced/components/xserver/xserver.component';
 import { SmartContractsComponent } from './smart-contracts/components/smart-contracts.component';
 import { AddressBookComponent } from './address-book/address-book.component';
 
@@ -30,7 +31,8 @@ const routes: Routes = [
           { path: 'sign', component: SignVerifyComponent },
           { path: 'extpubkey', component: ExtPubkeyComponent },
           { path: 'generate-addresses', component: GenerateAddressesComponent },
-          { path: 'resync', component: ResyncComponent }
+          { path: 'resync', component: ResyncComponent },
+          { path: 'xserver', component: XServerComponent }
         ]
       },
       { path: 'smart-contracts', component: SmartContractsComponent },

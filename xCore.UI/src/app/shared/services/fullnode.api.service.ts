@@ -25,6 +25,9 @@ import { ValidateAddressResponse } from "../models/validateaddressresponse";
 import { AddressType } from '../models/address-type';
 import { ColdHotStateRequest } from '../models/coldhotstaterequest';
 import { SignMessageResponse } from '../models/signmessageresponse';
+import { TransactionOutput } from '../models/transaction-output';
+import { xServerRegistrationRequest } from '../models/xserver-registration-request';
+import { xServerRegistrationResponse } from '../models/xserver-registration-response';
 
 @Injectable({
   providedIn: 'root'
@@ -64,6 +67,12 @@ export class FullNodeApiService {
       switchMap(() => this.http.get<XServerStatus>(this.x42ApiUrl + '/XServer/getxserverstats')),
       catchError(err => this.handleHttpError(err))
     )
+  }
+
+  registerxServer(registrationRequest: xServerRegistrationRequest): Observable<xServerRegistrationResponse> {
+    return this.http.post<xServerRegistrationResponse>(this.x42ApiUrl + '/XServer/registerxserver', JSON.stringify(registrationRequest)).pipe(
+      catchError(err => this.handleHttpError(err))
+    );
   }
 
   getAddressBookAddresses(): Observable<any> {
@@ -187,6 +196,20 @@ export class FullNodeApiService {
     return this.pollingInterval.pipe(
       startWith(0),
       switchMap(() => this.http.get(this.x42ApiUrl + '/wallet/general-info', { params })),
+      catchError(err => this.handleHttpError(err, silent))
+    )
+  }
+
+  /**
+   * Gets the unspent outputs of a specific vout in a transaction.
+   */
+  getTxOut(trxid: string, includeMemPool: boolean, silent?: boolean): Observable<TransactionOutput> {
+    let params = new HttpParams()
+      .set('trxid', trxid)
+      .set('includeMemPool', includeMemPool ? "true" : "false");
+    return this.pollingInterval.pipe(
+      startWith(0),
+      switchMap(() => this.http.get<TransactionOutput>(this.x42ApiUrl + '/Node/gettxout', { params })),
       catchError(err => this.handleHttpError(err, silent))
     )
   }

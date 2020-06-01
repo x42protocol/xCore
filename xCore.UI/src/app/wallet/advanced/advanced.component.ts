@@ -59,6 +59,13 @@ export class AdvancedComponent implements OnInit, OnDestroy {
           command: (event: Event) => {
             this.router.navigate(['/wallet/advanced/resync']);
           }
+        },
+        {
+          label: 'xServer',
+          icon: 'pi pi-sitemap',
+          command: (event: Event) => {
+            this.router.navigate(['/wallet/advanced/xserver']);
+          }
         }
       ]
     }];

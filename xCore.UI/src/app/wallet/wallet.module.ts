@@ -19,6 +19,8 @@ import { SignVerifyComponent } from './advanced/components/sign-verify/sign-veri
 import { SignatureComponent } from './advanced/components/sign-verify/signature/signature.component';
 import { VerifyComponent } from './advanced/components/sign-verify/verify/verify.component';
 import { GenerateAddressesComponent } from './advanced/components/generate-addresses/generate-addresses.component';
+import { XServerComponent } from './advanced/components/xserver/xserver.component';
+import { RegisterComponent } from './advanced/components/xserver/register/register.component';
 import { ResyncComponent } from './advanced/components/resync/resync.component';
 import { SendComponent } from './send/send.component';
 import { ReceiveComponent } from './receive/receive.component';
@@ -60,6 +62,8 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { InputTextareaModule } from 'primeng/inputtextarea';
 import { ContextMenuModule } from 'primeng/contextmenu';
 import { CarouselModule } from 'primeng/carousel';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { AccordionModule } from 'primeng/accordion';
 
 @NgModule({
   imports: [
@@ -89,7 +93,9 @@ import { CarouselModule } from 'primeng/carousel';
     CheckboxModule,
     InputTextareaModule,
     ContextMenuModule,
-    CarouselModule
+    CarouselModule,
+    ProgressBarModule,
+    AccordionModule
   ],
   declarations: [
     WalletComponent,
@@ -111,6 +117,8 @@ import { CarouselModule } from 'primeng/carousel';
     SignatureComponent,
     VerifyComponent,
     GenerateAddressesComponent,
+    XServerComponent,
+    RegisterComponent,
     ResyncComponent,
     ColdStakingOverviewComponent,
     ColdStakingCreateComponent,
@@ -138,7 +146,8 @@ import { CarouselModule } from 'primeng/carousel';
     ColdStakingCreateAddressComponent,
     ColdStakingWithdrawComponent,
     ColdStakingWithdrawConfirmationComponent,
-    ColdStakingCreateHotComponent
+    ColdStakingCreateHotComponent,
+    RegisterComponent
   ]
 })
 
