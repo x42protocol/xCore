@@ -10,6 +10,11 @@ import { RegisterComponent } from './register/register.component';
 import { DialogService } from 'primeng/dynamicdialog';
 import { SelectItem } from 'primeng/api';
 
+interface NetworkProtocol {
+  name: string;
+  value: number;
+}
+
 @Component({
   selector: 'app-xserver',
   templateUrl: './xserver.component.html',
@@ -31,6 +36,8 @@ export class XServerComponent implements OnInit, OnDestroy {
   public tiers: SelectItem[];
   public coinUnit: string;
   public confirmedBalance: number;
+  public protocols: NetworkProtocol[];
+  public selectedProtocol: NetworkProtocol;
 
   public xserverName: string;
   public networkAddress: string;
@@ -38,12 +45,16 @@ export class XServerComponent implements OnInit, OnDestroy {
   public serverId: string;
   public selectedTier: string;
   public walletPassword: string;
-  
+
   ngOnInit() {
     this.tiers = [
       { label: 'Tier 1', value: "1000" },
       { label: 'Tier 2', value: "20000" },
       { label: 'Tier 3', value: "100000" },
+    ];
+    this.protocols = [
+      { name: 'http', value: 1 },
+      { name: 'https', value: 2 }
     ];
     this.selectedTier = "1000";
     this.applicationVersion = this.globalService.getApplicationVersion();
@@ -92,6 +103,7 @@ export class XServerComponent implements OnInit, OnDestroy {
   onRegisterClick(): void {
     let modalData = {
       "xserverName": this.xserverName,
+      "selectedProtocol": this.selectedProtocol.value,
       "networkAddress": this.networkAddress,
       "networkPort": this.networkPort,
       "serverId": this.serverId,

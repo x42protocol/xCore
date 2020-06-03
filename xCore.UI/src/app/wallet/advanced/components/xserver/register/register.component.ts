@@ -36,6 +36,7 @@ export class RegisterComponent implements OnInit {
   public registrationFailed: boolean = false;
 
   public xserverName: string;
+  public selectedProtocol: number;
   public networkAddress: string;
   public networkPort: string = "4242";
   public selectedTier: string;
@@ -55,6 +56,7 @@ export class RegisterComponent implements OnInit {
 
   ngOnInit() {
     this.xserverName = this.config.data.xserverName;
+    this.selectedProtocol = this.config.data.selectedProtocol;
     this.networkAddress = this.config.data.networkAddress;
     this.networkPort = this.config.data.networkPort;
     this.server.serverId = this.config.data.serverId;
@@ -105,7 +107,7 @@ export class RegisterComponent implements OnInit {
     } else if (this.selectedTier = "100000") {
       xServerTier = 3;
     }
-    const registrationRequest = new xServerRegistrationRequest(this.xserverName, this.networkAddress, Number(this.networkPort), this.signedMessage, this.signWithAddress, xServerTier);
+    const registrationRequest = new xServerRegistrationRequest(this.xserverName, this.selectedProtocol, this.networkAddress, Number(this.networkPort), this.signedMessage, this.signWithAddress, xServerTier);
     console.log(registrationRequest);
     this.apiService.registerxServer(registrationRequest)
       .subscribe(

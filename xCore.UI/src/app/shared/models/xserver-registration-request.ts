@@ -1,6 +1,7 @@
 export class xServerRegistrationRequest {
-  constructor(name: string, networkAddress: string, networkPort: number, signature: string, address: string, tier: number) {
+  constructor(name: string, networkProtocol: number, networkAddress: string, networkPort: number, signature: string, address: string, tier: number) {
     this.name = name;
+    this.networkProtocol = networkProtocol;
     this.networkAddress = networkAddress;
     this.networkPort = networkPort;
     this.signature = signature;
@@ -9,6 +10,7 @@ export class xServerRegistrationRequest {
   }
 
   public name: string;
+  public networkProtocol: number;
   public networkAddress: string;
   public networkPort: number;
   public signature: string;
