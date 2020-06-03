@@ -33,6 +33,7 @@ import { SplitButtonModule } from 'primeng/splitbutton';
 import { SlideMenuModule } from 'primeng/slidemenu';
 import { ContextMenuModule } from 'primeng/contextmenu';
 import { ProgressBarModule } from 'primeng/progressbar';
+import { ToolbarModule } from 'primeng/toolbar';
 
 @NgModule({
   imports: [
@@ -62,7 +63,8 @@ import { ProgressBarModule } from 'primeng/progressbar';
     SplitButtonModule,
     SlideMenuModule,
     ContextMenuModule,
-    ProgressBarModule
+    ProgressBarModule,
+    ToolbarModule
   ],
   declarations: [
     AppComponent,

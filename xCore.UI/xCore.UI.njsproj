@@ -150,6 +150,8 @@
     <Content Include="src\assets\images\notransactions.svg" />
     <Content Include="src\assets\images\Tick_Mark-16.png" />
     <Content Include="src\assets\images\white background.png" />
+    <Content Include="src\assets\js\jdenticon.min.js" />
+    <Content Include="src\assets\js\jdenticon.min.js.map" />
     <Content Include="src\assets\themes\bootstrap\theme.css" />
     <Content Include="src\assets\themes\cruze\theme.css" />
     <Content Include="src\assets\themes\cruze\theme.scss" />
@@ -656,6 +658,7 @@
     <Folder Include="src\assets\fonts\" />
     <Folder Include="src\assets\images\" />
     <Folder Include="src\assets\images\icons\" />
+    <Folder Include="src\assets\js\" />
     <Folder Include="src\assets\themes\" />
     <Folder Include="src\assets\themes\bootstrap\" />
     <Folder Include="src\assets\themes\cruze\" />

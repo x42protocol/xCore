@@ -17,40 +17,40 @@
     </p-carousel>
   </div>
   <div class="col-10">
+    <p-toolbar>
+      <div class="ui-toolbar-group-left">
+        <span class="ui-message ui-widget ui-corner-all ui-message-info ng-star-inserted">
+          Balance:
+          <strong>{{ (confirmedBalance | coinNotation) || (0 | coinNotation) }}</strong>
+          <small class="text-uppercase"> {{ coinUnit }}</small>
+          <span style="margin-left: 10px;" *ngIf="unconfirmedBalance < 0.00000000">
+            <strong>{{ (unconfirmedBalance | coinNotation) || (0 | coinNotation) }}</strong><em> (unconfirmed)</em>
+          </span>
+        </span>
+      </div>
+
+      <div class="ui-toolbar-group-right">
+        <button type="button" pButton (click)="openReceiveDialog()" label="Receive" class="ui-button-success" icon="pi pi-arrow-circle-down" style="width: 100px; margin-right: 10px;"></button>
+        <button type="button" pButton (click)="openSendDialog()" label="Send" class="ui-button-warning" icon="pi pi-arrow-circle-up" style="width: 100px;"></button>
+      </div>
+    </p-toolbar>
     <!-- CONTAINER -->
     <section id="content" class="col-11 mx-auto">
       <!-- JUMBOTRON-->
-      <div class="jumbotron jumbotron-fluid">
-        <div class="col-12">
-          <p-panel #balancepnl>
+      <!-- /JUMBOTRON-->
+      <section style="display: flex;" class="jumbotron jumbotron-fluid">
+        <div class="col-6">
+          <p-panel>
             <p-header>
               <div class="ui-helper-clearfix">
-                <div class="col text-right" style="white-space: nowrap; width: 100px; display: inline;">
-                  <span class="ui-panel-title" style="font-size:16px;display:inline-block;margin-top:2px;">Balance</span>
-                  <p style="float: right;">
-                    <button type="button" pButton (click)="openReceiveDialog()" label="Receive" class="ui-button-success" icon="pi pi-arrow-circle-down" style="width: 100px; margin-right: 10px;"></button>
-                    <button type="button" pButton (click)="openSendDialog()" label="Send" class="ui-button-warning" icon="pi pi-arrow-circle-up" style="width: 100px;"></button>
-                  </p>
-                </div>
+                <span class="ui-panel-title" style="font-size:16px;display:inline-block;margin-top:2px;">Welcome!</span>
+                <p-splitButton [style]="{'float':'right'}" label=" " class="hideButton" icon="" [model]="welcomeMenu"></p-splitButton>
               </div>
             </p-header>
-            <div class="col-9 text-left">
-              <p class="lead">
-                <strong>{{ (confirmedBalance | coinNotation) || (0 | coinNotation) }}</strong>
-                <small class="text-uppercase"> {{ coinUnit }}</small>
-              </p>
-              <ul class="list-unstyled">
-                <li><strong>{{ (unconfirmedBalance | coinNotation) || (0 | coinNotation) }}</strong><em> (unconfirmed)</em></li>
-                <!-- <li><strong>805.65900153</strong> <em>(staking)</em></li> -->
-              </ul>
-            </div>
-
+            You do not have a rating yet.
+            <p-rating [ngModel]="0" readonly="true" stars="10" [cancel]="false"></p-rating>
           </p-panel>
         </div>
-        <!-- /col-->
-      </div>
-      <!-- /JUMBOTRON-->
-      <section style="display: flex;">
         <div class="col-6">
           <p-panel *ngIf="(hasBalance || hasHotBalance)">
             <p-header>
@@ -108,20 +108,7 @@
               </div>
             </section>
           </p-panel>
-
         </div>
-        <!--
-          <div class="col-6">
-            <p-panel>
-              <p-header>
-                <div class="ui-helper-clearfix">
-                  <span class="ui-panel-title" style="font-size:16px;display:inline-block;margin-top:2px;">Null Box</span>
-                  <p-splitButton [style]="{'float':'right', 'height':'20px'}" label=" " class="hideButton" icon="" [model]="nullBoxitems"></p-splitButton>
-                </div>
-              </p-header>
-            </p-panel>
-          </div>
-        -->
       </section>
 
       <!-- CONTENT -->

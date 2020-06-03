@@ -52,7 +52,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public confirmedHotBalance: number = 0;
   public unconfirmedHotBalance: number;
   public spendableHotBalance: number;
-  public nullBoxitems: MenuItem[];
+  public welcomeMenu: MenuItem[];
   public hotStakingAccount: string = "coldStakingHotAddresses";
   public stakingForm: FormGroup;
   public apps: any[];
@@ -67,7 +67,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.walletName = this.globalService.getWalletName();
     this.coinUnit = this.globalService.getCoinUnit();
     this.startSubscriptions();
-    this.setupNullBoxMenu();
+    this.setupWelcomeMenu();
 
     this.apps = [
       { "name": "Search For Apps", "image": "https://cdn1.iconfinder.com/data/icons/hawcons/32/698628-icon-112-search-plus-512.png" }
@@ -78,10 +78,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.cancelSubscriptions();
   }
 
-  setupNullBoxMenu() {
-    this.nullBoxitems = [
+  setupWelcomeMenu() {
+    this.welcomeMenu = [
       {
-        label: 'Rename', icon: 'pi pi-fw pi-pencil',
+        label: 'Edit Profile', icon: 'pi pi-fw pi-pencil',
         command: () => {
           // TODO: Open Rename Dialog
         }

@@ -150,7 +150,8 @@ function shutdownDaemon(portNumber) {
     hostname: 'localhost',
     port: portNumber,
     path: '/api/node/shutdown',
-    method: 'POST'
+    method: 'POST',
+    body: 'true'
   };
 
   const req = http.request(options);

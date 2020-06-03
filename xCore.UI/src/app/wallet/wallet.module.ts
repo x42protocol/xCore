@@ -64,6 +64,8 @@ import { ContextMenuModule } from 'primeng/contextmenu';
 import { CarouselModule } from 'primeng/carousel';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { AccordionModule } from 'primeng/accordion';
+import { ToolbarModule } from 'primeng/toolbar';
+import { RatingModule } from 'primeng/rating';
 
 @NgModule({
   imports: [
@@ -95,7 +97,9 @@ import { AccordionModule } from 'primeng/accordion';
     ContextMenuModule,
     CarouselModule,
     ProgressBarModule,
-    AccordionModule
+    AccordionModule,
+    ToolbarModule,
+    RatingModule
   ],
   declarations: [
     WalletComponent,
