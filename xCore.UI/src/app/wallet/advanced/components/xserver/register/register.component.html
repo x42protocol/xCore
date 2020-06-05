@@ -78,7 +78,7 @@
   </div>
 </div>
 <div class="modal-footer">
-  <button *ngIf="currentStep >= -1 && errorMessage == ''" type="button" class="btn-block ui-button-danger" (click)="Cancel()" label="Cancel" pButton></button>
+  <button *ngIf="currentStep >= -1 && errorMessage == '' && currentStep != 3" type="button" class="btn-block ui-button-danger" (click)="Cancel()" label="Cancel" pButton></button>
   <button *ngIf="currentStep == 3 || errorMessage != ''" type="button" class="btn-block" (click)="Close()" label="Close" pButton></button>
 </div>
 <!-- /MODAL RECEIVE -->
