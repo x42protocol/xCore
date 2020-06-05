@@ -9,6 +9,8 @@ import { RegisterComponent } from './register/register.component';
 
 import { DialogService } from 'primeng/dynamicdialog';
 import { SelectItem } from 'primeng/api';
+import { ClipboardService } from 'ngx-clipboard';
+import { ColdStakingService } from '../../../../shared/services/coldstaking.service';
 
 interface NetworkProtocol {
   name: string;
@@ -22,7 +24,7 @@ interface NetworkProtocol {
 })
 export class XServerComponent implements OnInit, OnDestroy {
 
-  constructor(private globalService: GlobalService, private apiService: FullNodeApiService, private electron: ElectronService, public dialogService: DialogService) { }
+  constructor(private globalService: GlobalService, private apiService: FullNodeApiService, private electron: ElectronService, public dialogService: DialogService, private clipboardService: ClipboardService, private stakingService: ColdStakingService) { }
 
   private walletBalanceSubscription: Subscription;
   public clientName: string;
@@ -38,13 +40,21 @@ export class XServerComponent implements OnInit, OnDestroy {
   public confirmedBalance: number;
   public protocols: NetworkProtocol[];
   public selectedProtocol: NetworkProtocol;
+  public copyType: SelectItem[];
+  public copied: boolean;
+  public allAddresses: SelectItem[];
 
+  public keyAddress: string;
   public xserverName: string;
   public networkAddress: string;
   public networkPort: string = "4242";
   public serverId: string;
   public selectedTier: string;
   public walletPassword: string;
+
+  public mainAccount: string = "account 0";
+  public coldStakingAccount: string = "coldStakingColdAddresses";
+  public hotStakingAccount: string = "coldStakingHotAddresses";
 
   ngOnInit() {
     this.tiers = [
@@ -56,7 +66,14 @@ export class XServerComponent implements OnInit, OnDestroy {
       { name: 'http', value: 1 },
       { name: 'https', value: 2 }
     ];
+    this.copyType = [
+      { label: 'Copy', value: 'Copy', icon: 'pi pi-copy' }
+    ];
+    this.getKeyAddress();
+    this.getAddresses();
+    this.copied = false;
     this.selectedTier = "1000";
+    this.selectedProtocol = this.protocols[0];
     this.applicationVersion = this.globalService.getApplicationVersion();
     this.isElectron = this.electron.isElectronApp;
     this.startSubscriptions();
@@ -86,6 +103,41 @@ export class XServerComponent implements OnInit, OnDestroy {
       );
   }
 
+  private getAddresses() {
+    const walletInfo = new WalletInfo(this.globalService.getWalletName());
+    walletInfo.accountName = this.coldStakingAccount;
+    this.apiService.getAllAddresses(walletInfo)
+      .subscribe(
+        response => {
+          this.allAddresses = [];
+
+          for (let address of response.addresses) {
+            let type = "New";
+            if (address.isUsed) {
+              type = "Used";
+            } else if (address.isChange) {
+              type = "Change";
+            }
+            this.allAddresses.push({ title: type, label: address.address, value: address.address });
+
+            //if (((!address.isUsed && this.showUnusedAddresses) || address.isUsed) && (!address.isChange)) {
+          }
+        }
+      );
+  }
+
+  private getKeyAddress() {
+    this.stakingService.getAddress(this.globalService.getWalletName(), true, false.toString().toLowerCase()).subscribe(getAddressResponse => {
+      this.keyAddress = getAddressResponse.address;
+    });
+  }
+  
+  copyToClipboardClicked() {
+    if (this.clipboardService.copyFromContent(this.keyAddress)) {
+      this.copied = true;
+    }
+  }
+
   public getTierCost(): number {
     if (this.selectedTier == "") {
       return 0;
@@ -102,6 +154,7 @@ export class XServerComponent implements OnInit, OnDestroy {
 
   onRegisterClick(): void {
     let modalData = {
+      "keyAddress": this.keyAddress,
       "xserverName": this.xserverName,
       "selectedProtocol": this.selectedProtocol.value,
       "networkAddress": this.networkAddress,
@@ -114,7 +167,8 @@ export class XServerComponent implements OnInit, OnDestroy {
     this.dialogService.open(RegisterComponent, {
       header: 'Setting up remote xServer',
       width: '540px',
-      data: modalData
+      data: modalData,
+      dismissableMask: true
     });
   }
 }

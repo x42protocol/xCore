@@ -9,12 +9,35 @@
           <input type="text" class="form-control" [(ngModel)]="xserverName" placeholder="Choose a name for the xServer" pInputText>
         </div>
       </div>
-      <div class="form-group">
-        <div class='col-12 blockLabel'>
-          Network Protocol:
+      <div class="form-group d-flex">
+        <div class='col-3'>
+          <div class='blockLabel'>
+            Network Protocol:
+          </div>
+          <div class='col blockText' style="display: contents;">
+            <p-dropdown [options]="protocols" [(ngModel)]="selectedProtocol" optionLabel="name" name="selectedProtocol"></p-dropdown>
+          </div>
         </div>
-        <div class='col blockText'>
-          <p-dropdown [options]="protocols" [(ngModel)]="selectedProtocol" optionLabel="name"></p-dropdown>
+        <div class='col-9'>
+          <div class='blockLabel'>
+            Key Address:
+          </div>
+          <div class='col blockText' style="display: contents;">
+            <div class="myAddress d-flex">
+              <p-dropdown [options]="allAddresses" placeholder="Choose a address" [(ngModel)]="keyAddress" name="keyAddress" autoWidth="false" [style]="{'width':'400px'}" filter="true">
+                <ng-template let-item pTemplate="selectedItem">
+                  ({{item.title}}) <span style="vertical-align:middle; margin-left: .5em">{{item.value}}</span>
+                </ng-template>
+                <ng-template let-address pTemplate="item">
+                  <div class="ui-helper-clearfix" style="position: relative;height: 25px;">
+                    ({{address.title}}) <span style="vertical-align:middle; margin-left: .5em">{{address.value}}</span>
+                  </div>
+                </ng-template>
+              </p-dropdown>
+              <p-selectButton [options]="copyType" ngxClipboard icon="pi pi-copy" (click)="copyToClipboardClicked()"></p-selectButton>
+              <p-message *ngIf="copied" severity="success" class="ml-2"></p-message>
+            </div>
+          </div>
         </div>
       </div>
       <div class="form-group">

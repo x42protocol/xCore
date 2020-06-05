@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
 import { Observable, interval, throwError } from 'rxjs';
-import { catchError, startWith, switchMap} from 'rxjs/operators';
+import { catchError, startWith, switchMap } from 'rxjs/operators';
 
 import { GlobalService } from './global.service';
 import { ModalService } from './modal.service';
@@ -59,16 +59,16 @@ export class ColdStakingService {
     );
   }
 
-  createColdstaking(coldStakingSetup: ColdStakingSetup): Observable<ColdStakingSetupResponse> {
+  createColdstaking(coldStakingSetup: ColdStakingSetup, silent?: boolean): Observable<ColdStakingSetupResponse> {
     return this.http.post<ColdStakingSetupResponse>(this.x42ApiUrl + '/coldstaking/setup-cold-staking', JSON.stringify(coldStakingSetup)).pipe(
-      catchError(err => this.handleHttpError(err))
+      catchError(err => this.handleHttpError(err, silent))
     );
   }
 
-  createColdStakingAccount(walletName: string, walletPassword: string, isColdWalletAddress: boolean): Observable<ColdStakingCreateAccountResponse> {
+  createColdStakingAccount(walletName: string, walletPassword: string, isColdWalletAddress: boolean, silent?: boolean): Observable<ColdStakingCreateAccountResponse> {
     var request = new ColdStakingCreateAccountRequest(walletName, walletPassword, isColdWalletAddress);
     return this.http.post<ColdStakingCreateAccountResponse>(this.x42ApiUrl + '/coldstaking/cold-staking-account', JSON.stringify(request)).pipe(
-      catchError(err => this.handleHttpError(err))
+      catchError(err => this.handleHttpError(err, silent))
     );
   }
 
@@ -80,19 +80,12 @@ export class ColdStakingService {
 
   private handleHttpError(error: HttpErrorResponse, silent?: boolean) {
     console.log(error);
-    if (error.status === 0) {
-      if(!silent) {
-        this.modalService.openModal(null, null);
-        this.router.navigate(['app']);
-      }
-    } else if (error.status >= 400) {
-      if (!error.error.errors[0].message) {
-        console.log(error);
-      }
-      else {
+    if (error.status >= 400) {
+      if (error.error.errors[0].message && !silent) {
         this.modalService.openModal(null, error.error.errors[0].message);
       }
     }
+    console.log(error);
     return throwError(error);
   }
 }

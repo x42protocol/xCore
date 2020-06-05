@@ -38,15 +38,15 @@ export class RegisterComponent implements OnInit {
   public xserverName: string;
   public selectedProtocol: number;
   public networkAddress: string;
-  public networkPort: string = "4242";
+  public networkPort: string;
   public selectedTier: string;
   public walletPassword: string;
+  public keyAddress: string;
   public errorMessage: string = "";
 
   private server: ServerIDResponse = new ServerIDResponse();
   private generalWalletInfoSubscription: Subscription;
 
-  private signWithAddress: string;
   private signedMessage: string;
   private broadcastStarted: boolean = false;
 
@@ -62,6 +62,7 @@ export class RegisterComponent implements OnInit {
     this.server.serverId = this.config.data.serverId;
     this.walletPassword = this.config.data.walletPassword;
     this.selectedTier = this.config.data.selectedTier;
+    this.keyAddress = this.config.data.keyAddress;
 
     let previousConfirmation = 0;
 
@@ -91,6 +92,7 @@ export class RegisterComponent implements OnInit {
         }
         previousConfirmation = this.confirmations;
       } else {
+        clearInterval(interval);
         console.log(this.errorMessage);
       }
     }, 1000);
@@ -107,7 +109,7 @@ export class RegisterComponent implements OnInit {
     } else if (this.selectedTier = "100000") {
       xServerTier = 3;
     }
-    const registrationRequest = new xServerRegistrationRequest(this.xserverName, this.selectedProtocol, this.networkAddress, Number(this.networkPort), this.signedMessage, this.signWithAddress, xServerTier);
+    const registrationRequest = new xServerRegistrationRequest(this.xserverName, this.selectedProtocol, this.networkAddress, Number(this.networkPort), this.signedMessage, this.keyAddress, xServerTier);
     console.log(registrationRequest);
     this.apiService.registerxServer(registrationRequest)
       .subscribe(
@@ -125,7 +127,7 @@ export class RegisterComponent implements OnInit {
   private signRegistrationRequest() {
     const walletName = this.globalService.getWalletName();
     const message = `${this.xserverName}${this.networkAddress}${this.networkPort}`;
-    const address = this.signWithAddress;
+    const address = this.keyAddress;
     const password = this.walletPassword;
 
     const signMessageRequest = new SignMessageRequest(walletName, this.coldStakingAccount, password, address, message);
@@ -156,11 +158,11 @@ export class RegisterComponent implements OnInit {
         error => {
           if (error.status === 0) {
             this.cancelWalletSubscriptions();
-            this.errorMessage = "Could not get confirmation.";
+            this.stopWithErrorMessage("Could not get confirmation.");
           } else if (error.status >= 400) {
             if (!error.error.errors[0].message) {
               this.cancelWalletSubscriptions();
-              this.errorMessage = "Could not get confirmation..";
+              this.stopWithErrorMessage("Could not get confirmation..");
             }
           }
         }
@@ -181,60 +183,43 @@ export class RegisterComponent implements OnInit {
     const fee = 0;
 
     if (hotWalletAddress == "") {
-      this.errorMessage = "Invalid xServer ID";
+      this.stopWithErrorMessage("Invalid xServer ID");
     } else {
       console.log(hotWalletAddress);
 
-      this.apiService.validateAddress(hotWalletAddress).subscribe(
-        address => {
-          this.stakingService.createColdStakingAccount(walletName, walletPassword, true)
-            .subscribe(
-              createColdStakingAccountResponse => {
-                this.stakingService.getAddress(walletName, true, address.iswitness.toString().toLowerCase()).subscribe(getAddressResponse => {
-                  this.signWithAddress = getAddressResponse.address;
-                  console.log("Sign Addy: " + this.signWithAddress);
-                  this.stakingService.createColdstaking(new ColdStakingSetup(
-                    hotWalletAddress,
-                    getAddressResponse.address,
-                    amount,
-                    walletName,
-                    walletPassword,
-                    this.mainAccount,
-                    fee
-                  ))
-                    .subscribe(
-                      createColdstakingResponse => {
-                        const transaction = new TransactionSending(createColdstakingResponse.transactionHex);
-                        this.apiService
-                          .sendTransaction(transaction)
-                          .subscribe(
-                            sendTransactionResponse => {
-                              this.deligatedTransactionSent(sendTransactionResponse)
-                            },
-                            error => {
-                              this.errorMessage = "Sending: " + error.error.errors[0].message;
-                            }
-                          );
-                      },
-                      error => {
-                        this.errorMessage = "Setup: " + error.error.errors[0].message;
-                      }
-                    );
+      this.stakingService.createColdstaking(new ColdStakingSetup(
+        hotWalletAddress,
+        this.keyAddress,
+        amount,
+        walletName,
+        walletPassword,
+        this.mainAccount,
+        fee
+      ), true)
+        .subscribe(
+          createColdstakingResponse => {
+            const transaction = new TransactionSending(createColdstakingResponse.transactionHex);
+            this.apiService
+              .sendTransaction(transaction)
+              .subscribe(
+                sendTransactionResponse => {
+                  this.deligatedTransactionSent(sendTransactionResponse)
                 },
-                  error => {
-                    this.errorMessage = "Retrieve: " + error.error.errors[0].message;
-                  });
-              },
-              error => {
-                this.errorMessage = "Creating: " + error.error.errors[0].message;
-              },
-            )
-        },
-        error => {
-          this.errorMessage = "Validate: " + error.error.errors[0].message;
-        }
-      );
+                error => {
+                  this.stopWithErrorMessage("Sending: " + error.error.errors[0].message);
+                }
+              );
+          },
+          error => {
+            this.stopWithErrorMessage("Setup: " + error.error.errors[0].message);
+          }
+        );
     }
+  }
+
+  private stopWithErrorMessage(message: string) {
+    this.errorMessage = message;
+    this.currentStep = -2;
   }
 
   private cancelWalletSubscriptions() {
@@ -248,8 +233,7 @@ export class RegisterComponent implements OnInit {
   }
 
   public Cancel() {
-    this.errorMessage = "User Canceled";
-    this.currentStep = -2;
+    this.stopWithErrorMessage("User Canceled");
   }
 
 }
