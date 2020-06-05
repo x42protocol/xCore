@@ -1,6 +1,6 @@
 <p align="center">
   <p align="center">
-    <img src="https://user-images.githubusercontent.com/41244965/83369128-81f5e400-a378-11ea-8b8a-283f8b8a9ffd.png" height="100" alt="xServer" />
+    <img src="https://user-images.githubusercontent.com/41244965/83692201-c53a9780-a5b0-11ea-8b9c-4a2e238dd1b9.png" height="100" alt="xServer" />
   </p>
   <h3 align="center">
     About xCore
