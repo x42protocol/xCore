@@ -148,7 +148,7 @@ export class CreateComponent implements OnInit {
 
   walletCreateResult(success: boolean): void {
     if (success) {
-      this.resultMessage = [{ severity: 'success', summary: 'Wallet Created', detail: '<br>Your wallet has been created. Keep your secret words, password and passphrase safe!' }];
+      this.resultMessage = [{ severity: 'success', summary: 'Wallet Created', detail: ' Your wallet has been created. Keep your secret words, password and passphrase safe!' }];
       this.walletCreated = true;
       this.isCreated.emit(true);
       this.router.navigate(['']);

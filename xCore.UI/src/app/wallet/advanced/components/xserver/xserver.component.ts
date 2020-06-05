@@ -11,6 +11,7 @@ import { DialogService } from 'primeng/dynamicdialog';
 import { SelectItem } from 'primeng/api';
 import { ClipboardService } from 'ngx-clipboard';
 import { ColdStakingService } from '../../../../shared/services/coldstaking.service';
+import { ThemeService } from '../../../../shared/services/theme.service';
 
 interface NetworkProtocol {
   name: string;
@@ -24,8 +25,11 @@ interface NetworkProtocol {
 })
 export class XServerComponent implements OnInit, OnDestroy {
 
-  constructor(private globalService: GlobalService, private apiService: FullNodeApiService, private electron: ElectronService, public dialogService: DialogService, private clipboardService: ClipboardService, private stakingService: ColdStakingService) { }
+  constructor(private globalService: GlobalService, private apiService: FullNodeApiService, private electron: ElectronService, public dialogService: DialogService, private clipboardService: ClipboardService, private stakingService: ColdStakingService, private themeService: ThemeService) {
+    this.isDarkTheme = themeService.getCurrentTheme().themeType == 'dark';
+  }
 
+  public isDarkTheme = false;
   private walletBalanceSubscription: Subscription;
   public clientName: string;
   public applicationVersion: string;
@@ -43,6 +47,8 @@ export class XServerComponent implements OnInit, OnDestroy {
   public copyType: SelectItem[];
   public copied: boolean;
   public allAddresses: SelectItem[];
+  public isUnlocking: boolean;
+  public unlockError: string;
 
   public keyAddress: string;
   public xserverName: string;
@@ -70,7 +76,6 @@ export class XServerComponent implements OnInit, OnDestroy {
       { label: 'Copy', value: 'Copy', icon: 'pi pi-copy' }
     ];
     this.getKeyAddress();
-    this.getAddresses();
     this.copied = false;
     this.selectedTier = "1000";
     this.selectedProtocol = this.protocols[0];
@@ -126,12 +131,30 @@ export class XServerComponent implements OnInit, OnDestroy {
       );
   }
 
-  private getKeyAddress() {
-    this.stakingService.getAddress(this.globalService.getWalletName(), true, false.toString().toLowerCase()).subscribe(getAddressResponse => {
-      this.keyAddress = getAddressResponse.address;
-    });
+  public onUnlockClicked() {
+    this.unlockError = "";
+    this.isUnlocking = true;
+    this.stakingService.createColdStakingAccount(this.globalService.getWalletName(), this.walletPassword, true)
+      .subscribe(
+        createColdStakingAccountResponse => {
+          this.getKeyAddress();
+          this.isUnlocking = false;
+        },
+        error => {
+          this.isUnlocking = false;
+          this.unlockError = error.error.errors[0].message;
+        }
+      );
   }
-  
+
+  private getKeyAddress() {
+    this.stakingService.getAddress(this.globalService.getWalletName(), true, false.toString().toLowerCase(), true).subscribe(
+      getAddressResponse => {
+        this.keyAddress = getAddressResponse.address;
+        this.getAddresses();
+      });
+  }
+
   copyToClipboardClicked() {
     if (this.clipboardService.copyFromContent(this.keyAddress)) {
       this.copied = true;

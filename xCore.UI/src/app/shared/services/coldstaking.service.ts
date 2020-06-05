@@ -45,7 +45,7 @@ export class ColdStakingService {
     );
   }
 
-  getAddress(walletName: string, isColdWalletAddress: boolean, isSegwit: string = ""): Observable<ColdStakingCreateAddressResponse> {
+  getAddress(walletName: string, isColdWalletAddress: boolean, isSegwit: string = "", silent?: boolean): Observable<ColdStakingCreateAddressResponse> {
     if (isSegwit == "") {
       isSegwit = this.addressType.IsSegwit();
     }
@@ -55,7 +55,7 @@ export class ColdStakingService {
       .set('Segwit', isSegwit);
 
     return this.http.get<ColdStakingCreateAddressResponse>(this.x42ApiUrl + '/coldstaking/cold-staking-address', { params }).pipe(
-      catchError(err => this.handleHttpError(err))
+      catchError(err => this.handleHttpError(err, silent))
     );
   }
 
