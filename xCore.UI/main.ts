@@ -104,9 +104,9 @@ app.on('ready', () => {
   }
   else {
     if (sidechain && !nodaemon) {
-      startDaemon("x42.x42D");
+      startDaemon("x42.Node");
     } else if (!nodaemon) {
-      startDaemon("x42.x42D")
+      startDaemon("x42.Node")
     }
   }
   createTray();
