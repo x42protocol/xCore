@@ -28,6 +28,8 @@ import { SignMessageResponse } from '../models/signmessageresponse';
 import { TransactionOutput } from '../models/transaction-output';
 import { xServerRegistrationRequest } from '../models/xserver-registration-request';
 import { xServerRegistrationResponse } from '../models/xserver-registration-response';
+import { xServerTestRequest } from '../models/xserver-test-request';
+import { xServerTestResponse } from '../models/xserver-test-response';
 
 @Injectable({
   providedIn: 'root'
@@ -64,13 +66,19 @@ export class FullNodeApiService {
   getxServerStatusInterval(): Observable<XServerStatus> {
     return this.pollingInterval.pipe(
       startWith(0),
-      switchMap(() => this.http.get<XServerStatus>(this.x42ApiUrl + '/XServer/getxserverstats')),
+      switchMap(() => this.http.get<XServerStatus>(this.x42ApiUrl + '/xServer/getxserverstats')),
       catchError(err => this.handleHttpError(err))
     )
   }
 
+  testxServer(testRequest: xServerTestRequest): Observable<xServerTestResponse> {
+    return this.http.post<xServerTestResponse>(this.x42ApiUrl + '/xServer/testxserverports', JSON.stringify(testRequest)).pipe(
+      catchError(err => this.handleHttpError(err))
+    );
+  }
+
   registerxServer(registrationRequest: xServerRegistrationRequest): Observable<xServerRegistrationResponse> {
-    return this.http.post<xServerRegistrationResponse>(this.x42ApiUrl + '/XServer/registerxserver', JSON.stringify(registrationRequest)).pipe(
+    return this.http.post<xServerRegistrationResponse>(this.x42ApiUrl + '/xServer/registerxserver', JSON.stringify(registrationRequest)).pipe(
       catchError(err => this.handleHttpError(err))
     );
   }

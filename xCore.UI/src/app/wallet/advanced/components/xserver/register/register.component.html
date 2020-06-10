@@ -4,7 +4,15 @@
     <br />
     <span class="text-warning"><span class="lnr lnr-warning"></span> Be sure the xServer you are setting up is online during this process.</span>
   </div>
-  <div class="mt-4">
+  <div class="mt-4" *ngIf="testStatus == 0">
+    <i class="pi pi-spin pi-spinner text-info"></i>
+    Testing Required Ports
+  </div>
+  <div class="mt-4" *ngIf="testStatus == -1">
+    <i class="pi pi-exclamation-circle text-danger" *ngIf="errorMessage != ''"></i>
+    Test Failed.
+  </div>
+  <div class="mt-4" *ngIf="testStatus == 1">
     <p-accordion [activeIndex]="currentStep">
       <p-accordionTab>
         <p-header>

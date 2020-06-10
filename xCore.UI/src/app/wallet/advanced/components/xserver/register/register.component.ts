@@ -16,6 +16,8 @@ import { TransactionInfo } from '../../../../../shared/models/transaction-info';
 import { SignMessageRequest } from '../../../../../shared/models/wallet-signmessagerequest';
 import { TransactionOutput } from '../../../../../shared/models/transaction-output';
 import { xServerRegistrationRequest } from '../../../../../shared/models/xserver-registration-request';
+import { xServerTestRequest } from '../../../../../shared/models/xserver-test-request';
+import { NodeStatus } from '../../../../../shared/models/node-status';
 
 @Component({
   selector: 'register-component',
@@ -43,9 +45,11 @@ export class RegisterComponent implements OnInit {
   public walletPassword: string;
   public keyAddress: string;
   public errorMessage: string = "";
+  public testStatus: number = 0;
 
   private server: ServerIDResponse = new ServerIDResponse();
   private generalWalletInfoSubscription: Subscription;
+  private nodeStatusSubscription: Subscription;
 
   private signedMessage: string;
   private broadcastStarted: boolean = false;
@@ -64,11 +68,41 @@ export class RegisterComponent implements OnInit {
     this.selectedTier = this.config.data.selectedTier;
     this.keyAddress = this.config.data.keyAddress;
 
-    let previousConfirmation = 0;
+    this.startSubscription();
 
+  }
+
+  private startSubscription() {
+    this.nodeStatusSubscription = this.apiService.getNodeStatus()
+      .subscribe(
+        (data: NodeStatus) => {
+          let statusResponse = data
+          this.testXServer(statusResponse.blockStoreHeight);
+        }
+      );
+  }
+
+  private testXServer(blockHeight: number) {
+    const registrationRequest = new xServerTestRequest(this.selectedProtocol, this.networkAddress, Number(this.networkPort), blockHeight);
+    console.log(registrationRequest);
+    this.apiService.testxServer(registrationRequest)
+      .subscribe(
+        response => {
+          if (response.success) {
+            this.testStatus = 1;
+            this.startRegistration()
+          } else {
+            this.testStatus = -1;
+            this.errorMessage = response.resultMessage;
+          }
+        }
+      );
+  }
+
+  private startRegistration() {
+    let previousConfirmation = 0;
     this.broadcastTransaction();
     this.currentStep++;
-
     let interval = setInterval(() => {
       if (this.errorMessage == "") {
         if (this.collateralProgress > 0 && this.currentStep < 1) {

@@ -17,6 +17,14 @@ import { debounceTime } from 'rxjs/operators';
 
 import { DynamicDialogRef, DynamicDialogConfig, DialogService } from 'primeng/dynamicdialog';
 
+interface TxDetails {
+  transactionFee?: number
+  sidechainEnabled?: boolean
+  opReturnAmount?: number
+  hasOpReturn?: boolean
+  amount?: any
+}
+
 @Component({
   selector: 'send-component',
   templateUrl: './send.component.html',
@@ -46,7 +54,7 @@ export class SendComponent implements OnInit, OnDestroy {
   public secondTitle: string;
   public opReturnAmount: number = 1000;
   public transactionComplete: boolean;
-  public transactionDetails: {};
+  public transactionDetails: TxDetails;
   public transaction: TransactionBuilding;
 
   private transactionHex: string;
@@ -346,13 +354,12 @@ export class SendComponent implements OnInit, OnDestroy {
       .subscribe(
         response => {
           this.transactionDetails = {
-            "transactionFee": this.estimatedFee,
-            "sidechainEnabled": this.sidechainEnabled,
-            "opReturnAmount": this.opReturnAmount,
-            "hasOpReturn": this.hasOpReturn,
-            "amount": this.sendForm.get("amount").value
+            transactionFee: this.estimatedFee,
+            sidechainEnabled: this.sidechainEnabled,
+            opReturnAmount: this.opReturnAmount,
+            hasOpReturn: this.hasOpReturn,
+            amount: this.sendForm.get("amount").value
           };
-          console.log(this.transactionDetails);
           this.transactionComplete = true;
         },
         error => {
