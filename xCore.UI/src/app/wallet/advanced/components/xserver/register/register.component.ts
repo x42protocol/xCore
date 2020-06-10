@@ -143,7 +143,11 @@ export class RegisterComponent implements OnInit {
   }
 
   private incrementProgress(progress: number) {
-    this.collateralProgress = this.collateralProgress + progress;
+    let totalProgress = this.collateralProgress + progress;
+    if (totalProgress > 100) {
+      totalProgress = 100;
+    }
+    this.collateralProgress = totalProgress;
   }
 
   private updateConfirmations() {

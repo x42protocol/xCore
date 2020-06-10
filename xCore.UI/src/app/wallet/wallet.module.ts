@@ -24,7 +24,6 @@ import { RegisterComponent } from './advanced/components/xserver/register/regist
 import { ResyncComponent } from './advanced/components/resync/resync.component';
 import { SendComponent } from './send/send.component';
 import { ReceiveComponent } from './receive/receive.component';
-import { SendConfirmationComponent } from './send/send-confirmation/send-confirmation.component';
 import { TransactionDetailsComponent } from './transaction-details/transaction-details.component';
 import { LogoutConfirmationComponent } from './logout-confirmation/logout-confirmation.component';
 
@@ -34,7 +33,6 @@ import { ColdStakingCreateComponent } from './cold-staking/create/create.compone
 import { ColdStakingCreateSuccessComponent } from "./cold-staking/create-success/create-success.component";
 import { ColdStakingCreateAddressComponent } from "./cold-staking/create-address/create-address.component";
 import { ColdStakingWithdrawComponent } from "./cold-staking/withdraw/withdraw.component";
-import { ColdStakingWithdrawConfirmationComponent } from "./cold-staking/withdraw/withdraw-confirmation/withdraw-confirmation.component";
 import { ColdStakingCreateHotComponent } from './cold-staking/create-hot/create-hot.component';
 
 // PrimeNG Components.
@@ -107,7 +105,6 @@ import { RatingModule } from 'primeng/rating';
     DashboardComponent,
     SendComponent,
     ReceiveComponent,
-    SendConfirmationComponent,
     TransactionDetailsComponent,
     LogoutConfirmationComponent,
     HistoryComponent,
@@ -129,7 +126,6 @@ import { RatingModule } from 'primeng/rating';
     ColdStakingCreateSuccessComponent,
     ColdStakingCreateAddressComponent,
     ColdStakingWithdrawComponent,
-    ColdStakingWithdrawConfirmationComponent,
     ColdStakingCreateHotComponent
   ],
   providers: [
@@ -139,7 +135,6 @@ import { RatingModule } from 'primeng/rating';
   ],
   entryComponents: [
     SendComponent,
-    SendConfirmationComponent,
     ReceiveComponent,
     TransactionDetailsComponent,
     LogoutConfirmationComponent,
@@ -149,7 +144,6 @@ import { RatingModule } from 'primeng/rating';
     ColdStakingCreateSuccessComponent,
     ColdStakingCreateAddressComponent,
     ColdStakingWithdrawComponent,
-    ColdStakingWithdrawConfirmationComponent,
     ColdStakingCreateHotComponent,
     RegisterComponent
   ]

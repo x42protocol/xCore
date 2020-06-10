@@ -1,4 +1,4 @@
-<div class="modal-body pb-0">
+<div class="modal-body pb-0" *ngIf="!transactionComplete">
   <form [formGroup]="sendForm">
     <!--<div class="form-group has-danger clearfix">-->
     <div class="form-group clearfix">
@@ -33,7 +33,7 @@
     <small *ngIf="apiError" class="text-danger">{{ apiError }}</small>
   </form>
 </div>
-<div class="modal-footer mt-1">
+<div class="modal-footer mt-1" *ngIf="!transactionComplete">
   <button *ngIf="!isSending" type="button" [disabled]="isSending" class="btn btn-outline-light" (click)="activeModal.close('Close clicked')">Cancel</button>
   <button *ngIf="!isSending" type="button" class="btn-block" [disabled]="!sendForm.valid || isSending" (click)="send()" label="Withdraw" pButton></button>
   <!-- SVG -->
@@ -46,4 +46,18 @@
       </g>
     </svg>
   </div>
+</div>
+
+<div class="modal-body" *ngIf="transactionComplete">
+  <div class="text-center">
+    <svg height="80px" width="80px" version="1.1" id="checkmark" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+         x="0px" y="0px" viewBox="0 0 98.5 98.5" enable-background="new 0 0 98.5 98.5" xml:space="preserve">
+    <path class="checkmark" fill="none" stroke-width="8" stroke-miterlimit="10" d="M81.7,17.8C73.5,9.3,62,4,49.2,4
+                C24.3,4,4,24.3,4,49.2s20.3,45.2,45.2,45.2s45.2-20.3,45.2-45.2c0-8.6-2.4-16.6-6.5-23.4l0,0L45.6,68.2L24.7,47.3"></path>
+    </svg>
+    <p class="text-success text-center col-8 mx-auto mt-3">Transaction that withdraws to spendable address was created with success.</p>
+  </div>
+</div>
+<div class="modal-footer" *ngIf="transactionComplete">
+  <button type="button" class="btn-block" data-dismiss="modal" (click)="activeModal.close('Close clicked')" label="Ok" pButton></button>
 </div>

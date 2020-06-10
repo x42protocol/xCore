@@ -73,8 +73,6 @@
     <Content Include="src\app\wallet\cold-staking\create\create.component.html" />
     <Content Include="src\app\wallet\cold-staking\overview.component.css" />
     <Content Include="src\app\wallet\cold-staking\overview.component.html" />
-    <Content Include="src\app\wallet\cold-staking\withdraw\withdraw-confirmation\withdraw-confirmation.component.css" />
-    <Content Include="src\app\wallet\cold-staking\withdraw\withdraw-confirmation\withdraw-confirmation.component.html" />
     <Content Include="src\app\wallet\cold-staking\withdraw\withdraw.component.css" />
     <Content Include="src\app\wallet\cold-staking\withdraw\withdraw.component.html" />
     <Content Include="src\app\setup\create\show-mnemonic\show-mnemonic.component.css" />
@@ -110,8 +108,6 @@
     <Content Include="src\app\wallet\menu\menu.component.html" />
     <Content Include="src\app\wallet\receive\receive.component.css" />
     <Content Include="src\app\wallet\receive\receive.component.html" />
-    <Content Include="src\app\wallet\send\send-confirmation\send-confirmation.component.css" />
-    <Content Include="src\app\wallet\send\send-confirmation\send-confirmation.component.html" />
     <Content Include="src\app\wallet\send\send.component.css" />
     <Content Include="src\app\wallet\send\send.component.html" />
     <Content Include="src\app\wallet\smart-contracts\components\modals\transaction\transaction.component.css" />
@@ -495,8 +491,6 @@
     <TypeScriptCompile Include="src\app\wallet\cold-staking\create\create.component.ts" />
     <TypeScriptCompile Include="src\app\wallet\cold-staking\overview.component.spec.ts" />
     <TypeScriptCompile Include="src\app\wallet\cold-staking\overview.component.ts" />
-    <TypeScriptCompile Include="src\app\wallet\cold-staking\withdraw\withdraw-confirmation\withdraw-confirmation.component.spec.ts" />
-    <TypeScriptCompile Include="src\app\wallet\cold-staking\withdraw\withdraw-confirmation\withdraw-confirmation.component.ts" />
     <TypeScriptCompile Include="src\app\wallet\cold-staking\withdraw\withdraw.component.spec.ts" />
     <TypeScriptCompile Include="src\app\wallet\cold-staking\withdraw\withdraw.component.ts" />
     <TypeScriptCompile Include="src\app\setup\create\show-mnemonic\show-mnemonic.component.spec.ts" />
@@ -562,8 +556,6 @@
     <TypeScriptCompile Include="src\app\wallet\menu\menu.component.ts" />
     <TypeScriptCompile Include="src\app\wallet\receive\receive.component.spec.ts" />
     <TypeScriptCompile Include="src\app\wallet\receive\receive.component.ts" />
-    <TypeScriptCompile Include="src\app\wallet\send\send-confirmation\send-confirmation.component.spec.ts" />
-    <TypeScriptCompile Include="src\app\wallet\send\send-confirmation\send-confirmation.component.ts" />
     <TypeScriptCompile Include="src\app\wallet\send\send.component.spec.ts" />
     <TypeScriptCompile Include="src\app\wallet\send\send.component.ts" />
     <TypeScriptCompile Include="src\app\wallet\smart-contracts\components\balance\balance.component.ts" />
@@ -618,7 +610,6 @@
     <Folder Include="src\app\wallet\cold-staking\create-success\" />
     <Folder Include="src\app\wallet\cold-staking\create\" />
     <Folder Include="src\app\wallet\cold-staking\withdraw\" />
-    <Folder Include="src\app\wallet\cold-staking\withdraw\withdraw-confirmation\" />
     <Folder Include="src\app\setup\create\show-mnemonic\" />
     <Folder Include="src\app\setup\recover\" />
     <Folder Include="src\app\shared\" />
@@ -646,7 +637,6 @@
     <Folder Include="src\app\wallet\menu\" />
     <Folder Include="src\app\wallet\receive\" />
     <Folder Include="src\app\wallet\send\" />
-    <Folder Include="src\app\wallet\send\send-confirmation\" />
     <Folder Include="src\app\wallet\smart-contracts\" />
     <Folder Include="src\app\wallet\smart-contracts\components\" />
     <Folder Include="src\app\wallet\smart-contracts\components\balance\" />

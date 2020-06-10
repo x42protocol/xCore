@@ -13,8 +13,6 @@ import { TransactionSending } from '../../../shared/models/transaction-sending';
 import { WalletInfo } from '../../../shared/models/wallet-info';
 import { ColdStakingWithdrawalRequest } from "../../../shared/models/coldstakingwithdrawalrequest";
 
-import { ColdStakingWithdrawConfirmationComponent } from './withdraw-confirmation/withdraw-confirmation.component';
-
 import { Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 
@@ -53,6 +51,7 @@ export class ColdStakingWithdrawComponent implements OnInit, OnDestroy {
   public opReturnAmount: number = 0;
   public isColdStaking: boolean;
   public isDarkTheme = false;
+  public transactionComplete: boolean;
 
   private transactionHex: string;
   private walletBalanceSubscription: Subscription;
@@ -219,8 +218,7 @@ export class ColdStakingWithdrawComponent implements OnInit, OnDestroy {
       .sendTransaction(transaction)
       .subscribe(
         response => {
-          this.activeModal.close("Close clicked");
-          this.openConfirmationModal();
+          this.transactionComplete = true;
         },
         error => {
           this.isSending = false;
@@ -252,13 +250,6 @@ export class ColdStakingWithdrawComponent implements OnInit, OnDestroy {
         }
       );
   };
-
-  private openConfirmationModal() {
-    this.dialogService.open(ColdStakingWithdrawConfirmationComponent, {
-      header: 'Setup',
-      width: '540px'
-    });
-  }
 
   private cancelSubscriptions() {
     if (this.walletBalanceSubscription) {

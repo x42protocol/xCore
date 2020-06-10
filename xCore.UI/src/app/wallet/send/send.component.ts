@@ -12,8 +12,6 @@ import { TransactionSending } from '../../shared/models/transaction-sending';
 import { WalletInfo } from '../../shared/models/wallet-info';
 import { ThemeService } from '../../shared/services/theme.service';
 
-import { SendConfirmationComponent } from './send-confirmation/send-confirmation.component';
-
 import { Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 
@@ -47,9 +45,11 @@ export class SendComponent implements OnInit, OnDestroy {
   public firstTitle: string;
   public secondTitle: string;
   public opReturnAmount: number = 1000;
+  public transactionComplete: boolean;
+  public transactionDetails: {};
+  public transaction: TransactionBuilding;
+
   private transactionHex: string;
-  private responseMessage: any;
-  private transaction: TransactionBuilding;
   private walletBalanceSubscription: Subscription;
 
   ngOnInit() {
@@ -345,8 +345,15 @@ export class SendComponent implements OnInit, OnDestroy {
       .sendTransaction(transaction)
       .subscribe(
         response => {
-          this.ref.close("Close clicked");
-          this.openConfirmationModal()
+          this.transactionDetails = {
+            "transactionFee": this.estimatedFee,
+            "sidechainEnabled": this.sidechainEnabled,
+            "opReturnAmount": this.opReturnAmount,
+            "hasOpReturn": this.hasOpReturn,
+            "amount": this.sendForm.get("amount").value
+          };
+          console.log(this.transactionDetails);
+          this.transactionComplete = true;
         },
         error => {
           this.isSending = false;
@@ -376,24 +383,6 @@ export class SendComponent implements OnInit, OnDestroy {
         }
       );
   };
-
-  private openConfirmationModal() {
-    let modalData = {
-      "transaction": this.transaction,
-      "transactionFee": this.estimatedFee,
-      "sidechainEnabled": this.sidechainEnabled,
-      "opReturnAmount": this.opReturnAmount,
-      "hasOpReturn": this.hasOpReturn
-    };
-
-    const modalRef = this.dialogService.open(SendConfirmationComponent,
-      {
-        header: 'Confirmation',
-        width: '50%',
-        data: modalData
-      }
-    );
-  }
 
   private cancelSubscriptions() {
     if (this.walletBalanceSubscription) {
