@@ -194,7 +194,7 @@ export class ColdStakingWithdrawComponent implements OnInit, OnDestroy {
       this.globalService.getWalletName(),
       this.sendForm.get("password").value,
       this.estimatedFee
-    )).subscribe(withdrawal => {
+    ), true).subscribe(withdrawal => {
       this.transactionHex = withdrawal.transactionHex;
       if (this.isSending) {
         this.hasOpReturn = false;

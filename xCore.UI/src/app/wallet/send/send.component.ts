@@ -238,7 +238,7 @@ export class SendComponent implements OnInit, OnDestroy {
       true
     );
 
-    this.FullNodeApiService.estimateFee(transaction)
+    this.FullNodeApiService.estimateFee(transaction, true)
       .subscribe(
         response => {
           this.estimatedFee = response;
@@ -286,7 +286,7 @@ export class SendComponent implements OnInit, OnDestroy {
     );
 
     this.FullNodeApiService
-      .buildTransaction(this.transaction)
+      .buildTransaction(this.transaction, true)
       .subscribe(
         response => {
           this.estimatedFee = response.fee;
@@ -318,7 +318,6 @@ export class SendComponent implements OnInit, OnDestroy {
       this.sendToSidechainForm.get("destinationAddress").value.trim(),
       this.opReturnAmount / 100000000
     );
-
     this.FullNodeApiService.buildTransaction(this.transaction)
       .subscribe(
         response => {

@@ -238,7 +238,7 @@ export class RegisterComponent implements OnInit {
           createColdstakingResponse => {
             const transaction = new TransactionSending(createColdstakingResponse.transactionHex);
             this.apiService
-              .sendTransaction(transaction)
+              .sendTransaction(transaction, true)
               .subscribe(
                 sendTransactionResponse => {
                   this.deligatedTransactionSent(sendTransactionResponse)

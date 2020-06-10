@@ -310,7 +310,7 @@ export class FullNodeApiService {
   /**
  * Estimate the fee of a transaction
  */
-  estimateFee(data: FeeEstimation): Observable<any> {
+  estimateFee(data: FeeEstimation, silent?: boolean): Observable<any> {
     return this.http.post(this.x42ApiUrl + '/wallet/estimate-txfee', {
       'walletName': data.walletName,
       'accountName': data.accountName,
@@ -323,7 +323,7 @@ export class FullNodeApiService {
       'feeType': data.feeType,
       'allowUnconfirmed': true
     }).pipe(
-      catchError(err => this.handleHttpError(err))
+      catchError(err => this.handleHttpError(err, silent))
     );
   }
 
@@ -350,9 +350,9 @@ export class FullNodeApiService {
   /**
    * Build a transaction
    */
-  buildTransaction(data: TransactionBuilding): Observable<any> {
+  buildTransaction(data: TransactionBuilding, silent?: boolean): Observable<any> {
     return this.http.post(this.x42ApiUrl + '/wallet/build-transaction', JSON.stringify(data)).pipe(
-      catchError(err => this.handleHttpError(err))
+      catchError(err => this.handleHttpError(err, silent))
     );
   }
 

@@ -72,9 +72,9 @@ export class ColdStakingService {
     );
   }
 
-  withdrawColdStaking(coldStakingWithdrawalRequest: ColdStakingWithdrawalRequest): Observable<ColdStakingWithdrawalResponse> {
+  withdrawColdStaking(coldStakingWithdrawalRequest: ColdStakingWithdrawalRequest, silent?: boolean): Observable<ColdStakingWithdrawalResponse> {
     return this.http.post<ColdStakingWithdrawalResponse>(this.x42ApiUrl + '/coldstaking/cold-staking-withdrawal', JSON.stringify(coldStakingWithdrawalRequest)).pipe(
-      catchError(err => this.handleHttpError(err))
+      catchError(err => this.handleHttpError(err, silent))
     );
   }
 
