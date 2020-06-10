@@ -23,9 +23,10 @@
           Balance:
           <strong>{{ (confirmedBalance | coinNotation) || (0 | coinNotation) }}</strong>
           <small class="text-uppercase"> {{ coinUnit }}</small>
-          <span style="margin-left: 10px;" *ngIf="unconfirmedBalance < 0.00000000">
+        </span>
+
+        <span class="ml-2 ui-message ui-widget ui-corner-all ui-message-warn ng-star-inserted" *ngIf="unconfirmedBalance > 0.00000000">
             <strong>{{ (unconfirmedBalance | coinNotation) || (0 | coinNotation) }}</strong><em> (unconfirmed)</em>
-          </span>
         </span>
       </div>
 
