@@ -215,10 +215,12 @@ export class ColdStakingWithdrawComponent implements OnInit, OnDestroy {
   private sendTransaction(hex: string) {
     let transaction = new TransactionSending(hex);
     this.apiService
-      .sendTransaction(transaction)
+      .sendTransaction(transaction, true)
       .subscribe(
         response => {
-          this.transactionComplete = true;
+          if (response.transactionId) {
+            this.transactionComplete = true;
+          }
         },
         error => {
           this.isSending = false;

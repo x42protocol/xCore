@@ -350,17 +350,19 @@ export class SendComponent implements OnInit, OnDestroy {
   private sendTransaction(hex: string) {
     let transaction = new TransactionSending(hex);
     this.FullNodeApiService
-      .sendTransaction(transaction)
+      .sendTransaction(transaction, true)
       .subscribe(
         response => {
-          this.transactionDetails = {
-            transactionFee: this.estimatedFee,
-            sidechainEnabled: this.sidechainEnabled,
-            opReturnAmount: this.opReturnAmount,
-            hasOpReturn: this.hasOpReturn,
-            amount: this.sendForm.get("amount").value
-          };
-          this.transactionComplete = true;
+          if (response.transactionId) {
+            this.transactionDetails = {
+              transactionFee: this.estimatedFee,
+              sidechainEnabled: this.sidechainEnabled,
+              opReturnAmount: this.opReturnAmount,
+              hasOpReturn: this.hasOpReturn,
+              amount: this.sendForm.get("amount").value
+            };
+            this.transactionComplete = true;
+          }
         },
         error => {
           this.isSending = false;

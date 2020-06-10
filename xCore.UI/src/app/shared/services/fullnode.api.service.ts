@@ -359,9 +359,9 @@ export class FullNodeApiService {
   /**
    * Send transaction
    */
-  sendTransaction(data: TransactionSending): Observable<any> {
+  sendTransaction(data: TransactionSending, silent?: boolean): Observable<any> {
     return this.http.post(this.x42ApiUrl + '/wallet/send-transaction', JSON.stringify(data)).pipe(
-      catchError(err => this.handleHttpError(err))
+      catchError(err => this.handleHttpError(err, silent))
     );
   }
 
