@@ -155,7 +155,7 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
     if (isCold) {
       let coldHistoryResponse;
       walletInfo.accountName = this.coldStakingAccount;
-      this.walletColdHistorySubscription = this.apiService.getWalletHistory(walletInfo, true)
+      this.walletColdHistorySubscription = this.apiService.getWalletHistory(walletInfo, 0, 10, true)
         .subscribe(
           response => {
             if (!!response.history && response.history[0].transactionsHistory.length > 0) {
@@ -170,7 +170,7 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
     } else {
       let coldHistoryResponse;
       walletInfo.accountName = this.hotStakingAccount;
-      this.walletHotHistorySubscription = this.apiService.getWalletHistory(walletInfo, true)
+      this.walletHotHistorySubscription = this.apiService.getWalletHistory(walletInfo, 0, 10, true)
         .pipe(
           finalize(() => this.isLoading = false)
         )
