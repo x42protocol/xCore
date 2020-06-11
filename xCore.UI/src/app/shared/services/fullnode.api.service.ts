@@ -253,10 +253,15 @@ export class FullNodeApiService {
   /**
    * Get a wallets transaction history info from the API.
    */
-  getWalletHistory(data: WalletInfo, silent?: boolean): Observable<any> {
+  getWalletHistory(data: WalletInfo, skip: number = -1, take: number = -1, silent?: boolean): Observable<any> {
     let params = new HttpParams()
       .set('walletName', data.walletName)
-      .set('accountName', data.accountName);
+      .set('accountName', data.accountName)
+    if (take > 0) {
+      params = params.set('Skip', skip.toString())
+        .set('Take', take.toString());
+    }
+    console.log("Params: " + params);
     return this.pollingInterval.pipe(
       startWith(0),
       switchMap(() => this.http.get(this.x42ApiUrl + '/wallet/history', { params: params })),
