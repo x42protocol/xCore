@@ -261,7 +261,6 @@ export class FullNodeApiService {
       params = params.set('Skip', skip.toString())
         .set('Take', take.toString());
     }
-    console.log("Params: " + params);
     return this.pollingInterval.pipe(
       startWith(0),
       switchMap(() => this.http.get(this.x42ApiUrl + '/wallet/history', { params: params })),
@@ -306,6 +305,21 @@ export class FullNodeApiService {
       .set('walletName', data.walletName)
       .set('accountName', data.accountName)
       .set('Segwit', this.addressType.IsSegwit());
+    console.log(params);
+    return this.http.get(this.x42ApiUrl + '/wallet/addresses', { params }).pipe(
+      catchError(err => this.handleHttpError(err))
+    );
+  }
+
+  /**
+ * Get get all addresses for an account of a wallet from the API.
+ * All Non-Segwit for xServer support.
+ */
+  getNonSegwitAddresses(data: WalletInfo): Observable<any> {
+    let params = new HttpParams()
+      .set('walletName', data.walletName)
+      .set('accountName', data.accountName)
+      .set('Segwit', "false");
     console.log(params);
     return this.http.get(this.x42ApiUrl + '/wallet/addresses', { params }).pipe(
       catchError(err => this.handleHttpError(err))

@@ -111,7 +111,7 @@ export class XServerComponent implements OnInit, OnDestroy {
   private getAddresses() {
     const walletInfo = new WalletInfo(this.globalService.getWalletName());
     walletInfo.accountName = this.coldStakingAccount;
-    this.apiService.getAllAddresses(walletInfo)
+    this.apiService.getNonSegwitAddresses(walletInfo)
       .subscribe(
         response => {
           this.allAddresses = [];
