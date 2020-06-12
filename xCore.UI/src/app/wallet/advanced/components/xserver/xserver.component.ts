@@ -65,8 +65,7 @@ export class XServerComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.tiers = [
       { label: 'Tier 1', value: "1000" },
-      { label: 'Tier 2', value: "20000" },
-      { label: 'Tier 3', value: "100000" },
+      { label: 'Tier 2', value: "20000" }
     ];
     this.protocols = [
       { name: 'http', value: 1 },
