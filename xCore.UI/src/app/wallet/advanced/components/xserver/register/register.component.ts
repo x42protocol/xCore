@@ -136,11 +136,11 @@ export class RegisterComponent implements OnInit {
 
     let xServerTier: number;
 
-    if (this.selectedTier = "1000") {
+    if (this.selectedTier == "1000") {
       xServerTier = 1;
-    } else if (this.selectedTier = "20000") {
+    } else if (this.selectedTier == "20000") {
       xServerTier = 2;
-    } else if (this.selectedTier = "100000") {
+    } else if (this.selectedTier == "50000") {
       xServerTier = 3;
     }
     const registrationRequest = new xServerRegistrationRequest(this.xserverName, this.selectedProtocol, this.networkAddress, Number(this.networkPort), this.signedMessage, this.keyAddress, xServerTier);

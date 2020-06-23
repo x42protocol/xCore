@@ -312,6 +312,20 @@ export class FullNodeApiService {
   }
 
   /**
+   * Get get all addresses for an account of a wallet from the API.
+   */
+  getProfileAddress(data: WalletInfo): Observable<any> {
+    let params = new HttpParams()
+      .set('walletName', data.walletName)
+      .set('accountName', data.accountName)
+      .set('Segwit', 'false');
+    console.log(params);
+    return this.http.get(this.x42ApiUrl + '/wallet/profileaddress', { params }).pipe(
+      catchError(err => this.handleHttpError(err))
+    );
+  }
+
+  /**
  * Get get all addresses for an account of a wallet from the API.
  * All Non-Segwit for xServer support.
  */

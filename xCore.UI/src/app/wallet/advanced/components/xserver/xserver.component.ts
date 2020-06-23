@@ -27,6 +27,7 @@ export class XServerComponent implements OnInit, OnDestroy {
 
   constructor(private globalService: GlobalService, private apiService: FullNodeApiService, private electron: ElectronService, public dialogService: DialogService, private clipboardService: ClipboardService, private stakingService: ColdStakingService, private themeService: ThemeService) {
     this.isDarkTheme = themeService.getCurrentTheme().themeType == 'dark';
+    this.isTestnet = this.globalService.getTestnetEnabled();
   }
 
   public isDarkTheme = false;
@@ -49,6 +50,7 @@ export class XServerComponent implements OnInit, OnDestroy {
   public allAddresses: SelectItem[];
   public isUnlocking: boolean;
   public unlockError: string;
+  public isTestnet: boolean;
 
   public keyAddress: string;
   public xserverName: string;
@@ -65,7 +67,8 @@ export class XServerComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.tiers = [
       { label: 'Tier 1', value: "1000" },
-      { label: 'Tier 2', value: "20000" }
+      { label: 'Tier 2', value: "20000" },
+      { label: 'Tier 3', value: "50000" }
     ];
     this.protocols = [
       { name: 'http', value: 1 },
@@ -74,6 +77,9 @@ export class XServerComponent implements OnInit, OnDestroy {
     this.copyType = [
       { label: 'Copy', value: 'Copy', icon: 'pi pi-copy' }
     ];
+    if (this.isTestnet) {
+      this.networkPort = "4243";
+    }
     this.getKeyAddress();
     this.copied = false;
     this.selectedTier = "1000";
