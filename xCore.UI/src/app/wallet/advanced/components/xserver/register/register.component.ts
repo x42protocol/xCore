@@ -99,6 +99,18 @@ export class RegisterComponent implements OnInit {
       );
   }
 
+  private getTierNumber(): number {
+    let xServerTier: number = 0;
+    if (this.selectedTier == "1000") {
+      xServerTier = 1;
+    } else if (this.selectedTier == "20000") {
+      xServerTier = 2;
+    } else if (this.selectedTier == "50000") {
+      xServerTier = 3;
+    }
+    return xServerTier;
+  }
+
   private startRegistration() {
     let previousConfirmation = 0;
     this.broadcastTransaction();
@@ -133,17 +145,7 @@ export class RegisterComponent implements OnInit {
   }
 
   private broadcastRegistrationRequest() {
-
-    let xServerTier: number;
-
-    if (this.selectedTier == "1000") {
-      xServerTier = 1;
-    } else if (this.selectedTier == "20000") {
-      xServerTier = 2;
-    } else if (this.selectedTier == "50000") {
-      xServerTier = 3;
-    }
-    const registrationRequest = new xServerRegistrationRequest(this.xserverName, this.selectedProtocol, this.networkAddress, Number(this.networkPort), this.signedMessage, this.keyAddress, xServerTier);
+    const registrationRequest = new xServerRegistrationRequest(this.xserverName, this.selectedProtocol, this.networkAddress, Number(this.networkPort), this.signedMessage, this.keyAddress, this.server.getAddressFromServerId(), this.getTierNumber());
     console.log(registrationRequest);
     this.apiService.registerxServer(registrationRequest)
       .subscribe(
@@ -160,11 +162,11 @@ export class RegisterComponent implements OnInit {
 
   private signRegistrationRequest() {
     const walletName = this.globalService.getWalletName();
-    const message = `${this.xserverName}${this.networkAddress}${this.networkPort}`;
+    const serverKey = `${this.networkAddress}${this.networkPort}${this.server.getAddressFromServerId()}${this.getTierNumber()}`;
     const address = this.keyAddress;
     const password = this.walletPassword;
 
-    const signMessageRequest = new SignMessageRequest(walletName, this.coldStakingAccount, password, address, message);
+    const signMessageRequest = new SignMessageRequest(walletName, this.coldStakingAccount, password, address, serverKey);
 
     this.apiService.signMessage(signMessageRequest)
       .subscribe(
