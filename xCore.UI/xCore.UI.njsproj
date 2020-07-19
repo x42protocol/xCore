@@ -448,6 +448,10 @@
     <TypeScriptCompile Include="src\app\shared\models\coldstakingcreateaccountrequest.ts" />
     <TypeScriptCompile Include="src\app\shared\models\coldstakingcreateaccountresponse.ts" />
     <TypeScriptCompile Include="src\app\shared\models\coldstakingcreateaddressresponse.ts" />
+    <TypeScriptCompile Include="src\app\shared\models\pricelockutil.ts" />
+    <TypeScriptCompile Include="src\app\shared\models\xserver-submit-payment-request.ts" />
+    <TypeScriptCompile Include="src\app\shared\models\xserver-create-pl-request.ts" />
+    <TypeScriptCompile Include="src\app\shared\models\xserver-pairs-response.ts" />
     <TypeScriptCompile Include="src\app\shared\models\serveridresponse.ts" />
     <TypeScriptCompile Include="src\app\shared\models\transaction-output.ts" />
     <TypeScriptCompile Include="src\app\shared\models\xserver-test-response.ts" />

@@ -57,6 +57,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public stakingForm: FormGroup;
   public apps: any[];
   public profileStatus: number = 0;
+  public profileAddress: string;
 
   private walletBalanceSubscription: Subscription;
   private walletHotBalanceSubscription: Subscription;

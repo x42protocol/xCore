@@ -53,7 +53,8 @@ export class XServerComponent implements OnInit, OnDestroy {
   public isTestnet: boolean;
 
   public keyAddress: string;
-  public xserverName: string;
+  public feeAddress: string;
+  public profileName: string;
   public networkAddress: string;
   public networkPort: string = "4242";
   public serverId: string;
@@ -80,7 +81,7 @@ export class XServerComponent implements OnInit, OnDestroy {
     if (this.isTestnet) {
       this.networkPort = "4243";
     }
-    this.getKeyAddress();
+    this.setKeyAddress();
     this.copied = false;
     this.selectedTier = "1000";
     this.selectedProtocol = this.protocols[0];
@@ -88,6 +89,7 @@ export class XServerComponent implements OnInit, OnDestroy {
     this.isElectron = this.electron.isElectronApp;
     this.startSubscriptions();
     this.coinUnit = this.globalService.getCoinUnit();
+    this.setFeeAddress();
   }
 
   ngOnDestroy() {
@@ -113,36 +115,13 @@ export class XServerComponent implements OnInit, OnDestroy {
       );
   }
 
-  private getAddresses() {
-    const walletInfo = new WalletInfo(this.globalService.getWalletName());
-    walletInfo.accountName = this.coldStakingAccount;
-    this.apiService.getNonSegwitAddresses(walletInfo)
-      .subscribe(
-        response => {
-          this.allAddresses = [];
-
-          for (let address of response.addresses) {
-            let type = "New";
-            if (address.isUsed) {
-              type = "Used";
-            } else if (address.isChange) {
-              type = "Change";
-            }
-            this.allAddresses.push({ title: type, label: address.address, value: address.address });
-
-            //if (((!address.isUsed && this.showUnusedAddresses) || address.isUsed) && (!address.isChange)) {
-          }
-        }
-      );
-  }
-
   public onUnlockClicked() {
     this.unlockError = "";
     this.isUnlocking = true;
     this.stakingService.createColdStakingAccount(this.globalService.getWalletName(), this.walletPassword, true)
       .subscribe(
         createColdStakingAccountResponse => {
-          this.getKeyAddress();
+          this.setKeyAddress();
           this.isUnlocking = false;
         },
         error => {
@@ -152,12 +131,18 @@ export class XServerComponent implements OnInit, OnDestroy {
       );
   }
 
-  private getKeyAddress() {
-    this.stakingService.getAddress(this.globalService.getWalletName(), true, false.toString().toLowerCase(), true).subscribe(
-      getAddressResponse => {
-        this.keyAddress = getAddressResponse.address;
-        this.getAddresses();
-      });
+  private setFeeAddress() {
+    let walletInfo = new WalletInfo(this.globalService.getWalletName())
+    this.apiService.getUnusedReceiveAddress(walletInfo)
+      .subscribe(
+        response => {
+          this.feeAddress = response;
+        }
+      );
+  }
+
+  private setKeyAddress() {
+    this.keyAddress = this.globalService.getWalletKeyAddress();
   }
 
   copyToClipboardClicked() {
@@ -183,7 +168,8 @@ export class XServerComponent implements OnInit, OnDestroy {
   onRegisterClick(): void {
     let modalData = {
       "keyAddress": this.keyAddress,
-      "xserverName": this.xserverName,
+      "feeAddress": this.feeAddress,
+      "profileName": this.profileName,
       "selectedProtocol": this.selectedProtocol.value,
       "networkAddress": this.networkAddress,
       "networkPort": this.networkPort,

@@ -1,0 +1,4 @@
+:host
+::ng-deep .ui-message.ui-message-success {
+  height: 33px;
+}

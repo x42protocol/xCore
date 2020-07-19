@@ -1,21 +1,23 @@
 export class xServerRegistrationRequest {
-  constructor(name: string, networkProtocol: number, networkAddress: string, networkPort: number, signature: string, address: string, serverKeyAddress: string, tier: number) {
-    this.name = name;
+  constructor(profileName: string, networkProtocol: number, networkAddress: string, networkPort: number, signature: string, keyAddress: string, signAddress: string, feeAddress: string, tier: number) {
+    this.profileName = profileName;
     this.networkProtocol = networkProtocol;
     this.networkAddress = networkAddress;
     this.networkPort = networkPort;
-    this.serverKeyAddress = serverKeyAddress;
+    this.keyAddress = keyAddress;
+    this.feeAddress = feeAddress;
     this.signature = signature;
-    this.address = address;
+    this.signAddress = signAddress;
     this.tier = tier;
   }
 
-  public name: string;
+  public profileName: string;
   public networkProtocol: number;
   public networkAddress: string;
   public networkPort: number;
-  public serverKeyAddress: string;
+  public keyAddress: string;
+  public feeAddress: string;
   public signature: string;
-  public address: string;
+  public signAddress: string;
   public tier: number;
 }

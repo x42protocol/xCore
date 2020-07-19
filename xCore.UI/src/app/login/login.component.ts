@@ -10,6 +10,7 @@ import { WalletLoad } from '../shared/models/wallet-load';
 import { ThemeService } from '../shared/services/theme.service';
 
 import { SelectItem, Message, MenuItem } from 'primeng/api';
+import { ColdStakingService } from '../shared/services/coldstaking.service';
 
 @Component({
   selector: 'app-login',
@@ -18,7 +19,7 @@ import { SelectItem, Message, MenuItem } from 'primeng/api';
 })
 
 export class LoginComponent implements OnInit {
-  constructor(private globalService: GlobalService, private FullNodeApiService: FullNodeApiService, private genericModalService: ModalService, private router: Router, private fb: FormBuilder, private themeService: ThemeService) {
+  constructor(private globalService: GlobalService, private FullNodeApiService: FullNodeApiService, private genericModalService: ModalService, private router: Router, private fb: FormBuilder, private themeService: ThemeService, private stakingService: ColdStakingService) {
     this.buildDecryptForm();
     this.isDarkTheme = themeService.getCurrentTheme().themeType == 'dark';
   }
@@ -133,12 +134,24 @@ export class LoginComponent implements OnInit {
     this.FullNodeApiService.loadX42Wallet(walletLoad)
       .subscribe(
         response => {
-          this.router.navigate(['wallet/dashboard']);
+          this.getKeyAddress(walletLoad.name);
         },
         error => {
           this.isDecrypting = false;
         }
       );
+  }
+
+  private getKeyAddress(walletName: string) {
+    this.stakingService.getProfileAddress(walletName).subscribe(
+      getProfileAddressResponse => {
+        this.globalService.setWalletKeyAddress(getProfileAddressResponse.address);
+        console.log(getProfileAddressResponse.address);
+        this.router.navigate(['wallet/dashboard']);
+      },
+      error => {
+        this.isDecrypting = false;
+      });
   }
 
   private getCurrentNetwork() {

@@ -68,6 +68,7 @@
     "@angular/cdk": "9.2.4",
     "electron-context-menu": "2.0.1",
     "font-awesome": "^4.7.0",
+    "ng-circle-progress": "^1.5.1",
     "ngx-pagination": "5.0.0",
     "ngx-qrcode2": "9.0.0",
     "primeflex": "^1.0.0",

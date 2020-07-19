@@ -4,8 +4,6 @@ import { FullNodeApiService } from '../../../../../shared/services/fullnode.api.
 import { GlobalService } from '../../../../../shared/services/global.service';
 import { ThemeService } from '../../../../../shared/services/theme.service';
 
-import { WalletInfo } from '../../../../../shared/models/wallet-info';
-
 import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { ColdStakingSetup } from '../../../../../shared/models/coldstakingsetup';
 import { TransactionSending } from '../../../../../shared/models/transaction-sending';
@@ -14,7 +12,6 @@ import { ColdStakingService } from '../../../../../shared/services/coldstaking.s
 import { Subscription } from 'rxjs';
 import { TransactionInfo } from '../../../../../shared/models/transaction-info';
 import { SignMessageRequest } from '../../../../../shared/models/wallet-signmessagerequest';
-import { TransactionOutput } from '../../../../../shared/models/transaction-output';
 import { xServerRegistrationRequest } from '../../../../../shared/models/xserver-registration-request';
 import { xServerTestRequest } from '../../../../../shared/models/xserver-test-request';
 import { NodeStatus } from '../../../../../shared/models/node-status';
@@ -37,13 +34,14 @@ export class RegisterComponent implements OnInit {
   public transactionInfo: TransactionInfo;
   public registrationFailed: boolean = false;
 
-  public xserverName: string;
+  public profileName: string;
   public selectedProtocol: number;
   public networkAddress: string;
   public networkPort: string;
   public selectedTier: string;
   public walletPassword: string;
   public keyAddress: string;
+  public feeAddress: string;
   public errorMessage: string = "";
   public testStatus: number = 0;
 
@@ -59,7 +57,7 @@ export class RegisterComponent implements OnInit {
   public hotStakingAccount: string = "coldStakingHotAddresses";
 
   ngOnInit() {
-    this.xserverName = this.config.data.xserverName;
+    this.profileName = this.config.data.profileName;
     this.selectedProtocol = this.config.data.selectedProtocol;
     this.networkAddress = this.config.data.networkAddress;
     this.networkPort = this.config.data.networkPort;
@@ -67,6 +65,7 @@ export class RegisterComponent implements OnInit {
     this.walletPassword = this.config.data.walletPassword;
     this.selectedTier = this.config.data.selectedTier;
     this.keyAddress = this.config.data.keyAddress;
+    this.feeAddress = this.config.data.feeAddress;
 
     this.startSubscription();
 
@@ -145,7 +144,7 @@ export class RegisterComponent implements OnInit {
   }
 
   private broadcastRegistrationRequest() {
-    const registrationRequest = new xServerRegistrationRequest(this.xserverName, this.selectedProtocol, this.networkAddress, Number(this.networkPort), this.signedMessage, this.keyAddress, this.server.getAddressFromServerId(), this.getTierNumber());
+    const registrationRequest = new xServerRegistrationRequest(this.profileName, this.selectedProtocol, this.networkAddress, Number(this.networkPort), this.signedMessage, this.keyAddress, this.server.getAddressFromServerId(), this.feeAddress, this.getTierNumber());
     console.log(registrationRequest);
     this.apiService.registerxServer(registrationRequest)
       .subscribe(
@@ -162,7 +161,7 @@ export class RegisterComponent implements OnInit {
 
   private signRegistrationRequest() {
     const walletName = this.globalService.getWalletName();
-    const serverKey = `${this.networkAddress}${this.networkPort}${this.server.getAddressFromServerId()}${this.getTierNumber()}`;
+    const serverKey = `${this.networkAddress}${this.networkPort}${this.keyAddress}${this.server.getAddressFromServerId()}${this.feeAddress}${this.getTierNumber()}${this.profileName}`;
     const address = this.keyAddress;
     const password = this.walletPassword;
 

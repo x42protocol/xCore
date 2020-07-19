@@ -30,4 +30,8 @@ export class TransactionBuilding {
   shuffleOutputs: boolean;
   opReturnData: string;
   opReturnAmount: number;
+
+  public AddRecipient(destinationAddress: string, amount: string) {
+    this.recipients.push(new Recipient(destinationAddress, amount));
+  }
 }

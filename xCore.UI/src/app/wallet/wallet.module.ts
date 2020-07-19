@@ -64,6 +64,9 @@ import { ProgressBarModule } from 'primeng/progressbar';
 import { AccordionModule } from 'primeng/accordion';
 import { ToolbarModule } from 'primeng/toolbar';
 import { RatingModule } from 'primeng/rating';
+import { SliderModule } from 'primeng/slider';
+
+import { NgCircleProgressModule } from 'ng-circle-progress';
 
 @NgModule({
   imports: [
@@ -97,7 +100,9 @@ import { RatingModule } from 'primeng/rating';
     ProgressBarModule,
     AccordionModule,
     ToolbarModule,
-    RatingModule
+    RatingModule,
+    SliderModule,
+    NgCircleProgressModule.forRoot({})
   ],
   declarations: [
     WalletComponent,

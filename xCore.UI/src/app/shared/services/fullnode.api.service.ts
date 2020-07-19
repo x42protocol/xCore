@@ -30,6 +30,9 @@ import { xServerRegistrationRequest } from '../models/xserver-registration-reque
 import { xServerRegistrationResponse } from '../models/xserver-registration-response';
 import { xServerTestRequest } from '../models/xserver-test-request';
 import { xServerTestResponse } from '../models/xserver-test-response';
+import { PairResults } from '../models/xserver-pairs-response';
+import { CreatePriceLockRequest } from '../models/xserver-create-pl-request';
+import { SubmitPaymentRequest } from '../models/xserver-submit-payment-request';
 
 @Injectable({
   providedIn: 'root'
@@ -79,6 +82,40 @@ export class FullNodeApiService {
 
   registerxServer(registrationRequest: xServerRegistrationRequest): Observable<xServerRegistrationResponse> {
     return this.http.post<xServerRegistrationResponse>(this.x42ApiUrl + '/xServer/registerxserver', JSON.stringify(registrationRequest)).pipe(
+      catchError(err => this.handleHttpError(err))
+    );
+  }
+
+  getAvailablePairs(): Observable<any> {
+    return this.http.get<any>(this.x42ApiUrl + '/xServer/getavailablepairs').pipe(
+      catchError(err => this.handleHttpError(err))
+    );
+  }
+
+  /**
+ * Create a price lock.
+ */
+  createPriceLock(createPLRequest: CreatePriceLockRequest): Observable<any> {
+    return this.http.post(this.x42ApiUrl + '/xServer/createpricelock', JSON.stringify(createPLRequest)).pipe(
+      catchError(err => this.handleHttpError(err))
+    );
+  }
+
+  /**
+ * Get a price lock.
+ */
+  getPriceLock(priceLockId: string): Observable<any> {
+    let params = new HttpParams().set('priceLockId', priceLockId);
+    return this.http.get(this.x42ApiUrl + '/xServer/getpricelock', { params }).pipe(
+      catchError(err => this.handleHttpError(err))
+    );
+  }
+
+  /**
+ * Submit payment
+ */
+  submitPayment(submitPaymentRequest: SubmitPaymentRequest): Observable<any> {
+    return this.http.post(this.x42ApiUrl + '/xServer/submitpayment', JSON.stringify(submitPaymentRequest)).pipe(
       catchError(err => this.handleHttpError(err))
     );
   }
@@ -307,20 +344,6 @@ export class FullNodeApiService {
       .set('Segwit', this.addressType.IsSegwit());
     console.log(params);
     return this.http.get(this.x42ApiUrl + '/wallet/addresses', { params }).pipe(
-      catchError(err => this.handleHttpError(err))
-    );
-  }
-
-  /**
-   * Get get all addresses for an account of a wallet from the API.
-   */
-  getProfileAddress(data: WalletInfo): Observable<any> {
-    let params = new HttpParams()
-      .set('walletName', data.walletName)
-      .set('accountName', data.accountName)
-      .set('Segwit', 'false');
-    console.log(params);
-    return this.http.get(this.x42ApiUrl + '/wallet/profileaddress', { params }).pipe(
       catchError(err => this.handleHttpError(err))
     );
   }

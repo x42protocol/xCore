@@ -78,6 +78,19 @@ export class ColdStakingService {
     );
   }
 
+  /**
+   * Get get the address for your profile.
+   */
+  getProfileAddress(walletName: string): Observable<any> {
+    let params = new HttpParams()
+      .set('walletName', walletName)
+      .set('isColdWalletAddress', 'true')
+      .set('Segwit', 'false');
+    return this.http.get(this.x42ApiUrl + '/coldstaking/getprofileaddress', { params }).pipe(
+      catchError(err => this.handleHttpError(err))
+    );
+  }
+
   private handleHttpError(error: HttpErrorResponse, silent?: boolean) {
     console.log(error);
     if (error.status >= 400) {

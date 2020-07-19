@@ -16,6 +16,9 @@ import { Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 
 import { DynamicDialogRef, DynamicDialogConfig, DialogService } from 'primeng/dynamicdialog';
+import { PriceLockUtil } from '../../shared/models/pricelockutil';
+import { SubmitPaymentRequest } from '../../shared/models/xserver-submit-payment-request';
+import { SignMessageRequest } from '../../shared/models/wallet-signmessagerequest';
 
 interface TxDetails {
   transactionFee?: number
@@ -33,13 +36,15 @@ interface TxDetails {
 
 export class SendComponent implements OnInit, OnDestroy {
   private address: string;
-  constructor(private FullNodeApiService: FullNodeApiService, private globalService: GlobalService, private fb: FormBuilder, public dialogService: DialogService, public ref: DynamicDialogRef, public config: DynamicDialogConfig, private themeService: ThemeService) {
+  constructor(private apiService: FullNodeApiService, private globalService: GlobalService, private fb: FormBuilder, public dialogService: DialogService, public ref: DynamicDialogRef, public config: DynamicDialogConfig, private themeService: ThemeService) {
     this.buildSendForm();
+    this.buildPaymentForm();
     this.buildSendToSidechainForm();
     this.isDarkTheme = themeService.getCurrentTheme().themeType == 'dark';
   }
 
   public sendForm: FormGroup;
+  public paymentForm: FormGroup;
   public sendToSidechainForm: FormGroup;
   public sidechainEnabled: boolean;
   public hasOpReturn: boolean;
@@ -56,7 +61,30 @@ export class SendComponent implements OnInit, OnDestroy {
   public transactionComplete: boolean;
   public transactionDetails: TxDetails;
   public transaction: TransactionBuilding;
+  public isPayment: boolean;
+  public isLookingUpPriceLock: boolean;
+  public priceLockFound: boolean;
+  public remainingTitle: string;
+  public remainingSubTitle: string;
+  public priceLockId: string;
+  public priceLockUtil: PriceLockUtil = new PriceLockUtil();
+  public blocksRemaining: number;
+  public percentageLeft: number;
+  public payToAddress: string;
+  public payFeeToAddress: string;
+  public paymentTotal: string;
+  public paymentAmount: number;
+  public paymentFee: number;
+  public paymentPairAmount: number;
+  public pairSymbol: string;
+  public pairName: string;
+  public paymentExpired: boolean;
+  public paymentSuccess: boolean;
 
+  public outerColor: string = "#78C000";
+  public innerColor: string = "#C7E596";
+
+  private paymentPairId: number;
   private transactionHex: string;
   private walletBalanceSubscription: Subscription;
 
@@ -93,6 +121,15 @@ export class SendComponent implements OnInit, OnDestroy {
       .subscribe(data => this.onSendValueChanged(data));
   }
 
+  private buildPaymentForm(): void {
+    this.paymentForm = this.fb.group({
+      "paymentPassword": ["", Validators.required]
+    });
+
+    this.paymentForm.valueChanges.pipe(debounceTime(300))
+      .subscribe(data => this.onPaymentValueChanged(data));
+  }
+
   private buildSendToSidechainForm(): void {
     this.sendToSidechainForm = this.fb.group({
       "federationAddress": ["", Validators.compose([Validators.required, Validators.minLength(26)])],
@@ -104,6 +141,23 @@ export class SendComponent implements OnInit, OnDestroy {
 
     this.sendToSidechainForm.valueChanges.pipe(debounceTime(300))
       .subscribe(data => this.onSendToSidechainValueChanged(data));
+  }
+
+  onPaymentValueChanged(data?: any) {
+    if (!this.paymentForm) { return; }
+    const form = this.paymentForm;
+    for (const field in this.paymentFormErrors) {
+      this.paymentFormErrors[field] = '';
+      const control = form.get(field);
+      if (control && control.dirty && !control.valid) {
+        const messages = this.paymentValidationMessages[field];
+        for (const key in control.errors) {
+          this.paymentFormErrors[field] += messages[key] + ' ';
+        }
+      }
+    }
+
+    this.apiError = "";
   }
 
   onSendValueChanged(data?: any) {
@@ -127,6 +181,175 @@ export class SendComponent implements OnInit, OnDestroy {
     }
   }
 
+  public showPriceLock() {
+    this.isPayment = true;
+  }
+
+  public lookupPayment() {
+    this.priceLockUtil.priceLockId = this.priceLockId;
+    let paymentId = this.priceLockUtil.getPriceLockId()
+    if (paymentId != "") {
+      this.isLookingUpPriceLock = true;
+      this.apiService.getPriceLock(paymentId)
+        .subscribe(
+          response => {
+            if (response.success) {
+              this.getPairs(response);
+            } else {
+              this.apiError = response.resultMessage;
+              this.isLookingUpPriceLock = false;
+            }
+          },
+          error => {
+            this.apiError = error.error.errors[0].message;
+            this.isLookingUpPriceLock = false;
+          }
+        );
+    }
+  }
+
+  private getPairs(priceLockInfo: any) {
+    this.apiService.getAvailablePairs()
+      .subscribe(
+        response => {
+          this.payToAddress = priceLockInfo.destinationAddress;
+          this.paymentTotal = parseFloat(priceLockInfo.destinationAmount + priceLockInfo.feeAmount).toFixed(8);
+          this.paymentAmount = priceLockInfo.destinationAmount;
+          this.paymentFee = priceLockInfo.feeAmount;
+          this.payFeeToAddress = priceLockInfo.feeAddress;
+
+          this.paymentPairAmount = priceLockInfo.requestAmount;
+          this.paymentPairId = priceLockInfo.requestAmountPair;
+
+          for (let pair of response) {
+            if (this.paymentPairId == pair.id) {
+              let symbolChar = this.globalService.getSymbolCharacter(pair.symbol);
+              this.pairName = pair.symbol;
+              this.pairSymbol = symbolChar;
+              break;
+            }
+          }
+
+          this.updateProggress(priceLockInfo);
+          this.startProgress(priceLockInfo);
+
+          this.isLookingUpPriceLock = false;
+          this.priceLockFound = true;
+        }
+      );
+  }
+
+  private updateProggress(priceLockInfo: any) {
+    this.blocksRemaining = priceLockInfo.expireBlock - this.globalService.getBlockHeight();
+    this.percentageLeft = (this.blocksRemaining / 60) * 100
+    this.paymentExpired = this.blocksRemaining <= 0;
+
+    if (this.paymentExpired) {
+      this.remainingTitle = "Expired";
+      this.remainingSubTitle = " ";
+    } else {
+      this.remainingTitle = this.blocksRemaining + " blocks remaining";
+      this.remainingSubTitle = "Expires in ~" + this.blocksRemaining + " minutes";
+    }
+
+    this.setProgressColors();
+  }
+
+  private startProgress(priceLockInfo: any) {
+    let interval = setInterval(() => {
+      this.updateProggress(priceLockInfo);
+      if (this.blocksRemaining < 0) {
+        clearInterval(interval);
+      }
+    }, 1000);
+  }
+
+  private setProgressColors() {
+    if (this.percentageLeft <= 0) {
+      this.outerColor = "#ff0000";
+      this.innerColor = "#ff0000";
+    } else if (this.percentageLeft < 25) {
+      this.outerColor = "#FF6347";
+      this.innerColor = "#ff0000";
+    } else if (this.percentageLeft < 50) {
+      this.outerColor = "#ffb10a";
+      this.innerColor = "#FF6347";
+    } else if (this.percentageLeft < 75) {
+      this.outerColor = "#78C000";
+      this.innerColor = "#ffb10a";
+    }
+  }
+
+  makePayment() {
+    this.isSending = true;
+    this.buildPaymentTransaction();
+  }
+
+  public buildPaymentTransaction() {
+    this.transaction = new TransactionBuilding(
+      this.globalService.getWalletName(),
+      "account 0",
+      this.paymentForm.get("paymentPassword").value,
+      this.payToAddress,
+      this.paymentAmount.toString(),
+      this.estimatedFee / 100000000,
+      true,
+      false
+    );
+
+    this.transaction.AddRecipient(this.payFeeToAddress, this.paymentFee.toString());
+
+    this.apiService
+      .buildTransaction(this.transaction, true)
+      .subscribe(
+        response => {
+          console.log(response);
+          this.estimatedFee = response.fee;
+          this.transactionHex = response.hex;
+          if (this.isSending) {
+            this.hasOpReturn = false;
+            this.signPaymentId(response);
+          }
+        },
+        error => {
+          this.isSending = false;
+          this.apiError = error.error.errors[0].message;
+        }
+      );
+  };
+
+  private signPaymentId(builtTransaction) {
+    let walletName = this.globalService.getWalletName();
+    let accountName = "account 0";
+    let address = builtTransaction.inputAddresses[0];
+
+    let signMessageRequest = new SignMessageRequest(walletName, accountName, this.paymentForm.get("paymentPassword").value, address, this.priceLockUtil.getPriceLockId());
+
+    this.apiService.signMessage(signMessageRequest)
+      .subscribe(
+        signatureResponse => {
+          let payment = new SubmitPaymentRequest(
+            this.priceLockUtil.getPriceLockId(),
+            builtTransaction.hex,
+            builtTransaction.transactionId,
+            signatureResponse.signature
+          );
+          console.log(signatureResponse);
+          this.submitPayment(payment);
+        }
+      );
+  }
+
+  submitPayment(paymentRequest) {
+    this.apiService.submitPayment(paymentRequest)
+      .subscribe(
+        paymentResponse => {
+          this.paymentSuccess = paymentResponse.success;
+          this.isSending = false;
+        }
+      );
+  }
+
   onSendToSidechainValueChanged(data?: any) {
     if (!this.sendToSidechainForm) { return; }
     const form = this.sendToSidechainForm;
@@ -147,6 +370,16 @@ export class SendComponent implements OnInit, OnDestroy {
       this.estimateSidechainFee();
     }
   }
+
+  paymentFormErrors = {
+    'paymentPassword': ''
+  };
+
+  paymentValidationMessages = {
+    'paymentPassword': {
+      'required': 'Your password is required.'
+    }
+  };
 
   sendFormErrors = {
     'address': '',
@@ -213,7 +446,7 @@ export class SendComponent implements OnInit, OnDestroy {
 
     let balanceResponse;
 
-    this.FullNodeApiService.getMaximumBalance(data)
+    this.apiService.getMaximumBalance(data)
       .subscribe(
         response => {
           balanceResponse = response;
@@ -238,7 +471,7 @@ export class SendComponent implements OnInit, OnDestroy {
       true
     );
 
-    this.FullNodeApiService.estimateFee(transaction, true)
+    this.apiService.estimateFee(transaction, true)
       .subscribe(
         response => {
           this.estimatedFee = response;
@@ -260,7 +493,7 @@ export class SendComponent implements OnInit, OnDestroy {
       true
     );
 
-    this.FullNodeApiService.estimateSidechainFee(sidechainTransaction)
+    this.apiService.estimateSidechainFee(sidechainTransaction)
       .subscribe(
         response => {
           this.estimatedSidechainFee = response;
@@ -285,10 +518,11 @@ export class SendComponent implements OnInit, OnDestroy {
       false
     );
 
-    this.FullNodeApiService
+    this.apiService
       .buildTransaction(this.transaction, true)
       .subscribe(
         response => {
+          console.log(response);
           this.estimatedFee = response.fee;
           this.transactionHex = response.hex;
           if (this.isSending) {
@@ -318,7 +552,7 @@ export class SendComponent implements OnInit, OnDestroy {
       this.sendToSidechainForm.get("destinationAddress").value.trim(),
       this.opReturnAmount / 100000000
     );
-    this.FullNodeApiService.buildTransaction(this.transaction)
+    this.apiService.buildTransaction(this.transaction)
       .subscribe(
         response => {
           this.estimatedSidechainFee = response.fee;
@@ -348,7 +582,7 @@ export class SendComponent implements OnInit, OnDestroy {
 
   private sendTransaction(hex: string) {
     let transaction = new TransactionSending(hex);
-    this.FullNodeApiService
+    this.apiService
       .sendTransaction(transaction, true)
       .subscribe(
         response => {
@@ -372,7 +606,7 @@ export class SendComponent implements OnInit, OnDestroy {
 
   private getWalletBalance() {
     let walletInfo = new WalletInfo(this.globalService.getWalletName());
-    this.walletBalanceSubscription = this.FullNodeApiService.getWalletBalance(walletInfo)
+    this.walletBalanceSubscription = this.apiService.getWalletBalance(walletInfo)
       .subscribe(
         response => {
           let balanceResponse = response;
@@ -391,6 +625,10 @@ export class SendComponent implements OnInit, OnDestroy {
         }
       );
   };
+
+  public goBack() {
+    this.isPayment = false;
+  }
 
   private cancelSubscriptions() {
     if (this.walletBalanceSubscription) {
