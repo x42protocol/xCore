@@ -57,7 +57,7 @@
                 </div>
               </div>
             </div>
-            <div class="col-6">
+            <div class="col-6 text-center">
               <circle-progress *ngIf="!paymentSuccess"
                                [percent]=percentageLeft
                                [radius]="75"
@@ -84,7 +84,7 @@
                       C24.3,4,4,24.3,4,49.2s20.3,45.2,45.2,45.2s45.2-20.3,45.2-45.2c0-8.6-2.4-16.6-6.5-23.4l0,0L45.6,68.2L24.7,47.3" />
                 </svg>
               </div>
-              <p-message *ngIf="paymentSuccess" severity="success" text="Payment sent!" style="display: block; text-align: center;"></p-message>
+              <p-message *ngIf="paymentMessage" severity="{{paymentSeverity}}" text="{{paymentMessage}}" style="display: block; text-align: center;"></p-message>
             </div>
           </div>
           <p-accordion>

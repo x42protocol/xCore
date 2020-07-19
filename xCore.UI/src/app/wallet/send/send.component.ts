@@ -80,6 +80,8 @@ export class SendComponent implements OnInit, OnDestroy {
   public pairName: string;
   public paymentExpired: boolean;
   public paymentSuccess: boolean;
+  public paymentMessage: string;
+  public paymentSeverity: string;
 
   public outerColor: string = "#78C000";
   public innerColor: string = "#C7E596";
@@ -232,11 +234,56 @@ export class SendComponent implements OnInit, OnDestroy {
 
           this.updateProggress(priceLockInfo);
           this.startProgress(priceLockInfo);
+          this.setPaymentStatus(priceLockInfo.status);
 
           this.isLookingUpPriceLock = false;
           this.priceLockFound = true;
+
+          this.updatePriceLockStatus();
         }
       );
+  }
+
+  private setPaymentStatus(status) {
+    if (status == 0) {
+      this.paymentMessage = "Rejected";
+      this.paymentSeverity = "error";
+    } else if (status == 1) {
+      this.paymentMessage = "Awaiting Payment...";
+      this.paymentSeverity = "info";
+    } else if (status == 2) {
+      this.paymentMessage = "Payment received.";
+      this.paymentSeverity = "success";
+      this.paymentSuccess = true;
+    } else if (status == 3) {
+      this.paymentMessage = "Payment confirmed";
+      this.paymentSeverity = "success";
+      this.paymentSuccess = true;
+    } else if (status == 4) {
+      this.paymentMessage = "Payment mature";
+      this.paymentSeverity = "success";
+      this.paymentSuccess = true;
+    }
+  }
+
+  private updatePriceLockStatus() {
+    let interval = setInterval(() => {
+      let paymentId = this.priceLockUtil.getPriceLockId()
+      if (paymentId != "") {
+        this.isLookingUpPriceLock = true;
+        this.apiService.getPriceLock(paymentId)
+          .subscribe(
+            response => {
+              if (response.success) {
+                this.setPaymentStatus(response.status);
+                if (response.status == 0 || response.status == 4) {
+                  clearInterval(interval);
+                }
+              }
+            }
+          );
+      }
+    }, 30000);
   }
 
   private updateProggress(priceLockInfo: any) {
@@ -345,6 +392,10 @@ export class SendComponent implements OnInit, OnDestroy {
       .subscribe(
         paymentResponse => {
           this.paymentSuccess = paymentResponse.success;
+          if (paymentResponse.success) {
+            this.paymentMessage = "Payment sent!";
+            this.paymentSeverity = "success";
+          }
           this.isSending = false;
         }
       );
