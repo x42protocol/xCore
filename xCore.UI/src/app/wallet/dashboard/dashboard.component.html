@@ -69,12 +69,10 @@
           <p-panel *ngIf="profileStatus == 1">
             <p-header>
               <div class="ui-helper-clearfix">
-                <span class="ui-panel-title" style="font-size:16px;display:inline-block;margin-top:2px;">Welcome!</span>
-                <p-splitButton [style]="{'float':'right'}" label=" " class="hideButton" icon="" [model]="welcomeMenu"></p-splitButton>
+                <span class="ui-panel-title" style="font-size:16px;display:inline-block;margin-top:2px;">Profile</span>
               </div>
             </p-header>
-            You do not have a rating yet.
-            <p-rating [ngModel]="0" readonly="true" stars="10" [cancel]="false"></p-rating>
+            Welcome {{profile.name}}!
           </p-panel>
         </div>
         <div class="col-6">

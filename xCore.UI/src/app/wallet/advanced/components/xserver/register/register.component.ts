@@ -160,12 +160,11 @@ export class RegisterComponent implements OnInit {
   }
 
   private signRegistrationRequest() {
-    const walletName = this.globalService.getWalletName();
-    const serverKey = `${this.networkAddress}${this.networkPort}${this.keyAddress}${this.server.getAddressFromServerId()}${this.feeAddress}${this.getTierNumber()}${this.profileName}`;
-    const address = this.keyAddress;
-    const password = this.walletPassword;
-
-    const signMessageRequest = new SignMessageRequest(walletName, this.coldStakingAccount, password, address, serverKey);
+    let walletName = this.globalService.getWalletName();
+    let serverKey = `${this.networkAddress}${this.networkPort}${this.keyAddress}${this.server.getAddressFromServerId()}${this.feeAddress}${this.getTierNumber()}${this.profileName}`;
+    let address = this.keyAddress;
+    let password = this.walletPassword;
+    let signMessageRequest = new SignMessageRequest(walletName, this.coldStakingAccount, password, address, serverKey);
 
     this.apiService.signMessage(signMessageRequest)
       .subscribe(

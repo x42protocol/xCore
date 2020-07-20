@@ -104,9 +104,11 @@ export class FullNodeApiService {
   /**
  * Get a price lock.
  */
-  getPriceLock(priceLockId: string): Observable<any> {
-    let params = new HttpParams().set('priceLockId', priceLockId);
-    return this.http.get(this.x42ApiUrl + '/xServer/getpricelock', { params }).pipe(
+  getProfile(name: string, keyAddress: string): Observable<any> {
+    let params = new HttpParams()
+      .set('name', name)
+      .set('keyAddress', keyAddress);
+    return this.http.get(this.x42ApiUrl + '/xServer/getprofile', { params }).pipe(
       catchError(err => this.handleHttpError(err))
     );
   }
@@ -119,6 +121,17 @@ export class FullNodeApiService {
       catchError(err => this.handleHttpError(err))
     );
   }
+
+  /**
+ * Get a a profile.
+ */
+  getPriceLock(priceLockId: string): Observable<any> {
+    let params = new HttpParams().set('priceLockId', priceLockId);
+    return this.http.get(this.x42ApiUrl + '/xServer/getpricelock', { params }).pipe(
+      catchError(err => this.handleHttpError(err))
+    );
+  }
+
 
   getAddressBookAddresses(): Observable<any> {
     return this.pollingInterval.pipe(

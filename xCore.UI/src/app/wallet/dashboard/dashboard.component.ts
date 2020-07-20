@@ -52,12 +52,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public confirmedHotBalance: number = 0;
   public unconfirmedHotBalance: number;
   public spendableHotBalance: number;
-  public welcomeMenu: MenuItem[];
   public hotStakingAccount: string = "coldStakingHotAddresses";
   public stakingForm: FormGroup;
   public apps: any[];
   public profileStatus: number = 0;
   public profileAddress: string;
+  public profile: any;
 
   private walletBalanceSubscription: Subscription;
   private walletHotBalanceSubscription: Subscription;
@@ -69,7 +69,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.walletName = this.globalService.getWalletName();
     this.coinUnit = this.globalService.getCoinUnit();
     this.startSubscriptions();
-    this.setupWelcomeMenu();
+    this.getProfileOnConnection();
 
     this.apps = [
       { "name": "Search For Apps", "image": "https://cdn1.iconfinder.com/data/icons/hawcons/32/698628-icon-112-search-plus-512.png" }
@@ -78,23 +78,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.cancelSubscriptions();
-  }
-
-  setupWelcomeMenu() {
-    this.welcomeMenu = [
-      {
-        label: 'Edit Profile', icon: 'pi pi-fw pi-pencil',
-        command: () => {
-          // TODO: Open Rename Dialog
-        }
-      },
-      {
-        label: 'Configure', icon: 'pi pi-fw pi-cog',
-        command: () => {
-          // TODO: Open NullBox Config Dialog
-        }
-      }
-    ];
   }
 
   private buildStakingForm(): void {
@@ -130,6 +113,31 @@ export class DashboardComponent implements OnInit, OnDestroy {
       header: 'Transaction Details',
       data: modalData
     });
+  }
+
+  private getProfileOnConnection() {
+    let interval = setInterval(() => {
+      let xServerStatus = this.globalService.getxServerStatus();
+
+      if (xServerStatus.nodes.length > 0) {
+        let tierTwo = xServerStatus.nodes.find(n => n.tier == 2);
+        if (tierTwo) {
+          this.apiService.getProfile("", this.globalService.getWalletKeyAddress())
+            .subscribe(
+              response => {
+                if (response.success) {
+                  this.profileStatus = 1;
+                  this.globalService.setProfile(response);
+                  this.profile = response;
+                } else {
+                  this.profileStatus = -1;
+                }
+              }
+          );
+          clearInterval(interval);
+        }
+      }
+    }, 1000);
   }
 
   private getWalletBalance() {

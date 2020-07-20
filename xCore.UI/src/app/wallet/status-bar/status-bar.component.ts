@@ -67,6 +67,7 @@ export class StatusBarComponent implements OnInit, OnDestroy {
         (data: XServerStatus) => {
           let statusResponse = data;
           this.connectedXServers = statusResponse.connected;
+          this.globalService.setxServerStatus(statusResponse);
 
           if (statusResponse.connected == 1) {
             this.connectedXServerTooltip = "1 xServer";

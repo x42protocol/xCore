@@ -1,5 +1,6 @@
 import {Injectable} from "@angular/core";
 import { ElectronService } from 'ngx-electron';
+import { XServerStatus } from '../models/xserver-status';
 
 @Injectable({
   providedIn: 'root'
@@ -28,6 +29,8 @@ export class GlobalService {
   private network: string;
   private walletKeyAddress: string;
   private blockHeight: number;
+  private xServerStatus: XServerStatus;
+  private profile: any;
 
   quitApplication() {
     this.electronService.remote.app.quit();
@@ -127,6 +130,22 @@ export class GlobalService {
 
   getBlockHeight() {
     return this.blockHeight;
+  }
+
+  setxServerStatus(xServerStatus: XServerStatus) {
+    this.xServerStatus = xServerStatus;
+  }
+
+  getxServerStatus() {
+    return this.xServerStatus;
+  }
+
+  setProfile(profileInfo: any) {
+    this.profile = profileInfo;
+  }
+
+  getProfile() {
+    return this.profile;
   }
 
   public getSymbolCharacter(symbol: string): string {
