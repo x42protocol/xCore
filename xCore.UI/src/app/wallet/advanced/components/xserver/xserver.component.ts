@@ -54,7 +54,7 @@ export class XServerComponent implements OnInit, OnDestroy {
 
   public keyAddress: string;
   public feeAddress: string;
-  public profileName: string;
+  public profileName: string = "";
   public networkAddress: string;
   public networkPort: string = "4242";
   public serverId: string;
@@ -90,10 +90,28 @@ export class XServerComponent implements OnInit, OnDestroy {
     this.startSubscriptions();
     this.coinUnit = this.globalService.getCoinUnit();
     this.setFeeAddress();
+    this.startWatchingForProfileName();
   }
 
   ngOnDestroy() {
     this.cancelSubscriptions();
+  }
+
+  private startWatchingForProfileName() {
+    this.setProfileName();
+    let interval = setInterval(() => {
+      this.setProfileName();
+      if (this.profileName != "") {
+        clearInterval(interval);
+      }
+    }, 500);
+  }
+
+  private setProfileName() {
+      let profile = this.globalService.getProfile()
+      if (profile != null) {
+        this.profileName = profile.name;
+      }
   }
 
   private startSubscriptions() {

@@ -25,6 +25,7 @@ export class LogoutConfirmationComponent implements OnInit {
       this.FullNodeApiService.stopStaking()
         .subscribe();
     }
+    this.globalService.setProfile(null);
     this.ref.close();
     this.router.navigate(['/login']);
   }

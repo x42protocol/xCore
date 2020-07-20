@@ -106,6 +106,8 @@
     <Content Include="src\app\wallet\logout-confirmation\logout-confirmation.component.html" />
     <Content Include="src\app\wallet\menu\menu.component.css" />
     <Content Include="src\app\wallet\menu\menu.component.html" />
+    <Content Include="src\app\wallet\profile\create\create-profile.component.css" />
+    <Content Include="src\app\wallet\profile\create\create-profile.component.html" />
     <Content Include="src\app\wallet\receive\receive.component.css" />
     <Content Include="src\app\wallet\receive\receive.component.html" />
     <Content Include="src\app\wallet\send\send.component.css" />
@@ -560,6 +562,8 @@
     <TypeScriptCompile Include="src\app\wallet\logout-confirmation\logout-confirmation.component.ts" />
     <TypeScriptCompile Include="src\app\wallet\menu\menu.component.spec.ts" />
     <TypeScriptCompile Include="src\app\wallet\menu\menu.component.ts" />
+    <TypeScriptCompile Include="src\app\wallet\profile\create\create-profile.component.spec.ts" />
+    <TypeScriptCompile Include="src\app\wallet\profile\create\create-profile.component.ts" />
     <TypeScriptCompile Include="src\app\wallet\receive\receive.component.spec.ts" />
     <TypeScriptCompile Include="src\app\wallet\receive\receive.component.ts" />
     <TypeScriptCompile Include="src\app\wallet\send\send.component.spec.ts" />
@@ -641,6 +645,8 @@
     <Folder Include="src\app\wallet\history\" />
     <Folder Include="src\app\wallet\logout-confirmation\" />
     <Folder Include="src\app\wallet\menu\" />
+    <Folder Include="src\app\wallet\profile\" />
+    <Folder Include="src\app\wallet\profile\create\" />
     <Folder Include="src\app\wallet\receive\" />
     <Folder Include="src\app\wallet\send\" />
     <Folder Include="src\app\wallet\smart-contracts\" />

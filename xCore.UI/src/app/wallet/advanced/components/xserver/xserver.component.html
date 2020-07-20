@@ -1,4 +1,9 @@
 <div class="p-4">
+  <p-panel header="Profile Requirement" *ngIf="!profileName">
+    <div class='col blockText'>
+      A profile is required to register an xServer. Please go back to the dashboard and create a profile.
+    </div>
+  </p-panel>
   <p-panel header="Unlock wallet" *ngIf="!keyAddress">
     <div class='col blockText'>
       <input *ngIf="!isUnlocking" type="password" class="form-control" [(ngModel)]="walletPassword" placeholder="Please enter your wallet password to unlock" pInputText>
@@ -17,7 +22,7 @@
       <button type="submit" class="btn-block" (click)="onUnlockClicked()" pButton label="Unlock"></button>
     </div>
   </p-panel>
-  <p-panel header="xServer Registration" *ngIf="keyAddress">
+  <p-panel header="xServer Registration" *ngIf="keyAddress && profileName">
     <div style="min-height:200px;">
       <div class="form-group">
         <div class='blockLabel col-12'>

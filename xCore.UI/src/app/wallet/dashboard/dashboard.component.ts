@@ -104,6 +104,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
   };
 
+  public openCreateProfileDialog() {
+    this.dialogService.open(ReceiveComponent, {
+      header: 'Receive',
+      width: '540px'
+    });
+  };
+
   public openTransactionDetailDialog(transaction: TransactionInfo) {
     let modalData = {
       "transaction": transaction
@@ -116,28 +123,33 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private getProfileOnConnection() {
-    let interval = setInterval(() => {
-      let xServerStatus = this.globalService.getxServerStatus();
-
-      if (xServerStatus.nodes.length > 0) {
-        let tierTwo = xServerStatus.nodes.find(n => n.tier == 2);
-        if (tierTwo) {
-          this.apiService.getProfile("", this.globalService.getWalletKeyAddress())
-            .subscribe(
-              response => {
-                if (response.success) {
-                  this.profileStatus = 1;
-                  this.globalService.setProfile(response);
-                  this.profile = response;
-                } else {
-                  this.profileStatus = -1;
+    let cachedProfile = this.globalService.getProfile();
+    if (cachedProfile != null) {
+      this.profile = cachedProfile;
+      this.profileStatus = 1;
+    } else {
+      let interval = setInterval(() => {
+        let xServerStatus = this.globalService.getxServerStatus();
+        if (xServerStatus.nodes.length > 0) {
+          let tierTwo = xServerStatus.nodes.find(n => n.tier == 2);
+          if (tierTwo) {
+            this.apiService.getProfile("", this.globalService.getWalletKeyAddress())
+              .subscribe(
+                response => {
+                  if (response.success) {
+                    this.profileStatus = 1;
+                    this.globalService.setProfile(response);
+                    this.profile = response;
+                  } else {
+                    this.profileStatus = -1;
+                  }
                 }
-              }
-          );
-          clearInterval(interval);
+              );
+            clearInterval(interval);
+          }
         }
-      }
-    }, 1000);
+      }, 1000);
+    }
   }
 
   private getWalletBalance() {
