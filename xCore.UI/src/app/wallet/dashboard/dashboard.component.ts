@@ -12,6 +12,7 @@ import { ThemeService } from '../../shared/services/theme.service';
 import { SendComponent } from '../send/send.component';
 import { ReceiveComponent } from '../receive/receive.component';
 import { TransactionDetailsComponent } from '../transaction-details/transaction-details.component';
+import { CreateProfileComponent } from '../profile/create/create-profile.component';
 
 import { Subscription } from 'rxjs';
 
@@ -104,10 +105,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
   };
 
-  public openCreateProfileDialog() {
-    this.dialogService.open(ReceiveComponent, {
-      header: 'Receive',
-      width: '540px'
+  public openCreateProfileDialog(isReserved: boolean) {
+    let priceLockId = "";
+    if (isReserved) {
+      priceLockId = this.profile.priceLockId;
+    }
+    let modalData = {
+      "priceLockId": priceLockId
+    };
+
+    this.dialogService.open(CreateProfileComponent, {
+      header: 'Create Profile',
+      width: '540px',
+      data: modalData
     });
   };
 
@@ -123,33 +133,47 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private getProfileOnConnection() {
-    let cachedProfile = this.globalService.getProfile();
-    if (cachedProfile != null) {
-      this.profile = cachedProfile;
-      this.profileStatus = 1;
-    } else {
-      let interval = setInterval(() => {
-        let xServerStatus = this.globalService.getxServerStatus();
-        if (xServerStatus.nodes.length > 0) {
-          let tierTwo = xServerStatus.nodes.find(n => n.tier == 2);
-          if (tierTwo) {
-            this.apiService.getProfile("", this.globalService.getWalletKeyAddress())
-              .subscribe(
-                response => {
-                  if (response.success) {
-                    this.profileStatus = 1;
-                    this.globalService.setProfile(response);
-                    this.profile = response;
-                  } else {
-                    this.profileStatus = -1;
-                  }
-                }
-              );
+    this.setProfileInfo();
+    let interval = setInterval(() => {
+      let xServerStatus = this.globalService.getxServerStatus();
+      if (xServerStatus.nodes.length > 0) {
+        let tierTwo = xServerStatus.nodes.find(n => n.tier == 2);
+        if (tierTwo) {
+          let cachedProfile = this.globalService.getProfile();
+          if (cachedProfile != null) {
+            this.profile = cachedProfile;
+            this.profileStatus = cachedProfile.status;
+            if (this.profileStatus == 1) {
+              this.globalService.setProfile(null);
+            }
+          } else {
+            this.setProfileInfo();
+          }
+          if (this.profileStatus == 2) {
             clearInterval(interval);
           }
         }
-      }, 1000);
-    }
+      }
+    }, 10000);
+  }
+
+  private setProfileInfo() {
+    this.apiService.getProfile("", this.globalService.getWalletKeyAddress())
+      .subscribe(
+        response => {
+          if (response.success) {
+            this.profileStatus = response.status;
+            this.globalService.setProfile(response);
+            this.profile = response;
+          } else {
+            this.profileStatus = -1;
+            let profile = {
+              "status": this.profileStatus
+            };
+            this.globalService.setProfile(profile);
+          }
+        }
+      );
   }
 
   private getWalletBalance() {

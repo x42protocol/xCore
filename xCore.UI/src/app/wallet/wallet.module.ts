@@ -26,6 +26,7 @@ import { SendComponent } from './send/send.component';
 import { ReceiveComponent } from './receive/receive.component';
 import { TransactionDetailsComponent } from './transaction-details/transaction-details.component';
 import { LogoutConfirmationComponent } from './logout-confirmation/logout-confirmation.component';
+import { CreateProfileComponent } from './profile/create/create-profile.component';
 
 // Cold Staking
 import { ColdStakingOverviewComponent } from './cold-staking/overview.component';
@@ -131,7 +132,8 @@ import { NgCircleProgressModule } from 'ng-circle-progress';
     ColdStakingCreateSuccessComponent,
     ColdStakingCreateAddressComponent,
     ColdStakingWithdrawComponent,
-    ColdStakingCreateHotComponent
+    ColdStakingCreateHotComponent,
+    CreateProfileComponent
   ],
   providers: [
     MessageService,
@@ -150,7 +152,8 @@ import { NgCircleProgressModule } from 'ng-circle-progress';
     ColdStakingCreateAddressComponent,
     ColdStakingWithdrawComponent,
     ColdStakingCreateHotComponent,
-    RegisterComponent
+    RegisterComponent,
+    CreateProfileComponent
   ]
 })
 

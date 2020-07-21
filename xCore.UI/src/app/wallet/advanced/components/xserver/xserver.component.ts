@@ -108,10 +108,10 @@ export class XServerComponent implements OnInit, OnDestroy {
   }
 
   private setProfileName() {
-      let profile = this.globalService.getProfile()
-      if (profile != null) {
-        this.profileName = profile.name;
-      }
+    let profile = this.globalService.getProfile()
+    if (profile != null && profile.status == 2) {
+      this.profileName = profile.name;
+    }
   }
 
   private startSubscriptions() {

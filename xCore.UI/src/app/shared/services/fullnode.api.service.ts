@@ -33,6 +33,7 @@ import { xServerTestResponse } from '../models/xserver-test-response';
 import { PairResults } from '../models/xserver-pairs-response';
 import { CreatePriceLockRequest } from '../models/xserver-create-pl-request';
 import { SubmitPaymentRequest } from '../models/xserver-submit-payment-request';
+import { ProfileReserveRequest } from '../models/xserver-profile-reserve-request';
 
 @Injectable({
   providedIn: 'root'
@@ -123,7 +124,7 @@ export class FullNodeApiService {
   }
 
   /**
- * Get a a profile.
+ * Get a profile.
  */
   getPriceLock(priceLockId: string): Observable<any> {
     let params = new HttpParams().set('priceLockId', priceLockId);
@@ -132,6 +133,14 @@ export class FullNodeApiService {
     );
   }
 
+  /**
+ * Reserve a profile.
+ */
+  reserveProfile(profileReserveRequest: ProfileReserveRequest): Observable<any> {
+    return this.http.post(this.x42ApiUrl + '/xServer/reserveprofile', JSON.stringify(profileReserveRequest)).pipe(
+      catchError(err => this.handleHttpError(err))
+    );
+  }
 
   getAddressBookAddresses(): Observable<any> {
     return this.pollingInterval.pipe(

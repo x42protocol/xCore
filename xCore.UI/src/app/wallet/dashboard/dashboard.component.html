@@ -44,7 +44,7 @@
           <p-panel *ngIf="profileStatus == -1">
             <p-header>
               <div class="ui-helper-clearfix">
-                <button type="button" pButton (click)="openCreateProfileDialog()" label="Create Profile" class="ui-button-success" icon="pi pi-user-plus"></button>
+                <button type="button" pButton (click)="openCreateProfileDialog(false)" label="Create Profile" class="ui-button-success" icon="pi pi-user-plus"></button>
               </div>
             </p-header>
             Creating a profiles gives you an identity on the network and unlocks features otherwise not available.
@@ -67,6 +67,14 @@
             </div>
           </p-panel>
           <p-panel *ngIf="profileStatus == 1">
+            <p-header>
+              <div class="ui-helper-clearfix">
+                <button type="button" pButton (click)="openCreateProfileDialog(true)" label="Open Payment" class="ui-button-success" icon="pi pi-user-plus"></button>
+              </div>
+            </p-header>
+            <p-message severity="warn" text="Waiting for the payment."></p-message>
+          </p-panel>
+          <p-panel *ngIf="profileStatus == 2">
             <p-header>
               <div class="ui-helper-clearfix">
                 <span class="ui-panel-title" style="font-size:16px;display:inline-block;margin-top:2px;">Profile</span>

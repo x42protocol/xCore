@@ -56,10 +56,9 @@ export class ReceiveComponent implements OnInit {
   public destinationAmount: string;
   public feeAmount: string;
   public expirationBlock: string;
-
-  private errorMessage: string;
-  private showAbout: boolean;
-
+  public showAbout: boolean;
+  public errorMessage: string;
+  
   ngOnInit() {
     this.getPairs();
     this.getUnusedReceiveAddresses();
