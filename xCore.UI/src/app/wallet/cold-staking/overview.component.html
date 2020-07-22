@@ -1,6 +1,6 @@
 <section *ngIf="isLoading">
   <div class="form-group clearfix text-center">
-    <p-messages [value]="loadingMessage" [closable]="false"></p-messages>
+    <p-messages [value]="loadingMessage" [closable]="false" [escape]="false"></p-messages>
   </div>
 </section>
 <section id="content pb-4" class="col-11 mx-auto" *ngIf="!isLoading">
@@ -32,7 +32,7 @@
           </ul>
         </div>
         <div class="col-12" *ngIf="!coldWalletAccountExists">
-          <p-messages [value]="setupColdMessage" [closable]="false"></p-messages>
+          <p-messages [value]="setupColdMessage" [closable]="false" [escape]="false"></p-messages>
         </div>
       </p-panel>
     </div>
@@ -52,7 +52,7 @@
           <ul class="list-unstyled">
             <li><strong>{{ (unconfirmedHotBalance  | coinNotation) || (0 | coinNotation) }}</strong><em> (unconfirmed)</em></li>
           </ul>
-          <p-messages [value]="hotMessage" [closable]="false"></p-messages>
+          <p-messages [value]="hotMessage" [closable]="false" [escape]="false"></p-messages>
         </div>
         <p class="text-center mt-3" *ngIf="!coldWalletAccountExists">
           <button type="button" pButton (click)="onHotSetup()" label="Setup Hot Wallet" class="ui-button-success" icon="pi pi-arrow-circle-up" style="width: 150px;"></button>

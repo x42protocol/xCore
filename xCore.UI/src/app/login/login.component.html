@@ -19,7 +19,7 @@
 			</div>
 			<div *ngIf="!hasWallet && !isWalletLoading" class="row d-flex justify-content-center mt-3">
 				<div class="col-12">
-					<p-messages [value]="noWalletsFound" [closable]="false"></p-messages>
+					<p-messages [value]="noWalletsFound" [closable]="false" [escape]="false"></p-messages>
 				</div>
 			</div>
 			<!-- SVG -->
