@@ -72,7 +72,7 @@
                 <button type="button" pButton (click)="openCreateProfileDialog(true)" label="Open Payment" class="ui-button-success" icon="pi pi-user-plus"></button>
               </div>
             </p-header>
-            <p-message severity="warn" text="Waiting for the payment."></p-message>
+            <p-message severity="warn" text="Waiting for payment and network confirmation."></p-message>
           </p-panel>
           <p-panel *ngIf="profileStatus == 2">
             <p-header>
