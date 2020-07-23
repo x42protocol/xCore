@@ -134,7 +134,7 @@ export class LoginComponent implements OnInit {
     this.FullNodeApiService.loadX42Wallet(walletLoad)
       .subscribe(
         response => {
-          this.getKeyAddress(walletLoad.name);
+          this.getKeyAddress(walletLoad.name, walletLoad.password);
         },
         error => {
           this.isDecrypting = false;
@@ -142,8 +142,8 @@ export class LoginComponent implements OnInit {
       );
   }
 
-  private getKeyAddress(walletName: string) {
-    this.stakingService.getProfileAddress(walletName).subscribe(
+  private getKeyAddress(walletName: string, walletPassword: string) {
+    this.stakingService.getProfileAddress(walletName, walletPassword).subscribe(
       getProfileAddressResponse => {
         this.globalService.setWalletKeyAddress(getProfileAddressResponse.address);
         console.log(getProfileAddressResponse.address);
