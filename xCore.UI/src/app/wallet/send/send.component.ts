@@ -368,7 +368,7 @@ export class SendComponent implements OnInit, OnDestroy {
   private signPaymentId(builtTransaction) {
     let walletName = this.globalService.getWalletName();
     let accountName = "account 0";
-    let address = builtTransaction.inputAddresses[0];
+    let address = builtTransaction.inputAddress;
 
     let signMessageRequest = new SignMessageRequest(walletName, accountName, this.paymentForm.get("paymentPassword").value, address, this.priceLockUtil.getPriceLockId());
 
