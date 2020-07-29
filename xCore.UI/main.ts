@@ -91,7 +91,7 @@ function createWindow() {
   });
 
   // Remove menu, new from Electron 5
-  mainWindow.removeMenu();
+  //mainWindow.removeMenu();
 
 };
 
