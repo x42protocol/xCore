@@ -187,12 +187,19 @@ export class CreateProfileComponent implements OnInit, OnDestroy {
               this.globalService.setProfile(null); // Reset profile. 
               this.getPriceLock(response.priceLockId);
             } else {
+              this.profileReserving = false;
               this.apiError = response.resultMessage;
+              this.profileStatus = -1;
             }
           } else {
             this.profileStatus = -1;
           }
           this.profileReserving = false;
+        },
+        error => {
+          this.apiError = error.error.errors[0].message;
+          this.profileReserving = false;
+          this.profileStatus = -1;
         }
       );
   }
