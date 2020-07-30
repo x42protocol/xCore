@@ -403,7 +403,7 @@ export class CreateProfileComponent implements OnInit, OnDestroy {
   private signPaymentId(builtTransaction) {
     let walletName = this.globalService.getWalletName();
     let accountName = "account 0";
-    let address = builtTransaction.inputAddresses[0];
+    let address = builtTransaction.inputAddress;
     console.log(this.priceLockId);
     let signMessageRequest = new SignMessageRequest(walletName, accountName, this.paymentForm.get("paymentPassword").value, address, this.priceLockId);
     console.log(signMessageRequest);
