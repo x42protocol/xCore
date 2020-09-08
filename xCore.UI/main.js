@@ -83,7 +83,7 @@ function createWindow() {
         mainWindow = null;
     });
     // Remove menu, new from Electron 5
-    mainWindow.removeMenu();
+    //mainWindow.removeMenu();
 }
 ;
 // This method will be called when Electron has finished
