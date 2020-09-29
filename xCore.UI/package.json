@@ -1,8 +1,8 @@
 {
   "name": "xCore",
   "description": "xCore",
-  "version": "5.0.0-b21",
-  "bc_version": "1.1.12",
+  "version": "5.0.0-b22",
+  "bc_version": "1.1.13",
   "author": {
     "name": "x42 Protocol",
     "email": "contact@x42.info"
