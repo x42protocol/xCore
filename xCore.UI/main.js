@@ -54,7 +54,8 @@ function createWindow() {
         minHeight: 800,
         title: "xCore",
         webPreferences: {
-            nodeIntegration: true
+            nodeIntegration: true,
+            enableRemoteModule: true
         }
     });
     if (serve) {
