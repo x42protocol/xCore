@@ -98,15 +98,17 @@ export class ResyncComponent implements OnInit, OnDestroy {
     this.generalWalletInfoSubscription = this.fullNodeApiService.getGeneralInfo(walletInfo)
       .subscribe(
         response => {
-          let generalWalletInfoResponse = response;
-          this.lastBlockSyncedHeight = generalWalletInfoResponse.lastBlockSyncedHeight;
-          this.chainTip = generalWalletInfoResponse.chainTip;
-          this.isChainSynced = generalWalletInfoResponse.isChainSynced;
+          if (response != null) {
+            let generalWalletInfoResponse = response;
+            this.lastBlockSyncedHeight = generalWalletInfoResponse.lastBlockSyncedHeight;
+            this.chainTip = generalWalletInfoResponse.chainTip;
+            this.isChainSynced = generalWalletInfoResponse.isChainSynced;
 
-          if (this.isChainSynced && this.lastBlockSyncedHeight == this.chainTip) {
-            this.isSyncing = false;
-          } else {
-            this.isSyncing = true;
+            if (this.isChainSynced && this.lastBlockSyncedHeight == this.chainTip) {
+              this.isSyncing = false;
+            } else {
+              this.isSyncing = true;
+            }
           }
         },
         error => {

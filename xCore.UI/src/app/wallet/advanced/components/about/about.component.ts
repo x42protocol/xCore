@@ -37,20 +37,22 @@ export class AboutComponent implements OnInit, OnDestroy {
   private startSubscriptions() {
     this.nodeStatusSubscription = this.FullNodeApiService.getNodeStatusInterval()
       .subscribe(
-        (data: NodeStatus) =>  {
-          let statusResponse = data
-          this.clientName = statusResponse.agent;
-          this.fullNodeVersion = statusResponse.version;
-          this.network = statusResponse.network;
-          this.protocolVersion = statusResponse.protocolVersion;
-          this.blockHeight = statusResponse.blockStoreHeight;
-          this.dataDirectory = statusResponse.dataDirectoryPath;
+        (data: NodeStatus) => {
+          if (data != null) {
+            let statusResponse = data
+            this.clientName = statusResponse.agent;
+            this.fullNodeVersion = statusResponse.version;
+            this.network = statusResponse.network;
+            this.protocolVersion = statusResponse.protocolVersion;
+            this.blockHeight = statusResponse.blockStoreHeight;
+            this.dataDirectory = statusResponse.dataDirectoryPath;
+          }
         }
       );
   }
 
   private cancelSubscriptions() {
-    if(this.nodeStatusSubscription) {
+    if (this.nodeStatusSubscription) {
       this.nodeStatusSubscription.unsubscribe();
     }
   }

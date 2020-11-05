@@ -188,9 +188,11 @@ export class RegisterComponent implements OnInit {
     this.generalWalletInfoSubscription = this.apiService.getTxOut(this.transactionInfo.transactionId, false, true)
       .subscribe(
         response => {
-          let transactionOutput = response;
-          if (transactionOutput != null) {
-            this.confirmations = transactionOutput.confirmations;
+          if (response != null) {
+            let transactionOutput = response;
+            if (transactionOutput != null) {
+              this.confirmations = transactionOutput.confirmations;
+            }
           }
         },
         error => {

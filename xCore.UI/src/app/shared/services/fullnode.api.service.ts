@@ -62,17 +62,37 @@ export class FullNodeApiService {
   getNodeStatusInterval(): Observable<NodeStatus> {
     return this.pollingInterval.pipe(
       startWith(0),
-      switchMap(() => this.http.get<NodeStatus>(this.x42ApiUrl + '/node/status')),
+      switchMap(() => this.getNodeStatusPolling()),
       catchError(err => this.handleHttpError(err))
     )
+  }
+
+  private nodeStatusPolling = false;
+  private async getNodeStatusPolling() {
+    if (!this.nodeStatusPolling) {
+      this.nodeStatusPolling = true;
+      var response = await this.http.get<NodeStatus>(this.x42ApiUrl + '/node/status').toPromise();
+      this.nodeStatusPolling = false;
+      return response;
+    }
   }
 
   getxServerStatusInterval(): Observable<XServerStatus> {
     return this.pollingInterval.pipe(
       startWith(0),
-      switchMap(() => this.http.get<XServerStatus>(this.x42ApiUrl + '/xServer/getxserverstats')),
+      switchMap(() => this.getxServerStatusPolling()),
       catchError(err => this.handleHttpError(err))
     )
+  }
+
+  private xserverStatusPolling = false;
+  private async getxServerStatusPolling() {
+    if (!this.xserverStatusPolling) {
+      this.xserverStatusPolling = true;
+      var response = await this.http.get<XServerStatus>(this.x42ApiUrl + '/xServer/getxserverstats').toPromise();
+      this.xserverStatusPolling = false;
+      return response;
+    }
   }
 
   testxServer(testRequest: xServerTestRequest): Observable<xServerTestResponse> {
@@ -145,9 +165,19 @@ export class FullNodeApiService {
   getAddressBookAddresses(): Observable<any> {
     return this.pollingInterval.pipe(
       startWith(0),
-      switchMap(() => this.http.get(this.x42ApiUrl + '/AddressBook')),
+      switchMap(() => this.getAddressBookAddressesPolling()),
       catchError(err => this.handleHttpError(err))
     )
+  }
+
+  private addressBookPolling = false;
+  private async getAddressBookAddressesPolling() {
+    if (!this.addressBookPolling) {
+      this.addressBookPolling = true;
+      var response = await this.http.get(this.x42ApiUrl + '/AddressBook').toPromise();
+      this.addressBookPolling = false;
+      return response;
+    }
   }
 
   addAddressBookAddress(data: AddressLabel): Observable<any> {
@@ -262,9 +292,19 @@ export class FullNodeApiService {
     let params = new HttpParams().set('Name', data.walletName);
     return this.pollingInterval.pipe(
       startWith(0),
-      switchMap(() => this.http.get(this.x42ApiUrl + '/wallet/general-info', { params })),
+      switchMap(() => this.getGeneralInfoPolling(params)),
       catchError(err => this.handleHttpError(err, silent))
     )
+  }
+
+  private generalInfoPolling = false;
+  private async getGeneralInfoPolling(params) {
+    if (!this.generalInfoPolling) {
+      this.generalInfoPolling = true;
+      var response = await this.http.get(this.x42ApiUrl + '/wallet/general-info', { params }).toPromise();
+      this.generalInfoPolling = false;
+      return response;
+    }
   }
 
   /**
@@ -276,9 +316,19 @@ export class FullNodeApiService {
       .set('includeMemPool', includeMemPool ? "true" : "false");
     return this.pollingInterval.pipe(
       startWith(0),
-      switchMap(() => this.http.get<TransactionOutput>(this.x42ApiUrl + '/Node/gettxout', { params })),
+      switchMap(() => this.getTxOutPolling(params)),
       catchError(err => this.handleHttpError(err, silent))
     )
+  }
+
+  private txOutPolling = false;
+  private async getTxOutPolling(params) {
+    if (!this.txOutPolling) {
+      this.txOutPolling = true;
+      var response = await this.http.get<TransactionOutput>(this.x42ApiUrl + '/Node/gettxout', { params }).toPromise();
+      this.txOutPolling = false;
+      return response;
+    }
   }
 
   /**
@@ -290,9 +340,19 @@ export class FullNodeApiService {
       .set('accountName', data.accountName);
     return this.pollingInterval.pipe(
       startWith(0),
-      switchMap(() => this.http.get(this.x42ApiUrl + '/wallet/balance', { params })),
+      switchMap(() => this.getWalletBalancePolling(params)),
       catchError(err => this.handleHttpError(err, silent))
     )
+  }
+
+  private walletBalancePolling = false;
+  private async getWalletBalancePolling(params) {
+    if (!this.walletBalancePolling) {
+      this.walletBalancePolling = true;
+      var response = await this.http.get(this.x42ApiUrl + '/wallet/balance', { params }).toPromise();
+      this.walletBalancePolling = false;
+      return response;
+    }
   }
 
   /**
@@ -310,9 +370,9 @@ export class FullNodeApiService {
   }
 
   /**
-   * Get a wallets transaction history info from the API.
-   */
-  getWalletHistory(data: WalletInfo, skip: number = -1, take: number = -1, silent?: boolean): Observable<any> {
+ * Get a wallets transaction history info from the API.
+ */
+  getWalletHistorySlim(data: WalletInfo, skip: number = -1, take: number = -1, silent?: boolean): Observable<any> {
     let params = new HttpParams()
       .set('walletName', data.walletName)
       .set('accountName', data.accountName)
@@ -322,10 +382,20 @@ export class FullNodeApiService {
     }
     return this.pollingInterval.pipe(
       startWith(0),
-      switchMap(() => this.http.get(this.x42ApiUrl + '/wallet/history', { params: params })),
+      switchMap(() => this.getWalletHistorySlimBalancePolling(params)),
       catchError(err => this.handleHttpError(err, silent))
     )
   };
+
+  private walletHistorySlimPolling = false;
+  private async getWalletHistorySlimBalancePolling(params) {
+    if (!this.walletHistorySlimPolling) {
+      this.walletHistorySlimPolling = true;
+      var response = await this.http.get(this.x42ApiUrl + '/wallet/historyslim', { params: params }).toPromise();
+      this.walletHistorySlimPolling = false;
+      return response;
+    }
+  }
 
   /**
    * Get an unused receive address for a certain wallet from the API.
@@ -498,9 +568,19 @@ export class FullNodeApiService {
   getStakingInfo(): Observable<any> {
     return this.pollingInterval.pipe(
       startWith(0),
-      switchMap(() => this.http.get(this.x42ApiUrl + '/staking/getstakinginfo')),
+      switchMap(() => this.getStakingInfoPolling()),
       catchError(err => this.handleHttpError(err))
     )
+  }
+
+  private stakingInfoPolling = false;
+  private async getStakingInfoPolling() {
+    if (!this.stakingInfoPolling) {
+      this.stakingInfoPolling = true;
+      var response = await this.http.get(this.x42ApiUrl + '/staking/getstakinginfo').toPromise();
+      this.stakingInfoPolling = false;
+      return response;
+    }
   }
 
   /**

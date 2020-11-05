@@ -47,12 +47,14 @@ export class AddressBookComponent implements OnInit, OnDestroy {
     this.addressBookSubcription = this.FullNodeApiService.getAddressBookAddresses()
       .subscribe(
         response => {
-          this.addresses = null;
-          if (response.addresses[0]) {
-            this.addresses = [];
-            let addressResponse = response.addresses;
-            for (let address of addressResponse) {
-              this.addresses.push(new AddressLabel(address.label, address.address));
+          if (response != null) {
+            this.addresses = null;
+            if (response.addresses[0]) {
+              this.addresses = [];
+              let addressResponse = response.addresses;
+              for (let address of addressResponse) {
+                this.addresses.push(new AddressLabel(address.label, address.address));
+              }
             }
           }
         },

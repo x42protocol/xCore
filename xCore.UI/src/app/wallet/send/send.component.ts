@@ -660,9 +660,11 @@ export class SendComponent implements OnInit, OnDestroy {
     this.walletBalanceSubscription = this.apiService.getWalletBalance(walletInfo)
       .subscribe(
         response => {
-          let balanceResponse = response;
-          //TO DO - add account feature instead of using first entry in array
-          this.totalBalance = balanceResponse.balances[0].amountConfirmed + balanceResponse.balances[0].amountUnconfirmed;
+          if (response != null) {
+            let balanceResponse = response;
+            //TO DO - add account feature instead of using first entry in array
+            this.totalBalance = balanceResponse.balances[0].amountConfirmed + balanceResponse.balances[0].amountUnconfirmed;
+          }
         },
         error => {
           if (error.status === 0) {

@@ -38,7 +38,7 @@ export class StatusBarComponent implements OnInit, OnDestroy {
   public toolTip = '';
 
   @Input() public isUnLocked: boolean = false;
-  
+
   constructor(private FullNodeApiService: FullNodeApiService, private globalService: GlobalService, private genericModalService: ModalService) { }
 
   ngOnInit() {
@@ -65,16 +65,18 @@ export class StatusBarComponent implements OnInit, OnDestroy {
     this.xServerStatusSubscription = this.FullNodeApiService.getxServerStatusInterval()
       .subscribe(
         (data: XServerStatus) => {
-          let statusResponse = data;
-          this.connectedXServers = statusResponse.connected;
-          this.globalService.setxServerStatus(statusResponse);
+          if (data != null) {
+            let statusResponse = data;
+            this.connectedXServers = statusResponse.connected;
+            this.globalService.setxServerStatus(statusResponse);
 
-          if (statusResponse.connected == 1) {
-            this.connectedXServerTooltip = "1 xServer";
-          } else if (statusResponse.connected >= 0) {
-            this.connectedXServerTooltip = `${statusResponse.connected} xServers`;
+            if (statusResponse.connected == 1) {
+              this.connectedXServerTooltip = "1 xServer";
+            } else if (statusResponse.connected >= 0) {
+              this.connectedXServerTooltip = `${statusResponse.connected} xServers`;
+            }
+            this.updateConnectionToolTip();
           }
-          this.updateConnectionToolTip();
         },
         error => {
           this.cancelSubscriptions();
@@ -88,37 +90,39 @@ export class StatusBarComponent implements OnInit, OnDestroy {
       this.nodeStatusSubscription = this.FullNodeApiService.getNodeStatusInterval()
         .subscribe(
           (data: NodeStatus) => {
-            let statusResponse = data;
-            this.connectedNodes = statusResponse.inboundPeers.length + statusResponse.outboundPeers.length;
-            this.lastBlockSyncedHeight = statusResponse.blockStoreHeight;
-            this.chainTip = statusResponse.bestPeerHeight;
+            if (data != null) {
+              let statusResponse = data;
+              this.connectedNodes = statusResponse.inboundPeers.length + statusResponse.outboundPeers.length;
+              this.lastBlockSyncedHeight = statusResponse.blockStoreHeight;
+              this.chainTip = statusResponse.bestPeerHeight;
 
-            let processedText = `Processed ${this.lastBlockSyncedHeight} out of ${this.chainTip} blocks.`;
-            if (this.chainTip == null) {
-              processedText = `Waiting for peer connections to start.`;
-            }
-
-            this.toolTip = `Synchronizing.  ${processedText}`;
-
-            if (this.connectedNodes == 1) {
-              this.connectedNodesTooltip = "1 node";
-            } else if (this.connectedNodes >= 0) {
-              this.connectedNodesTooltip = `${this.connectedNodes} nodes`;
-            }
-            this.updateConnectionToolTip();
-
-            if (this.chainTip == null || this.lastBlockSyncedHeight > this.chainTip) {
-              this.percentSynced = "syncing...";
-            } else {
-              this.percentSyncedNumber = ((this.lastBlockSyncedHeight / this.chainTip) * 100);
-              if (this.percentSyncedNumber.toFixed(0) === "100" && this.lastBlockSyncedHeight != this.chainTip) {
-                this.percentSyncedNumber = 99;
+              let processedText = `Processed ${this.lastBlockSyncedHeight} out of ${this.chainTip} blocks.`;
+              if (this.chainTip == null) {
+                processedText = `Waiting for peer connections to start.`;
               }
 
-              this.percentSynced = this.percentSyncedNumber.toFixed(0) + '%';
+              this.toolTip = `Synchronizing.  ${processedText}`;
 
-              if (this.percentSynced === '100%') {
-                this.toolTip = `Up to date.  ${processedText}`;
+              if (this.connectedNodes == 1) {
+                this.connectedNodesTooltip = "1 node";
+              } else if (this.connectedNodes >= 0) {
+                this.connectedNodesTooltip = `${this.connectedNodes} nodes`;
+              }
+              this.updateConnectionToolTip();
+
+              if (this.chainTip == null || this.lastBlockSyncedHeight > this.chainTip) {
+                this.percentSynced = "syncing...";
+              } else {
+                this.percentSyncedNumber = ((this.lastBlockSyncedHeight / this.chainTip) * 100);
+                if (this.percentSyncedNumber.toFixed(0) === "100" && this.lastBlockSyncedHeight != this.chainTip) {
+                  this.percentSyncedNumber = 99;
+                }
+
+                this.percentSynced = this.percentSyncedNumber.toFixed(0) + '%';
+
+                if (this.percentSynced === '100%') {
+                  this.toolTip = `Up to date.  ${processedText}`;
+                }
               }
             }
           },
@@ -132,36 +136,38 @@ export class StatusBarComponent implements OnInit, OnDestroy {
       this.generalWalletInfoSubscription = this.FullNodeApiService.getGeneralInfo(walletInfo)
         .subscribe(
           response => {
-            let generalWalletInfoResponse = response;
-            this.lastBlockSyncedHeight = generalWalletInfoResponse.lastBlockSyncedHeight;
-            this.chainTip = generalWalletInfoResponse.chainTip;
-            this.isChainSynced = generalWalletInfoResponse.isChainSynced;
-            this.connectedNodes = generalWalletInfoResponse.connectedNodes;
-            this.globalService.setBlockHeight(this.chainTip);
+            if (response != null) {
+              let generalWalletInfoResponse = response;
+              this.lastBlockSyncedHeight = generalWalletInfoResponse.lastBlockSyncedHeight;
+              this.chainTip = generalWalletInfoResponse.chainTip;
+              this.isChainSynced = generalWalletInfoResponse.isChainSynced;
+              this.connectedNodes = generalWalletInfoResponse.connectedNodes;
+              this.globalService.setBlockHeight(this.chainTip);
 
-            const processedText = `Processed ${this.lastBlockSyncedHeight} out of ${this.chainTip} blocks.`;
-            this.toolTip = `Synchronizing.  ${processedText}`;
+              const processedText = `Processed ${this.lastBlockSyncedHeight} out of ${this.chainTip} blocks.`;
+              this.toolTip = `Synchronizing.  ${processedText}`;
 
-            if (this.connectedNodes == 1) {
-              this.connectedNodesTooltip = "1 node";
-            } else if (this.connectedNodes >= 0) {
-              this.connectedNodesTooltip = `${this.connectedNodes} nodes`;
-            }
-            this.updateConnectionToolTip();
-
-            if (this.chainTip == null || this.lastBlockSyncedHeight > this.chainTip) {
-              this.percentSynced = "syncing...";
-            }
-            else {
-              this.percentSyncedNumber = ((this.lastBlockSyncedHeight / this.chainTip) * 100);
-              if (this.percentSyncedNumber.toFixed(0) === "100" && this.lastBlockSyncedHeight != this.chainTip && !this.isChainSynced) {
-                this.percentSyncedNumber = 99;
+              if (this.connectedNodes == 1) {
+                this.connectedNodesTooltip = "1 node";
+              } else if (this.connectedNodes >= 0) {
+                this.connectedNodesTooltip = `${this.connectedNodes} nodes`;
               }
+              this.updateConnectionToolTip();
 
-              this.percentSynced = this.percentSyncedNumber.toFixed(0) + '%';
+              if (this.chainTip == null || this.lastBlockSyncedHeight > this.chainTip) {
+                this.percentSynced = "syncing...";
+              }
+              else {
+                this.percentSyncedNumber = ((this.lastBlockSyncedHeight / this.chainTip) * 100);
+                if (this.percentSyncedNumber.toFixed(0) === "100" && this.lastBlockSyncedHeight != this.chainTip && !this.isChainSynced) {
+                  this.percentSyncedNumber = 99;
+                }
 
-              if (this.percentSynced === '100%') {
-                this.toolTip = `Up to date.  ${processedText}`;
+                this.percentSynced = this.percentSyncedNumber.toFixed(0) + '%';
+
+                if (this.percentSynced === '100%') {
+                  this.toolTip = `Up to date.  ${processedText}`;
+                }
               }
             }
           },
@@ -183,8 +189,10 @@ export class StatusBarComponent implements OnInit, OnDestroy {
     this.stakingInfoSubscription = this.FullNodeApiService.getStakingInfo()
       .subscribe(
         response => {
-          let stakingResponse = response
-          this.stakingEnabled = stakingResponse.enabled;
+          if (response != null) {
+            let stakingResponse = response
+            this.stakingEnabled = stakingResponse.enabled;
+          }
         }, error => {
           if (error.status === 0) {
             this.cancelSubscriptions();

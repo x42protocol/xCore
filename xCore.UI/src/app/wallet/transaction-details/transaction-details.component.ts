@@ -49,9 +49,11 @@ export class TransactionDetailsComponent implements OnInit, OnDestroy {
     this.generalWalletInfoSubscription = this.FullNodeApiService.getGeneralInfo(walletInfo)
       .subscribe(
         response => {
-          let generalWalletInfoResponse = response;
-          this.lastBlockSyncedHeight = generalWalletInfoResponse.lastBlockSyncedHeight;
-          this.getConfirmations(this.transaction);
+          if (response != null) {
+            let generalWalletInfoResponse = response;
+            this.lastBlockSyncedHeight = generalWalletInfoResponse.lastBlockSyncedHeight;
+            this.getConfirmations(this.transaction);
+          }
         },
         error => {
           if (error.status === 0) {

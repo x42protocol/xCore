@@ -155,34 +155,38 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
     if (isCold) {
       let coldHistoryResponse;
       walletInfo.accountName = this.coldStakingAccount;
-      this.walletColdHistorySubscription = this.apiService.getWalletHistory(walletInfo, 0, 10, true)
+      this.walletColdHistorySubscription = this.apiService.getWalletHistorySlim(walletInfo, 0, 10, true)
         .subscribe(
           response => {
-            if (!!response.history && response.history[0].transactionsHistory.length > 0) {
-              coldHistoryResponse = response.history[0].transactionsHistory;
-              this.getTransactionInfo(coldHistoryResponse, true);
-            }
-            else {
-              this.hasColdTransaction = false;
+            if (response != null) {
+              if (!!response.history && response.history[0].transactionsHistory.length > 0) {
+                coldHistoryResponse = response.history[0].transactionsHistory;
+                this.getTransactionInfo(coldHistoryResponse, true);
+              }
+              else {
+                this.hasColdTransaction = false;
+              }
             }
           }
         );
     } else {
       let coldHistoryResponse;
       walletInfo.accountName = this.hotStakingAccount;
-      this.walletHotHistorySubscription = this.apiService.getWalletHistory(walletInfo, 0, 10, true)
+      this.walletHotHistorySubscription = this.apiService.getWalletHistorySlim(walletInfo, 0, 10, true)
         .pipe(
           finalize(() => this.isLoading = false)
         )
         .subscribe(
           response => {
-            this.isLoading = false;
-            if (!!response.history && response.history[0].transactionsHistory.length > 0) {
-              coldHistoryResponse = response.history[0].transactionsHistory;
-              this.getTransactionInfo(coldHistoryResponse, false);
-            }
-            else {
-              this.hasHotTransaction = false;
+            if (response != null) {
+              this.isLoading = false;
+              if (!!response.history && response.history[0].transactionsHistory.length > 0) {
+                coldHistoryResponse = response.history[0].transactionsHistory;
+                this.getTransactionInfo(coldHistoryResponse, false);
+              }
+              else {
+                this.hasHotTransaction = false;
+              }
             }
           }
         );
@@ -233,12 +237,14 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
     this.walletColdBalanceSubscription = this.apiService.getWalletBalance(walletInfo, true)
       .subscribe(
         coldBalanceResponse => {
-          if (coldBalanceResponse.balances[0].amountConfirmed > 0 || coldBalanceResponse.balances[0].amountUnconfirmed > 0) {
-            this.hasColdBalance = true;
+          if (coldBalanceResponse != null) {
+            if (coldBalanceResponse.balances[0].amountConfirmed > 0 || coldBalanceResponse.balances[0].amountUnconfirmed > 0) {
+              this.hasColdBalance = true;
+            }
+            this.confirmedColdBalance = coldBalanceResponse.balances[0].amountConfirmed;
+            this.unconfirmedColdBalance = coldBalanceResponse.balances[0].amountUnconfirmed;
+            this.spendableColdBalance = coldBalanceResponse.balances[0].spendableAmount;
           }
-          this.confirmedColdBalance = coldBalanceResponse.balances[0].amountConfirmed;
-          this.unconfirmedColdBalance = coldBalanceResponse.balances[0].amountUnconfirmed;
-          this.spendableColdBalance = coldBalanceResponse.balances[0].spendableAmount;
         }
       );
 
@@ -246,12 +252,14 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
     this.walletHotBalanceSubscription = this.apiService.getWalletBalance(walletInfo, true)
       .subscribe(
         hotBalanceResponse => {
-          if (hotBalanceResponse.balances[0].amountConfirmed > 0 || hotBalanceResponse.balances[0].amountUnconfirmed > 0) {
-            this.hasHotBalance = true;
+          if (hotBalanceResponse != null) {
+            if (hotBalanceResponse.balances[0].amountConfirmed > 0 || hotBalanceResponse.balances[0].amountUnconfirmed > 0) {
+              this.hasHotBalance = true;
+            }
+            this.confirmedHotBalance = hotBalanceResponse.balances[0].amountConfirmed;
+            this.unconfirmedHotBalance = hotBalanceResponse.balances[0].amountUnconfirmed;
+            this.spendableHotBalance = hotBalanceResponse.balances[0].spendableAmount;
           }
-          this.confirmedHotBalance = hotBalanceResponse.balances[0].amountConfirmed;
-          this.unconfirmedHotBalance = hotBalanceResponse.balances[0].amountUnconfirmed;
-          this.spendableHotBalance = hotBalanceResponse.balances[0].spendableAmount;
         }
       );
   }

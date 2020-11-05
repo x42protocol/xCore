@@ -61,15 +61,17 @@ export class HistoryComponent {
   private getHistory() {
     let walletInfo = new WalletInfo(this.globalService.getWalletName())
     let historyResponse;
-    this.walletHistorySubscription = this.FullNodeApiService.getWalletHistory(walletInfo)
+    this.walletHistorySubscription = this.FullNodeApiService.getWalletHistorySlim(walletInfo)
       .subscribe(
         response => {
-          //TO DO - add account feature instead of using first entry in array
-          if (!!response.history && response.history[0].transactionsHistory.length > 0) {
-            historyResponse = response.history[0].transactionsHistory;
-            this.getTransactionInfo(historyResponse);
-          } else {
-            this.hasTransaction = false;
+          if (response != null) {
+            //TO DO - add account feature instead of using first entry in array
+            if (!!response.history && response.history[0].transactionsHistory.length > 0) {
+              historyResponse = response.history[0].transactionsHistory;
+              this.getTransactionInfo(historyResponse);
+            } else {
+              this.hasTransaction = false;
+            }
           }
         },
         error => {

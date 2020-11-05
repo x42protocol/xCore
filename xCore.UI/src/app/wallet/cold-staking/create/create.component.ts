@@ -117,9 +117,11 @@ export class ColdStakingCreateComponent implements OnInit, OnDestroy {
     this.walletBalanceSubscription = this.apiService.getWalletBalance(walletInfo)
       .subscribe(
         response => {
-          let balanceResponse = response;
-          this.totalBalance = balanceResponse.balances[0].amountConfirmed + balanceResponse.balances[0].amountUnconfirmed;
-          this.spendableBalance = balanceResponse.balances[0].spendableAmount;
+          if (response != null) {
+            let balanceResponse = response;
+            this.totalBalance = balanceResponse.balances[0].amountConfirmed + balanceResponse.balances[0].amountUnconfirmed;
+            this.spendableBalance = balanceResponse.balances[0].spendableAmount;
+          }
         },
         error => {
           if (error.status === 0) {
