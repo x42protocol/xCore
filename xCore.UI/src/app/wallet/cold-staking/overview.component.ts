@@ -71,7 +71,7 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
     this.coinUnit = this.globalService.getCoinUnit();
     this.startSubscriptions();
 
-    this.loadingMessage = [{ severity: 'info', summary: '', detail: 'Detecting wallet type, Please wait...' }];
+    this.loadingMessage = [{ severity: 'info', summary: '', detail: 'Loading, Please wait...' }];
     this.setupColdMessage = [{ severity: 'info', summary: '', detail: 'The Delegated Wallet has no access to your coins and you can withdraw to your spendable addresses balance at any time.' }];
     this.hotMessage = [{ severity: 'info', summary: '', detail: 'The hot balance reflects what has been deligated, this wallet does not have access to these funds.' }];
 
@@ -155,7 +155,7 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
     if (isCold) {
       let coldHistoryResponse;
       walletInfo.accountName = this.coldStakingAccount;
-      this.walletColdHistorySubscription = this.apiService.getWalletHistorySlim(walletInfo, 0, 10, true)
+      this.walletColdHistorySubscription = this.apiService.getWalletHistorySlim(walletInfo, 0, 100, true)
         .subscribe(
           response => {
             if (response != null) {
@@ -172,14 +172,13 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
     } else {
       let coldHistoryResponse;
       walletInfo.accountName = this.hotStakingAccount;
-      this.walletHotHistorySubscription = this.apiService.getWalletHistorySlim(walletInfo, 0, 10, true)
+      this.walletHotHistorySubscription = this.apiService.getWalletHistory(walletInfo, 0, 100, true)
         .pipe(
           finalize(() => this.isLoading = false)
         )
         .subscribe(
           response => {
             if (response != null) {
-              this.isLoading = false;
               if (!!response.history && response.history[0].transactionsHistory.length > 0) {
                 coldHistoryResponse = response.history[0].transactionsHistory;
                 this.getTransactionInfo(coldHistoryResponse, false);
@@ -187,6 +186,7 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
               else {
                 this.hasHotTransaction = false;
               }
+              this.isLoading = false;
             }
           }
         );
@@ -226,6 +226,13 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
         this.coldTransactions.push(new TransactionInfo(transactionType, transactionId, transactionAmount, transactionFee, transactionConfirmedInBlock, transactionTimestamp));
       } else {
         this.hotTransactions.push(new TransactionInfo(transactionType, transactionId, transactionAmount, transactionFee, transactionConfirmedInBlock, transactionTimestamp));
+      }
+
+      if (this.coldTransactions !== undefined && this.coldTransactions.length > 0) {
+        this.hasColdTransaction = true;
+      }
+      if (this.hotTransactions !== undefined && this.hotTransactions.length > 0) {
+        this.hasHotTransaction = true;
       }
     }
   };

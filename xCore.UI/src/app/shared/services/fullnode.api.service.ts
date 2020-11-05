@@ -370,7 +370,35 @@ export class FullNodeApiService {
   }
 
   /**
- * Get a wallets transaction history info from the API.
+   * Get a wallets transaction history info from the API.
+   */
+  getWalletHistory(data: WalletInfo, skip: number = -1, take: number = -1, silent?: boolean): Observable<any> {
+    let params = new HttpParams()
+      .set('walletName', data.walletName)
+      .set('accountName', data.accountName)
+    if (take > 0) {
+      params = params.set('Skip', skip.toString())
+        .set('Take', take.toString());
+    }
+    return this.pollingInterval.pipe(
+      startWith(0),
+      switchMap(() => this.getWalletHistoryBalancePolling(params)),
+      catchError(err => this.handleHttpError(err, silent))
+    )
+  };
+
+  private walletHistoryPolling = false;
+  private async getWalletHistoryBalancePolling(params) {
+    if (!this.walletHistoryPolling) {
+      this.walletHistoryPolling = true;
+      var response = await this.http.get(this.x42ApiUrl + '/wallet/history', { params: params }).toPromise();
+      this.walletHistoryPolling = false;
+      return response;
+    }
+  }
+
+  /**
+ * Get a wallets transaction slim history info from the API.
  */
   getWalletHistorySlim(data: WalletInfo, skip: number = -1, take: number = -1, silent?: boolean): Observable<any> {
     let params = new HttpParams()
