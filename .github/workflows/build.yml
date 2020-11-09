@@ -18,16 +18,19 @@ jobs:
             bc_extension: ".zip"
             runtime: "win"
             platform: "win"
+            update: ""
           - os: ubuntu-latest
             extension: ".deb"
             bc_extension: ".tar.gz"
             runtime: "linux-amd64"
             platform: "linux"
+            update: "-linux"
           - os: macos-latest
             runtime: "mac"
             extension: ".dmg"
             bc_extension: ".zip"
             platform: "mac"
+            update: "-mac"
         node_version: [12.x]
         dotnet_version: ['3.1.300']
       fail-fast: false
@@ -115,7 +118,7 @@ jobs:
       uses: DennisAMenace/action-release@master
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        files: "${{ env.UI_PATH }}app-builds/${{ env.RELEASE_NAME }}"
+        files: "${{ env.UI_PATH }}app-builds/${{ env.RELEASE_NAME }};${{ env.UI_PATH }}app-builds/latest${{matrix.update}}.yml"
         draft: true
         prerelease: true
         body: ''
