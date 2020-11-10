@@ -10,7 +10,10 @@ export class GenericModalComponent implements OnInit, AfterViewInit {
 
   public message: string;
 
-  constructor(public ref: DynamicDialogRef, public config: DynamicDialogConfig) { }
+  constructor(
+    public ref: DynamicDialogRef,
+    public config: DynamicDialogConfig,
+  ) { }
 
   @ViewChild('closeButton') focusElement: ElementRef;
 

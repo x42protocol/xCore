@@ -2,17 +2,20 @@ import { Component, OnInit } from '@angular/core';
 import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
 
 @Component({
-  selector: 'signature',
+  selector: 'app-signature',
   templateUrl: './signature.component.html',
   styleUrls: ['./signature.component.css'],
 })
 export class SignatureComponent implements OnInit {
-  constructor(public activeModal: DynamicDialogRef, public config: DynamicDialogConfig) { }
+  constructor(
+    public activeModal: DynamicDialogRef,
+    public config: DynamicDialogConfig,
+  ) { }
 
-  public content: string = "";
-  public address: string = "";
-  public message: string = "";
-  public copied: boolean = false;
+  public content = '';
+  public address = '';
+  public message = '';
+  public copied = false;
 
   ngOnInit() {
     this.content = this.config.data.content;

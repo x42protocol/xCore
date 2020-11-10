@@ -1,7 +1,18 @@
 {
   "appId": "com.x42.xCore",
+  "artifactName": "xCore-${version}-${os}-${arch}.${ext}",
   "productName": "xCore",
-  "publish": null,
+  "asar": true,
+  "publish": [
+    {
+      "provider": "github",
+      "owner": "x42protocol",
+      "repo": "xCore"
+    }
+  ],
+  "releaseInfo": {
+    "releaseName": "xCore"
+  },
   "directories": {
     "output": "app-builds"
   },

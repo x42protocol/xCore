@@ -2,12 +2,10 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ClipboardService } from 'ngx-clipboard';
 import { SelectItem } from 'primeng/api';
 import { DialogService } from 'primeng/dynamicdialog';
-
-import { FullNodeApiService } from '../../shared/services/fullnode.api.service';
+import { ApiService } from '../../shared/services/api.service';
 import { SendComponent } from '../send/send.component';
 import { AddNewAddressComponent } from '../address-book/modals/add-new-address/add-new-address.component';
 import { AddressLabel } from '../../shared/models/address-label';
-
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -16,7 +14,11 @@ import { Subscription } from 'rxjs';
   styleUrls: ['./address-book.component.css']
 })
 export class AddressBookComponent implements OnInit, OnDestroy {
-  constructor(private FullNodeApiService: FullNodeApiService, private clipboardService: ClipboardService, public dialogService: DialogService) { }
+  constructor(
+    private apiService: ApiService,
+    private clipboardService: ClipboardService,
+    public dialogService: DialogService,
+  ) { }
 
   public copyType: SelectItem[];
   private addressBookSubcription: Subscription;
@@ -44,15 +46,15 @@ export class AddressBookComponent implements OnInit, OnDestroy {
   }
 
   private getAddressBookAddresses() {
-    this.addressBookSubcription = this.FullNodeApiService.getAddressBookAddresses()
+    this.addressBookSubcription = this.apiService.getAddressBookAddresses()
       .subscribe(
         response => {
           if (response != null) {
             this.addresses = null;
             if (response.addresses[0]) {
               this.addresses = [];
-              let addressResponse = response.addresses;
-              for (let address of addressResponse) {
+              const addressResponse = response.addresses;
+              for (const address of addressResponse) {
                 this.addresses.push(new AddressLabel(address.label, address.address));
               }
             }
@@ -78,8 +80,8 @@ export class AddressBookComponent implements OnInit, OnDestroy {
   }
 
   sendClicked(address: AddressLabel) {
-    let modalData = {
-      "address": address.address
+    const modalData = {
+      address: address.address
     };
 
     this.dialogService.open(SendComponent, {
@@ -90,7 +92,7 @@ export class AddressBookComponent implements OnInit, OnDestroy {
   }
 
   removeClicked(address: AddressLabel) {
-    this.FullNodeApiService.removeAddressBookAddress(address.label)
+    this.apiService.removeAddressBookAddress(address.label)
       .subscribe(
         response => {
           this.cancelSubscriptions();

@@ -2,13 +2,10 @@ import { Component } from '@angular/core';
 import { FormGroup, Validators, FormBuilder } from '@angular/forms';
 import { SelectItem } from 'primeng/api';
 import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
-
 import { GlobalService } from '../../../shared/services/global.service';
 import { ThemeService } from '../../../shared/services/theme.service';
 import { ColdStakingService } from '../../../shared/services/coldstaking.service';
-
 import { debounceTime } from 'rxjs/operators';
-
 
 type FeeType = { id: number, display: string, value: number };
 
@@ -22,18 +19,35 @@ export class ColdStakingCreateHotComponent {
   selectedFeeType: FeeType;
   public copyType: SelectItem[];
 
-  constructor(private globalService: GlobalService, private stakingService: ColdStakingService, public activeModal: DynamicDialogRef, public config: DynamicDialogConfig, private fb: FormBuilder, private themeService: ThemeService) {
+  constructor(
+    private globalService: GlobalService,
+    private stakingService: ColdStakingService,
+    public activeModal: DynamicDialogRef,
+    public config: DynamicDialogConfig,
+    private fb: FormBuilder,
+    public themeService: ThemeService,
+  ) {
     this.buildSendForm();
-    this.isDarkTheme = themeService.getCurrentTheme().themeType == 'dark';
+    this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
   }
 
   public isDarkTheme = false;
   public sendForm: FormGroup;
   public apiError: string;
-  public isSending: boolean = false;
+  public isSending = false;
   public address: string;
   public acknowledgeWarning = false;
-  public addressCopied: Boolean = false;
+  public addressCopied = false;
+
+  sendFormErrors = {
+    password: ''
+  };
+
+  sendValidationMessages = {
+    password: {
+      required: 'Your password is required.'
+    }
+  };
 
   private buildSendForm(): void {
     this.copyType = [
@@ -41,7 +55,7 @@ export class ColdStakingCreateHotComponent {
     ];
 
     this.sendForm = this.fb.group({
-      "password": ["", Validators.required]
+      password: ['', Validators.required]
     });
 
     this.sendForm.valueChanges.pipe(debounceTime(300)).subscribe(data => this.onSendValueChanged(data));
@@ -50,33 +64,27 @@ export class ColdStakingCreateHotComponent {
   private onSendValueChanged(data?: any) {
     if (!this.sendForm) { return; }
     const form = this.sendForm;
+
+    // tslint:disable-next-line:forin
     for (const field in this.sendFormErrors) {
       this.sendFormErrors[field] = '';
       const control = form.get(field);
       if (control && control.dirty && !control.valid) {
         const messages = this.sendValidationMessages[field];
+
+        // tslint:disable-next-line:forin
         for (const key in control.errors) {
           this.sendFormErrors[field] += messages[key] + ' ';
         }
       }
     }
 
-    this.apiError = "";
+    this.apiError = '';
   }
 
   public onCopiedClick() {
     this.addressCopied = true;
   }
-
-  sendFormErrors = {
-    'password': ''
-  };
-
-  sendValidationMessages = {
-    'password': {
-      'required': 'Your password is required.'
-    }
-  };
 
   getFirstUnusedAddress() {
     this.stakingService.getAddress(this.globalService.getWalletName(), false).subscribe(x => this.address = x.address);
@@ -85,7 +93,7 @@ export class ColdStakingCreateHotComponent {
   public createAccount(): void {
     this.isSending = true;
     const walletName = this.globalService.getWalletName();
-    const walletPassword = this.sendForm.get("password").value;
+    const walletPassword = this.sendForm.get('password').value;
 
     this.stakingService.createColdStakingAccount(walletName, walletPassword, true)
       .subscribe(

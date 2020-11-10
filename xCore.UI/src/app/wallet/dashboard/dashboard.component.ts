@@ -1,36 +1,36 @@
-import { Component, OnInit, OnDestroy, Input } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormGroup, Validators, FormBuilder } from '@angular/forms';
-import { MenuItem } from 'primeng/api';
+import { Router } from '@angular/router';
 import { DialogService } from 'primeng/dynamicdialog';
-
-import { FullNodeApiService } from '../../shared/services/fullnode.api.service';
+import { ApiService } from '../../shared/services/api.service';
 import { GlobalService } from '../../shared/services/global.service';
 import { WalletInfo } from '../../shared/models/wallet-info';
 import { TransactionInfo } from '../../shared/models/transaction-info';
 import { ThemeService } from '../../shared/services/theme.service';
-
 import { SendComponent } from '../send/send.component';
 import { ReceiveComponent } from '../receive/receive.component';
 import { TransactionDetailsComponent } from '../transaction-details/transaction-details.component';
 import { CreateProfileComponent } from '../profile/create/create-profile.component';
-
 import { Subscription } from 'rxjs';
 
-import { Router } from '@angular/router';
-
 @Component({
-  selector: 'dashboard-component',
+  selector: 'app-dashboard-component',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
-
 export class DashboardComponent implements OnInit, OnDestroy {
-  constructor(private apiService: FullNodeApiService, private globalService: GlobalService, public dialogService: DialogService, private router: Router, private fb: FormBuilder, private themeService: ThemeService) {
+  constructor(
+    private apiService: ApiService,
+    private globalService: GlobalService,
+    public dialogService: DialogService,
+    private router: Router,
+    private fb: FormBuilder,
+    public themeService: ThemeService,
+  ) {
     this.buildStakingForm();
-    this.isDarkTheme = themeService.getCurrentTheme().themeType == 'dark';
+    this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
   }
 
-  public sidechainEnabled: boolean;
   public walletName: string;
   public coinUnit: string;
   public confirmedBalance: number;
@@ -40,23 +40,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public stakingEnabled: boolean;
   public stakingActive: boolean;
   public stakingWeight: number;
-  public awaitingMaturity: number = 0;
+  public awaitingMaturity = 0;
   public netStakingWeight: number;
   public expectedTime: number;
   public dateTime: string;
   public isStarting: boolean;
   public isStopping: boolean;
   public isDarkTheme = false;
-  public hasBalance: boolean = false;
-  public hasTX: boolean = false;
-  public hasHotBalance: boolean = false;
-  public confirmedHotBalance: number = 0;
+  public hasBalance = false;
+  public hasTX = false;
+  public hasHotBalance = false;
+  public confirmedHotBalance = 0;
   public unconfirmedHotBalance: number;
   public spendableHotBalance: number;
-  public hotStakingAccount: string = "coldStakingHotAddresses";
+  public hotStakingAccount = 'coldStakingHotAddresses';
   public stakingForm: FormGroup;
   public apps: any[];
-  public profileStatus: number = 0;
+  public profileStatus = 0;
   public profileAddress: string;
   public profile: any;
 
@@ -66,16 +66,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private stakingInfoSubscription: Subscription;
 
   ngOnInit() {
-    this.sidechainEnabled = this.globalService.getSidechainEnabled();
     this.walletName = this.globalService.getWalletName();
     this.coinUnit = this.globalService.getCoinUnit();
     this.startSubscriptions();
     this.getProfileOnConnection();
 
     this.apps = [
-      { "name": "Search For Apps", "image": "https://cdn1.iconfinder.com/data/icons/hawcons/32/698628-icon-112-search-plus-512.png" }
-    ]
-  };
+      { name: 'Search For Apps', image: 'https://cdn1.iconfinder.com/data/icons/hawcons/32/698628-icon-112-search-plus-512.png' }
+    ];
+  }
 
   ngOnDestroy() {
     this.cancelSubscriptions();
@@ -83,7 +82,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private buildStakingForm(): void {
     this.stakingForm = this.fb.group({
-      "walletPassword": ["", Validators.required]
+      walletPassword: ['', Validators.required]
     });
   }
 
@@ -103,28 +102,24 @@ export class DashboardComponent implements OnInit, OnDestroy {
       header: 'Receive',
       width: '540px'
     });
-  };
+  }
 
   public openCreateProfileDialog(isReserved: boolean) {
-    let priceLockId = "";
+    let priceLockId = '';
     if (isReserved) {
       priceLockId = this.profile.priceLockId;
     }
-    let modalData = {
-      "priceLockId": priceLockId
-    };
+    const modalData = { priceLockId };
 
     this.dialogService.open(CreateProfileComponent, {
       header: 'Create Profile',
       width: '540px',
       data: modalData
     });
-  };
+  }
 
   public openTransactionDetailDialog(transaction: TransactionInfo) {
-    let modalData = {
-      "transaction": transaction
-    };
+    const modalData = { transaction };
 
     this.dialogService.open(TransactionDetailsComponent, {
       header: 'Transaction Details',
@@ -134,22 +129,22 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private getProfileOnConnection() {
     this.setProfileInfo();
-    let interval = setInterval(() => {
-      let xServerStatus = this.globalService.getxServerStatus();
+    const interval = setInterval(() => {
+      const xServerStatus = this.globalService.getxServerStatus();
       if (xServerStatus.nodes.length > 0) {
-        let tierTwo = xServerStatus.nodes.find(n => n.tier == 2);
+        const tierTwo = xServerStatus.nodes.find(n => n.tier === 2);
         if (tierTwo) {
-          let cachedProfile = this.globalService.getProfile();
+          const cachedProfile = this.globalService.getProfile();
           if (cachedProfile != null) {
             this.profile = cachedProfile;
             this.profileStatus = cachedProfile.status;
-            if (this.profileStatus == 1) {
+            if (this.profileStatus === 1) {
               this.globalService.setProfile(null);
             }
           } else {
             this.setProfileInfo();
           }
-          if (this.profileStatus == 2) {
+          if (this.profileStatus === 2) {
             clearInterval(interval);
           }
         }
@@ -158,7 +153,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private setProfileInfo() {
-    this.apiService.getProfile("", this.globalService.getWalletKeyAddress())
+    this.apiService.getProfile('', this.globalService.getWalletKeyAddress())
       .subscribe(
         response => {
           if (response.success) {
@@ -167,9 +162,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             this.profile = response;
           } else {
             this.profileStatus = -1;
-            let profile = {
-              "status": this.profileStatus
-            };
+            const profile = { status: this.profileStatus };
             this.globalService.setProfile(profile);
           }
         }
@@ -177,13 +170,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private getWalletBalance() {
-    let walletInfo = new WalletInfo(this.globalService.getWalletName());
+    const walletInfo = new WalletInfo(this.globalService.getWalletName());
     this.walletBalanceSubscription = this.apiService.getWalletBalance(walletInfo)
       .subscribe(
         response => {
           if (response != null) {
-            let balanceResponse = response;
-            // TO DO - add account feature instead of using first entry in array
+            const balanceResponse = response;
+            // TODO - add account feature instead of using first entry in array
             this.confirmedBalance = balanceResponse.balances[0].amountConfirmed;
             this.unconfirmedBalance = balanceResponse.balances[0].amountUnconfirmed;
             this.spendableBalance = balanceResponse.balances[0].spendableAmount;
@@ -217,7 +210,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   }
 
-  // todo: add history in seperate service to make it reusable
+  // TODO: add history in seperate service to make it reusable
   private getHistory() {
     const walletInfo = new WalletInfo(this.globalService.getWalletName());
     let historyResponse;
@@ -225,7 +218,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .subscribe(
         response => {
           if (response != null) {
-            // TO DO - add account feature instead of using first entry in array
+            // TODO - add account feature instead of using first entry in array
             if (!!response.history && response.history[0].transactionsHistory.length > 0) {
               historyResponse = response.history[0].transactionsHistory;
               this.getTransactionInfo(historyResponse);
@@ -237,30 +230,30 @@ export class DashboardComponent implements OnInit, OnDestroy {
           this.startSubscriptions();
         }
       );
-  };
+  }
 
   private getTransactionInfo(transactions: any) {
     this.latestTransactions = [];
 
-    for (let transaction of transactions) {
+    for (const transaction of transactions) {
       let transactionType;
-      if (transaction.type === "send") {
-        transactionType = "sent";
-      } else if (transaction.type === "received") {
-        transactionType = "received";
-      } else if (transaction.type === "staked") {
-        transactionType = "staked";
+      if (transaction.type === 'send') {
+        transactionType = 'sent';
+      } else if (transaction.type === 'received') {
+        transactionType = 'received';
+      } else if (transaction.type === 'staked') {
+        transactionType = 'staked';
       }
-      let transactionId = transaction.id;
-      let transactionAmount = transaction.amount;
+      const transactionId = transaction.id;
+      const transactionAmount = transaction.amount;
       let transactionFee;
       if (transaction.fee) {
         transactionFee = transaction.fee;
       } else {
         transactionFee = 0;
       }
-      let transactionConfirmedInBlock = transaction.confirmedInBlock;
-      let transactionTimestamp = transaction.timestamp;
+      const transactionConfirmedInBlock = transaction.confirmedInBlock;
+      const transactionTimestamp = transaction.timestamp;
 
       this.latestTransactions.push(new TransactionInfo(transactionType, transactionId, transactionAmount, transactionFee, transactionConfirmedInBlock, transactionTimestamp));
     }
@@ -293,13 +286,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
         response => {
           this.makeLatestTxListSmall();
           this.stakingEnabled = true;
-          this.stakingForm.patchValue({ walletPassword: "" });
+          this.stakingForm.patchValue({ walletPassword: '' });
           this.getStakingInfo();
         },
         error => {
           this.isStarting = false;
           this.stakingEnabled = false;
-          this.stakingForm.patchValue({ walletPassword: "" });
+          this.stakingForm.patchValue({ walletPassword: '' });
         }
       )
       ;
@@ -346,38 +339,38 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private secondsToString(seconds: number) {
-    let numDays = Math.floor(seconds / 86400);
-    let numHours = Math.floor((seconds % 86400) / 3600);
-    let numMinutes = Math.floor(((seconds % 86400) % 3600) / 60);
-    let numSeconds = ((seconds % 86400) % 3600) % 60;
-    let dateString = "";
+    const numDays = Math.floor(seconds / 86400);
+    const numHours = Math.floor((seconds % 86400) / 3600);
+    const numMinutes = Math.floor(((seconds % 86400) % 3600) / 60);
+    const numSeconds = ((seconds % 86400) % 3600) % 60;
+    let dateString = '';
 
     if (numDays > 0) {
       if (numDays > 1) {
-        dateString += numDays + " days ";
+        dateString += numDays + ' days ';
       } else {
-        dateString += numDays + " day ";
+        dateString += numDays + ' day ';
       }
     }
 
     if (numHours > 0) {
       if (numHours > 1) {
-        dateString += numHours + " hours ";
+        dateString += numHours + ' hours ';
       } else {
-        dateString += numHours + " hour ";
+        dateString += numHours + ' hour ';
       }
     }
 
     if (numMinutes > 0) {
       if (numMinutes > 1) {
-        dateString += numMinutes + " minutes ";
+        dateString += numMinutes + ' minutes ';
       } else {
-        dateString += numMinutes + " minute ";
+        dateString += numMinutes + ' minute ';
       }
     }
 
-    if (dateString === "") {
-      dateString = "Unknown";
+    if (dateString === '') {
+      dateString = 'Unknown';
     }
 
     return dateString;
@@ -404,8 +397,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private startSubscriptions() {
     this.getWalletBalance();
     this.getHistory();
-    if (!this.sidechainEnabled) {
-      this.getStakingInfo();
-    }
+    this.getStakingInfo();
   }
 }

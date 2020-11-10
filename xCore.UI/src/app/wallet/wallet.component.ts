@@ -1,20 +1,20 @@
 import { Component, OnInit } from '@angular/core';
-import { GlobalService } from '../shared/services/global.service';
+import { ApplicationStateService } from '../shared/services/application-state.service';
 import { MenuItem } from 'primeng/api';
 
 @Component({
-  selector: 'wallet-component',
+  selector: 'app-wallet-component',
   templateUrl: './wallet.component.html',
   styleUrls: ['./wallet.component.css'],
 })
 export class WalletComponent implements OnInit {
-  constructor(private globalService: GlobalService) { }
+  constructor(public appState: ApplicationStateService) { }
   public contextMenuItems: MenuItem[];
 
   ngOnInit() {
     this.contextMenuItems = [
       {
-        label: 'x42 xCore ' + this.globalService.getApplicationVersion(),
+        label: 'x42 xCore ' + this.appState.version,
         icon: 'pi goat-icon'
       }
     ];

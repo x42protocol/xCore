@@ -12,7 +12,6 @@ import { ExtPubkeyComponent } from './advanced/components/ext-pubkey/ext-pubkey.
 import { GenerateAddressesComponent } from './advanced/components/generate-addresses/generate-addresses.component';
 import { ResyncComponent } from './advanced/components/resync/resync.component';
 import { XServerComponent } from './advanced/components/xserver/xserver.component';
-import { SmartContractsComponent } from './smart-contracts/components/smart-contracts.component';
 import { AddressBookComponent } from './address-book/address-book.component';
 
 const routes: Routes = [
@@ -35,7 +34,6 @@ const routes: Routes = [
           { path: 'xserver', component: XServerComponent }
         ]
       },
-      { path: 'smart-contracts', component: SmartContractsComponent },
       { path: 'address-book', component: AddressBookComponent }
     ]
   },

@@ -1,19 +1,15 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { DynamicDialogRef, DialogService } from 'primeng/dynamicdialog';
 import { FormGroup, Validators, FormBuilder, AbstractControl } from '@angular/forms';
-
 import { GlobalService } from '../../../shared/services/global.service';
 import { CoinNotationPipe } from '../../../shared/pipes/coin-notation.pipe';
-import { FullNodeApiService } from '../../../shared/services/fullnode.api.service';
+import { ApiService } from '../../../shared/services/api.service';
 import { ThemeService } from '../../../shared/services/theme.service';
-
 import { FeeEstimation } from '../../../shared/models/fee-estimation';
-
 import { ColdStakingService } from '../../../shared/services/coldstaking.service';
-import { TransactionSending } from "../../../shared/models/transaction-sending";
-import { Router } from '@angular/router';
-import { ColdStakingSetup } from "../../../shared/models/coldstakingsetup";
-import { ColdStakingCreateSuccessComponent } from "../create-success/create-success.component";
+import { TransactionSending } from '../../../shared/models/transaction-sending';
+import { ColdStakingSetup } from '../../../shared/models/coldstakingsetup';
+import { ColdStakingCreateSuccessComponent } from '../create-success/create-success.component';
 import { WalletInfo } from '../../../shared/models/wallet-info';
 import { Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
@@ -29,25 +25,55 @@ export class ColdStakingCreateComponent implements OnInit, OnDestroy {
   feeTypes: FeeType[] = [];
   selectedFeeType: FeeType;
 
-  constructor(private apiService: FullNodeApiService, private globalService: GlobalService, private stakingService: ColdStakingService, public activeModal: DynamicDialogRef, public dialogService: DialogService, private fb: FormBuilder, private themeService: ThemeService, private router: Router) {
-    this.isDarkTheme = themeService.getCurrentTheme().themeType == 'dark';
+  constructor(
+    private apiService: ApiService,
+    private globalService: GlobalService,
+    private stakingService: ColdStakingService,
+    public activeModal: DynamicDialogRef,
+    public dialogService: DialogService,
+    private fb: FormBuilder,
+    public themeService: ThemeService,
+  ) {
+    this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
     this.setCoinUnit();
     this.buildSendForm();
   }
 
   public sendForm: FormGroup;
   public coinUnit: string;
-  public spendableBalance: number = 0;
+  public spendableBalance = 0;
   public apiError: string;
   private walletBalanceSubscription: Subscription;
-  public totalBalance: number = 0;
-  public isSending: boolean = false;
-  public estimatedFee: number = 0;
+  public totalBalance = 0;
+  public isSending = false;
+  public estimatedFee = 0;
   public isDarkTheme = false;
 
-  public mainAccount: string = "account 0";
-  public coldStakingAccount: string = "coldStakingColdAddresses";
-  public hotStakingAccount: string = "coldStakingHotAddresses";
+  public mainAccount = 'account 0';
+  public coldStakingAccount = 'coldStakingColdAddresses';
+  public hotStakingAccount = 'coldStakingHotAddresses';
+
+  sendFormErrors = {
+    hotWalletAddress: '',
+    amount: '',
+    password: ''
+  };
+
+  sendValidationMessages = {
+    hotWalletAddress: {
+      required: 'An delegated staking address is required.',
+      minlength: 'An a delegated staking address is at least 26 characters long.'
+    },
+    amount: {
+      required: 'An amount is required.',
+      pattern: 'Enter a valid transaction amount. Only positive numbers and no more than 8 decimals are allowed.',
+      min: 'The amount has to be more or equal to 0.00001 x42.',
+      max: 'The total transaction amount exceeds your spendable balance.'
+    },
+    password: {
+      required: 'Your password is required.'
+    }
+  };
 
   public ngOnInit() {
     this.startSubscriptions();
@@ -59,10 +85,10 @@ export class ColdStakingCreateComponent implements OnInit, OnDestroy {
 
   private buildSendForm(): void {
     this.sendForm = this.fb.group({
-      "hotWalletAddress": ["", Validators.compose([Validators.required, Validators.minLength(26)])],
-      "amount": ["", Validators.compose([Validators.required, Validators.pattern(/^([0-9]+)?(\.[0-9]{0,8})?$/), Validators.min(0.00001), (control: AbstractControl) => Validators.max((this.spendableBalance - this.estimatedFee) / 100000000)(control)])],
-      "password": ["", Validators.required],
-      "fee": ["medium", Validators.required]
+      hotWalletAddress: ['', Validators.compose([Validators.required, Validators.minLength(26)])],
+      amount: ['', Validators.compose([Validators.required, Validators.pattern(/^([0-9]+)?(\.[0-9]{0,8})?$/), Validators.min(0.00001), (control: AbstractControl) => Validators.max((this.spendableBalance - this.estimatedFee) / 100000000)(control)])],
+      password: ['', Validators.required],
+      fee: ['medium', Validators.required]
     });
 
     this.sendForm.valueChanges.pipe(debounceTime(300))
@@ -72,53 +98,35 @@ export class ColdStakingCreateComponent implements OnInit, OnDestroy {
   private onSendValueChanged(data?: any) {
     if (!this.sendForm) { return; }
     const form = this.sendForm;
+
+    // tslint:disable-next-line:forin
     for (const field in this.sendFormErrors) {
       this.sendFormErrors[field] = '';
       const control = form.get(field);
       if (control && control.dirty && !control.valid) {
         const messages = this.sendValidationMessages[field];
+
+        // tslint:disable-next-line:forin
         for (const key in control.errors) {
           this.sendFormErrors[field] += messages[key] + ' ';
         }
       }
     }
 
-    this.apiError = "";
+    this.apiError = '';
 
-    if (this.sendForm.get("hotWalletAddress").valid && this.sendForm.get("amount").valid) {
+    if (this.sendForm.get('hotWalletAddress').valid && this.sendForm.get('amount').valid) {
       this.estimateFee();
     }
   }
 
-  sendFormErrors = {
-    'hotWalletAddress': '',
-    'amount': '',
-    'password': ''
-  };
-
-  sendValidationMessages = {
-    'hotWalletAddress': {
-      'required': 'An delegated staking address is required.',
-      'minlength': 'An a delegated staking address is at least 26 characters long.'
-    },
-    'amount': {
-      'required': 'An amount is required.',
-      'pattern': 'Enter a valid transaction amount. Only positive numbers and no more than 8 decimals are allowed.',
-      'min': "The amount has to be more or equal to 0.00001 XLR.",
-      'max': 'The total transaction amount exceeds your spendable balance.'
-    },
-    'password': {
-      'required': 'Your password is required.'
-    }
-  };
-
   private getWalletBalance() {
-    let walletInfo = new WalletInfo(this.globalService.getWalletName());
+    const walletInfo = new WalletInfo(this.globalService.getWalletName());
     this.walletBalanceSubscription = this.apiService.getWalletBalance(walletInfo)
       .subscribe(
         response => {
           if (response != null) {
-            let balanceResponse = response;
+            const balanceResponse = response;
             this.totalBalance = balanceResponse.balances[0].amountConfirmed + balanceResponse.balances[0].amountUnconfirmed;
             this.spendableBalance = balanceResponse.balances[0].spendableAmount;
           }
@@ -134,13 +142,13 @@ export class ColdStakingCreateComponent implements OnInit, OnDestroy {
           }
         }
       );
-  };
+  }
 
   public getMaxBalance() {
-    let data = {
+    const data = {
       walletName: this.globalService.getWalletName(),
-      feeType: this.sendForm.get("fee").value
-    }
+      feeType: this.sendForm.get('fee').value
+    };
 
     let balanceResponse;
 
@@ -153,11 +161,11 @@ export class ColdStakingCreateComponent implements OnInit, OnDestroy {
           this.apiError = error.error.errors[0].message;
         },
         () => {
-          this.sendForm.patchValue({ amount: +new CoinNotationPipe().transform(balanceResponse.maxSpendableAmount) });
+          this.sendForm.patchValue({ amount: +new CoinNotationPipe(this.globalService).transform(balanceResponse.maxSpendableAmount) });
           this.estimatedFee = balanceResponse.fee;
         }
-      )
-  };
+      );
+  }
 
   private startSubscriptions() {
     this.getWalletBalance();
@@ -167,24 +175,24 @@ export class ColdStakingCreateComponent implements OnInit, OnDestroy {
     if (this.walletBalanceSubscription) {
       this.walletBalanceSubscription.unsubscribe();
     }
-  };
+  }
 
   public send() {
     this.isSending = true;
     this.buildTransaction();
-  };
+  }
 
   public ngOnDestroy() {
     this.cancelSubscriptions();
-  };
+  }
 
   public estimateFee() {
-    let transaction = new FeeEstimation(
+    const transaction = new FeeEstimation(
       this.globalService.getWalletName(),
       this.mainAccount,
-      this.sendForm.get("hotWalletAddress").value.trim(),
-      this.sendForm.get("amount").value,
-      this.sendForm.get("fee").value,
+      this.sendForm.get('hotWalletAddress').value.trim(),
+      this.sendForm.get('amount').value,
+      this.sendForm.get('fee').value,
       true
     );
 
@@ -200,7 +208,7 @@ export class ColdStakingCreateComponent implements OnInit, OnDestroy {
   }
 
   public deligatedTransactionSent(transactionId: string) {
-    this.activeModal.close("Transaction Sent");
+    this.activeModal.close('Transaction Sent');
     this.dialogService.open(ColdStakingCreateSuccessComponent, {
       header: 'Success',
       width: '540px'
@@ -209,10 +217,10 @@ export class ColdStakingCreateComponent implements OnInit, OnDestroy {
 
   public buildTransaction(): void {
     const walletName = this.globalService.getWalletName();
-    const walletPassword = this.sendForm.get("password").value;
-    const amount = this.sendForm.get("amount").value;
-    const hotWalletAddress = this.sendForm.get("hotWalletAddress").value.trim();
-    const accountName = "account 0";
+    const walletPassword = this.sendForm.get('password').value;
+    const amount = this.sendForm.get('amount').value;
+    const hotWalletAddress = this.sendForm.get('hotWalletAddress').value.trim();
+    const accountName = 'account 0';
     const fee = this.estimatedFee;
 
     this.apiService.validateAddress(hotWalletAddress).subscribe(
@@ -237,7 +245,7 @@ export class ColdStakingCreateComponent implements OnInit, OnDestroy {
                         .sendTransaction(transaction)
                         .subscribe(
                           sendTransactionResponse => {
-                            this.deligatedTransactionSent(sendTransactionResponse.transactionId)
+                            this.deligatedTransactionSent(sendTransactionResponse.transactionId);
                           },
                           error => {
                             this.isSending = false;
@@ -260,7 +268,7 @@ export class ColdStakingCreateComponent implements OnInit, OnDestroy {
               this.isSending = false;
               this.apiError = error.error.errors[0].message;
             },
-          )
+          );
       },
       error => {
         this.isSending = false;

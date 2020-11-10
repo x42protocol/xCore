@@ -1,17 +1,17 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { FullNodeApiService } from '../../../../shared/services/fullnode.api.service';
-import { WalletInfo } from '../../../../shared/models/wallet-info';
-import { GlobalService } from '../../../../shared/services/global.service';
 import { ElectronService } from 'ngx-electron';
-import { CoinNotationPipe } from '../../../../shared/pipes/coin-notation.pipe';
-import { RegisterComponent } from './register/register.component';
-
 import { DialogService } from 'primeng/dynamicdialog';
 import { SelectItem } from 'primeng/api';
 import { ClipboardService } from 'ngx-clipboard';
+import { ApiService } from '../../../../shared/services/api.service';
+import { WalletInfo } from '../../../../shared/models/wallet-info';
+import { GlobalService } from '../../../../shared/services/global.service';
+import { CoinNotationPipe } from '../../../../shared/pipes/coin-notation.pipe';
+import { RegisterComponent } from './register/register.component';
 import { ColdStakingService } from '../../../../shared/services/coldstaking.service';
 import { ThemeService } from '../../../../shared/services/theme.service';
+import { ApplicationStateService } from '../../../../shared/services/application-state.service';
 
 interface NetworkProtocol {
   name: string;
@@ -25,9 +25,17 @@ interface NetworkProtocol {
 })
 export class XServerComponent implements OnInit, OnDestroy {
 
-  constructor(private globalService: GlobalService, private apiService: FullNodeApiService, private electron: ElectronService, public dialogService: DialogService, private clipboardService: ClipboardService, private stakingService: ColdStakingService, private themeService: ThemeService) {
-    this.isDarkTheme = themeService.getCurrentTheme().themeType == 'dark';
-    this.isTestnet = this.globalService.getTestnetEnabled();
+  constructor(
+    private globalService: GlobalService,
+    private apiService: ApiService,
+    private electron: ElectronService,
+    public dialogService: DialogService,
+    private clipboardService: ClipboardService,
+    private stakingService: ColdStakingService,
+    public themeService: ThemeService,
+    public appState: ApplicationStateService,
+  ) {
+    this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
   }
 
   public isDarkTheme = false;
@@ -50,26 +58,25 @@ export class XServerComponent implements OnInit, OnDestroy {
   public allAddresses: SelectItem[];
   public isUnlocking: boolean;
   public unlockError: string;
-  public isTestnet: boolean;
 
   public keyAddress: string;
   public feeAddress: string;
-  public profileName: string = "";
+  public profileName = '';
   public networkAddress: string;
-  public networkPort: string = "4242";
+  public networkPort = '4242';
   public serverId: string;
   public selectedTier: string;
   public walletPassword: string;
 
-  public mainAccount: string = "account 0";
-  public coldStakingAccount: string = "coldStakingColdAddresses";
-  public hotStakingAccount: string = "coldStakingHotAddresses";
+  public mainAccount = 'account 0';
+  public coldStakingAccount = 'coldStakingColdAddresses';
+  public hotStakingAccount = 'coldStakingHotAddresses';
 
   ngOnInit() {
     this.tiers = [
-      { label: 'Tier 1', value: "1000" },
-      { label: 'Tier 2', value: "20000" },
-      { label: 'Tier 3', value: "50000" }
+      { label: 'Tier 1', value: '1000' },
+      { label: 'Tier 2', value: '20000' },
+      { label: 'Tier 3', value: '50000' }
     ];
     this.protocols = [
       { name: 'http', value: 1 },
@@ -78,14 +85,14 @@ export class XServerComponent implements OnInit, OnDestroy {
     this.copyType = [
       { label: 'Copy', value: 'Copy', icon: 'pi pi-copy' }
     ];
-    if (this.isTestnet) {
-      this.networkPort = "4243";
+    if (this.appState.network !== 'x42main') {
+      this.networkPort = '4243';
     }
     this.setKeyAddress();
     this.copied = false;
-    this.selectedTier = "1000";
+    this.selectedTier = '1000';
     this.selectedProtocol = this.protocols[0];
-    this.applicationVersion = this.globalService.getApplicationVersion();
+    this.applicationVersion = this.appState.version;
     this.isElectron = this.electron.isElectronApp;
     this.startSubscriptions();
     this.coinUnit = this.globalService.getCoinUnit();
@@ -99,32 +106,32 @@ export class XServerComponent implements OnInit, OnDestroy {
 
   private startWatchingForProfileName() {
     this.setProfileName();
-    let interval = setInterval(() => {
+    const interval = setInterval(() => {
       this.setProfileName();
-      if (this.profileName != "") {
+      if (this.profileName !== '') {
         clearInterval(interval);
       }
     }, 500);
   }
 
   private setProfileName() {
-    let profile = this.globalService.getProfile()
-    if (profile != null && profile.status == 2) {
+    const profile = this.globalService.getProfile();
+    if (profile != null && profile.status === 2) {
       this.profileName = profile.name;
     }
   }
 
   private startSubscriptions() {
-    let walletRequestInfo = {
+    const walletRequestInfo = {
       walletName: this.globalService.getWalletName(),
-      feeType: "medium"
-    }
+      feeType: 'medium'
+    };
 
     this.walletBalanceSubscription = this.apiService.getMaximumBalance(walletRequestInfo)
       .subscribe(
         response => {
-          let balanceResponse = response;
-          this.confirmedBalance = new CoinNotationPipe().transform(balanceResponse.maxSpendableAmount);
+          const balanceResponse = response;
+          this.confirmedBalance = new CoinNotationPipe(this.globalService).transform(balanceResponse.maxSpendableAmount);
         },
         error => {
           this.cancelSubscriptions();
@@ -134,7 +141,7 @@ export class XServerComponent implements OnInit, OnDestroy {
   }
 
   public onUnlockClicked() {
-    this.unlockError = "";
+    this.unlockError = '';
     this.isUnlocking = true;
     this.stakingService.createColdStakingAccount(this.globalService.getWalletName(), this.walletPassword, true)
       .subscribe(
@@ -150,7 +157,7 @@ export class XServerComponent implements OnInit, OnDestroy {
   }
 
   private setFeeAddress() {
-    let walletInfo = new WalletInfo(this.globalService.getWalletName())
+    const walletInfo = new WalletInfo(this.globalService.getWalletName());
     this.apiService.getUnusedReceiveAddress(walletInfo)
       .subscribe(
         response => {
@@ -170,7 +177,7 @@ export class XServerComponent implements OnInit, OnDestroy {
   }
 
   public getTierCost(): number {
-    if (this.selectedTier == "") {
+    if (this.selectedTier === '') {
       return 0;
     }
 
@@ -184,16 +191,16 @@ export class XServerComponent implements OnInit, OnDestroy {
   }
 
   onRegisterClick(): void {
-    let modalData = {
-      "keyAddress": this.keyAddress,
-      "feeAddress": this.feeAddress,
-      "profileName": this.profileName,
-      "selectedProtocol": this.selectedProtocol.value,
-      "networkAddress": this.networkAddress,
-      "networkPort": this.networkPort,
-      "serverId": this.serverId,
-      "walletPassword": this.walletPassword,
-      "selectedTier": this.selectedTier
+    const modalData = {
+      keyAddress: this.keyAddress,
+      feeAddress: this.feeAddress,
+      profileName: this.profileName,
+      selectedProtocol: this.selectedProtocol.value,
+      networkAddress: this.networkAddress,
+      networkPort: this.networkPort,
+      serverId: this.serverId,
+      walletPassword: this.walletPassword,
+      selectedTier: this.selectedTier
     };
 
     this.dialogService.open(RegisterComponent, {

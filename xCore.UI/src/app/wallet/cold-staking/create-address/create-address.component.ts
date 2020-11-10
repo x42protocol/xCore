@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { SelectItem } from 'primeng/api';
 import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
-
 import { ColdStakingService } from '../../../shared/services/coldstaking.service';
 import { GlobalService } from '../../../shared/services/global.service';
 import { ThemeService } from '../../../shared/services/theme.service';
@@ -12,8 +11,14 @@ import { ThemeService } from '../../../shared/services/theme.service';
   styleUrls: ['./create-address.component.css']
 })
 export class ColdStakingCreateAddressComponent implements OnInit {
-  constructor(private globalService: GlobalService, private stakingService: ColdStakingService, public ref: DynamicDialogRef, public config: DynamicDialogConfig, private themeService: ThemeService) {
-    this.isDarkTheme = themeService.getCurrentTheme().themeType == 'dark';
+  constructor(
+    private globalService: GlobalService,
+    private stakingService: ColdStakingService,
+    public ref: DynamicDialogRef,
+    public config: DynamicDialogConfig,
+    public themeService: ThemeService,
+  ) {
+    this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
   }
 
   public isDarkTheme = false;

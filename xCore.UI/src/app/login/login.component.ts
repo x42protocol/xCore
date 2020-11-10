@@ -1,14 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, Validators, FormBuilder } from '@angular/forms';
 import { Router } from '@angular/router';
-
 import { GlobalService } from '../shared/services/global.service';
-import { FullNodeApiService } from '../shared/services/fullnode.api.service';
+import { ApiService } from '../shared/services/api.service';
 import { ModalService } from '../shared/services/modal.service';
-
+import { ApplicationStateService } from '../shared/services/application-state.service';
 import { WalletLoad } from '../shared/models/wallet-load';
 import { ThemeService } from '../shared/services/theme.service';
-
 import { SelectItem, Message, MenuItem } from 'primeng/api';
 import { ColdStakingService } from '../shared/services/coldstaking.service';
 
@@ -17,31 +15,49 @@ import { ColdStakingService } from '../shared/services/coldstaking.service';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
-
 export class LoginComponent implements OnInit {
-  constructor(private globalService: GlobalService, private FullNodeApiService: FullNodeApiService, private genericModalService: ModalService, private router: Router, private fb: FormBuilder, private themeService: ThemeService, private stakingService: ColdStakingService) {
+  constructor(
+    private globalService: GlobalService,
+    private FullNodeApiService: ApiService,
+    private router: Router,
+    private fb: FormBuilder,
+    public themeService: ThemeService,
+    private stakingService: ColdStakingService,
+    public appState: ApplicationStateService,
+  ) {
     this.buildDecryptForm();
-    this.isDarkTheme = themeService.getCurrentTheme().themeType == 'dark';
+    this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
   }
 
-  public hasWallet: boolean = false;
-  public isWalletLoading: boolean = false;
+  public hasWallet = false;
+  public isWalletLoading = false;
   public isDecrypting = false;
   public isDarkTheme = false;
   public wallets: SelectItem[] = [];
   public contextMenuItems: MenuItem[];
-  public walletSelected: boolean = false;
+  public walletSelected = false;
   public noWalletsFound: Message[] = [{ severity: 'info', summary: 'Create or restore wallet', detail: '<br>' + 'Please use one of the menu items at the top to create or restore a wallet' }];
   public openWalletForm: FormGroup;
+
+  formErrors = {
+    password: ''
+  };
+
+  validationMessages = {
+    password: {
+      required: 'Please enter your password.'
+    }
+  };
 
   ngOnInit() {
     this.isWalletLoading = true;
     this.getWalletFiles();
     this.getCurrentNetwork();
+    this.stakingService.initialize();
 
     this.contextMenuItems = [
       {
-        label: 'x42 xCore ' + this.globalService.getApplicationVersion(),
+        label: 'x42 xCore ' + this.appState.version,
         icon: 'pi goat-icon'
       }
     ];
@@ -49,8 +65,8 @@ export class LoginComponent implements OnInit {
 
   private buildDecryptForm(): void {
     this.openWalletForm = this.fb.group({
-      "selectWallet": [{ value: "", disabled: this.isDecrypting }, Validators.required],
-      "password": [{ value: "", disabled: this.isDecrypting }, Validators.required]
+      selectWallet: [{ value: '', disabled: this.isDecrypting }, Validators.required],
+      password: [{ value: '', disabled: this.isDecrypting }, Validators.required]
     });
 
     this.openWalletForm.valueChanges
@@ -65,27 +81,21 @@ export class LoginComponent implements OnInit {
       this.walletSelected = true;
     }
     const form = this.openWalletForm;
+
+    // tslint:disable-next-line:forin
     for (const field in this.formErrors) {
       this.formErrors[field] = '';
       const control = form.get(field);
       if (control && control.dirty && !control.valid) {
         const messages = this.validationMessages[field];
+
+        // tslint:disable-next-line:forin
         for (const key in control.errors) {
           this.formErrors[field] += messages[key] + ' ';
         }
       }
     }
   }
-
-  formErrors = {
-    'password': ''
-  };
-
-  validationMessages = {
-    'password': {
-      'required': 'Please enter your password.'
-    }
-  };
 
   private getWalletFiles() {
     this.FullNodeApiService.getWalletFiles()
@@ -95,7 +105,9 @@ export class LoginComponent implements OnInit {
           if (response.walletsFiles.length > 0) {
             this.hasWallet = true;
             this.isWalletLoading = false;
-            for (let wallet in response.walletsFiles) {
+
+            // tslint:disable-next-line:forin
+            for (const wallet in response.walletsFiles) {
               this.wallets.push({ label: response.walletsFiles[wallet].slice(0, -12), value: response.walletsFiles[wallet].slice(0, -12) });
             }
           } else {
@@ -118,11 +130,11 @@ export class LoginComponent implements OnInit {
 
   public onDecryptClicked() {
     this.isDecrypting = true;
-    let selectedWalletName: string = this.openWalletForm.get("selectWallet").value.label;
+    const selectedWalletName: string = this.openWalletForm.get('selectWallet').value.label;
     this.globalService.setWalletName(selectedWalletName);
-    let walletLoad = new WalletLoad(
+    const walletLoad = new WalletLoad(
       selectedWalletName,
-      this.openWalletForm.get("password").value
+      this.openWalletForm.get('password').value
     );
     if (walletLoad.name.length > 0) {
       this.loadWallet(walletLoad);
@@ -158,10 +170,15 @@ export class LoginComponent implements OnInit {
     this.FullNodeApiService.getNodeStatus()
       .subscribe(
         response => {
-          let responseMessage = response;
+          const responseMessage = response;
+          this.globalService.setCoinName(responseMessage.coinTicker);
           this.globalService.setCoinUnit(responseMessage.coinTicker);
           this.globalService.setNetwork(responseMessage.network);
+          this.appState.fullNodeVersion = responseMessage.version;
+          this.appState.protocolVersion = responseMessage.protocolVersion;
+          this.appState.dataDirectory = responseMessage.dataDirectoryPath;
         }
       );
   }
+
 }

@@ -1,45 +1,61 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, NgZone } from '@angular/core';
+import { FormGroup, Validators, FormBuilder } from '@angular/forms';
 import { ThemeService } from '../../services/theme.service';
-import { SelectItemGroup, MenuItem } from 'primeng/api';
+import { SelectItemGroup, MenuItem, SelectItem } from 'primeng/api';
 import { DialogService } from 'primeng/dynamicdialog';
 import { Router } from '@angular/router';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-
-import { Subscription } from 'rxjs';
-
+import { ElectronService } from 'ngx-electron';
 import { GlobalService } from '../../services/global.service';
 import { LogoutConfirmationComponent } from '../../../wallet/logout-confirmation/logout-confirmation.component';
-import { FullNodeApiService } from '../../../shared/services/fullnode.api.service';
-import { WalletInfo } from '../../../shared/models/wallet-info';
-
 import { SendComponent } from '../../../wallet/send/send.component';
 import { ReceiveComponent } from '../../../wallet/receive/receive.component';
 import { CreateComponent } from '../../../setup/create/create.component';
 import { RecoverComponent } from '../../../setup/recover/recover.component';
-import { NodeStatus } from '../../../shared/models/node-status';
+import { ApplicationStateService } from '../../../shared/services/application-state.service';
+import { UpdateService } from '../../../shared/services/update.service';
+import { Logger } from '../../../shared/services/logger.service';
+import { ApiService } from '../../services/api.service';
 
 @Component({
-  selector: 'main-menu',
+  selector: 'app-main-menu',
   templateUrl: './main-menu.component.html',
   styleUrls: ['./main-menu.component.css']
 })
 export class MainMenuComponent implements OnInit {
+  private ipc: Electron.IpcRenderer;
 
-  @Input() public isUnLocked: boolean = false;
+  @Input() public isUnLocked = false;
 
   public lastBlockSyncedHeight: number;
   public chainTip: number;
   public isChainSynced: boolean;
-  public connectedNodes: number = 0;
+  public connectedNodes = 0;
   public percentSynced: string;
   public stakingEnabled: boolean;
-  public isTestnet: boolean;
   public settingsMenu: boolean;
+  public networks: SelectItem[] = [];
+  public logoFileName: string;
+  public groupedThemes: SelectItemGroup[];
+  public menuItems: MenuItem[];
+  public networkForm: FormGroup;
+  public changeNetwork: boolean;
 
   toolTip = '';
   connectedNodesTooltip = '';
 
-  constructor(private FullNodeApiService: FullNodeApiService, private themeService: ThemeService, private globalService: GlobalService, private router: Router, private modalService: NgbModal, public dialogService: DialogService) {
+  constructor(
+    private log: Logger,
+    private themeService: ThemeService,
+    private globalService: GlobalService,
+    private router: Router,
+    public dialogService: DialogService,
+    public appState: ApplicationStateService,
+    public updateService: UpdateService,
+    private electronService: ElectronService,
+    public apiService: ApiService,
+    private zone: NgZone,
+    private fb: FormBuilder,
+  ) {
 
     this.groupedThemes = [
       {
@@ -60,24 +76,120 @@ export class MainMenuComponent implements OnInit {
         ]
       }
     ];
+
+    for (const network of appState.networks) {
+      this.networks.push({ label: network.name, value: network.id });
+    }
+
+    this.networkForm = this.fb.group({
+      selectNetwork: [{ value: appState.network, }],
+    });
+
+    if (this.electronService.ipcRenderer) {
+      if (this.electronService.remote) {
+        const applicationVersion = this.electronService.remote.app.getVersion();
+
+        this.appState.setVersion(applicationVersion);
+        this.log.info('Version: ' + applicationVersion);
+      }
+
+      this.ipc = electronService.ipcRenderer;
+
+      this.ipc.on('daemon-exiting', (event, error) => {
+        if (!this.appState.shutdownInProgress) {
+          this.zone.run(() => this.router.navigate(['shutdown']));
+
+          this.log.info('x42.Node is currently being stopped... please wait...');
+          this.appState.shutdownInProgress = true;
+
+          // If the exit takes a very long time, we want to allow users to forcefully exit xCore.
+          setTimeout(() => {
+            this.appState.shutdownDelayed = true;
+          }, 60000);
+        }
+      });
+
+      this.ipc.on('daemon-exited', (event, error) => {
+        this.log.info('x42.Node is stopped.');
+        this.appState.shutdownInProgress = false;
+        this.appState.shutdownDelayed = false;
+
+        // Perform a new close event on the window, this time it will close itself.
+        window.close();
+      });
+
+      this.ipc.on('daemon-error', (event, error) => {
+
+        this.log.error(error);
+        /* TODO Open dialog to show that we couldn't start the process.
+        const dialogRef = this.dialog.open(, {
+          data: {
+            title: 'Failed to start x42.Node process',
+            error,
+            lines: this.log.lastEntries()
+          }
+        });
+        dialogRef.afterClosed().subscribe(result => {
+          this.log.info(`Dialog result: ${result}`);
+        });
+        */
+      });
+
+      this.ipc.on('log-debug', (event, msg: any) => {
+        this.log.verbose(msg);
+      });
+
+      this.ipc.on('log-info', (event, msg: any) => {
+        this.log.info(msg);
+      });
+
+      this.ipc.on('log-error', (event, msg: any) => {
+        this.log.error(msg);
+      });
+    }
   }
-
-  public logoFileName: string;
-
-  groupedThemes: SelectItemGroup[];
-  menuItems: MenuItem[];
 
   ngOnInit() {
     this.themeService.setTheme();
     this.themeService.logoFileName.subscribe(x => this.logoFileName = x);
     this.setLogoPath();
     if (this.isUnLocked) {
-      this.setUnlockedMenuItems()
+      this.setUnlockedMenuItems();
     } else {
       this.setDefaultMenuItems();
     }
 
-    this.isTestnet = this.globalService.getTestnetEnabled();
+    this.checkForUpdates();
+
+    setTimeout(() => {
+      this.checkForUpdates();
+    }, 12000);
+  }
+
+  changeMode() {
+    this.appState.changingMode = true;
+    this.electronService.ipcRenderer.send('daemon-change');
+
+    // Make sure we shut down the existing node when user choose the change mode action.
+    this.apiService.shutdownNode().subscribe(response => { });
+
+    this.router.navigateByUrl('');
+  }
+
+  applyNetworkChange() {
+    this.changeNetwork = false;
+    const selectedNetwork = this.networkForm.get('selectNetwork').value.value;
+    console.log(this.appState.network);
+    console.log(selectedNetwork);
+    if (selectedNetwork !== undefined && this.appState.network !== selectedNetwork) {
+      this.appState.updateNetworkSelection(true, 'full', selectedNetwork, this.appState.daemon.path, this.appState.daemon.datafolder);
+      console.log('Network Chnaged: ' + selectedNetwork);
+      this.changeMode();
+    }
+  }
+
+  checkForUpdates() {
+    this.updateService.checkForUpdate();
   }
 
   setUnlockedMenuItems() {
@@ -172,7 +284,7 @@ export class MainMenuComponent implements OnInit {
         icon: 'fa fa-refresh',
         command: (event: Event) => { this.onRestoreClicked(); }
       }
-    ]
+    ];
   }
 
   onThemeChange(event) {
@@ -219,18 +331,18 @@ export class MainMenuComponent implements OnInit {
       header: 'Send to',
       width: '700px'
     });
-  };
+  }
 
   public openColdStaking() {
     this.router.navigate(['/wallet/coldstaking']);
-  };
+  }
 
   public openReceiveDialog() {
     this.dialogService.open(ReceiveComponent, {
       header: 'Receive',
       width: '540px'
     });
-  };
+  }
 
   openAdvanced() {
     this.router.navigate(['/wallet/advanced']);

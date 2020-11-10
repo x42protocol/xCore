@@ -1,7 +1,7 @@
 <p-menubar [model]="menuItems">
   <img id="logo" src="./assets/images/{{logoFileName}}" style="height:32px;" />
   <div>
-    <status-bar [isUnLocked]="isUnLocked"></status-bar>
+    <app-status-bar [isUnLocked]="isUnLocked"></app-status-bar>
     <button pButton icon="pi pi-cog" type="button" (click)="settingsMenu = true" *ngIf="!isUnLocked"></button>
     <button pButton icon="pi pi-cog" type="button" (click)="openAdvanced()" *ngIf="isUnLocked"></button>
   </div>
@@ -12,9 +12,24 @@
   <br /><br />
 
   <h3 style="font-weight:normal">Network</h3>
-  <span *ngIf="!isTestnet">Mainnet</span>
-  <span *ngIf="isTestnet">Testnet</span>
+  <div class="row">
+    <div class="col-md-6">
+      <span *ngIf="appState.network == 'x42main'">Mainnet</span>
+      <span *ngIf="appState.network != 'x42main'">Testnet</span>
+    </div>
+    <div class="col-md-5">
+      <button type="button" class="btn-block" *ngIf="!changeNetwork" (click)="changeNetwork = true" label="Change" pButton></button>
+    </div>
+  </div>
   <br />
+
+  <form [formGroup]="networkForm" *ngIf="changeNetwork">
+    <div>
+      <p-dropdown [options]="networks" placeholder="Select a Network" optionLabel="label" formControlName="selectNetwork" autoWidth="true"></p-dropdown>
+      <button type="button" (click)="applyNetworkChange()" label="Apply" pButton></button>
+    </div>
+
+  </form>
 
   <br /><br />
   <h3 style="font-weight:normal">Look and feel</h3>

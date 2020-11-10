@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable } from '@angular/core';
 import { DialogService } from 'primeng/dynamicdialog';
 
 import { GenericModalComponent } from '../components/generic-modal/generic-modal.component';
@@ -11,20 +11,18 @@ export class ModalService {
 
   public openModal(title, message) {
 
-    let showHeader: boolean = true;
+    let showHeader = true;
 
     if (title == null) {
       showHeader = false;
     }
 
-    let modalData = {
-      "message": message
-    };
+    const modalData = { message };
     const modalRef = this.dialogService.open(GenericModalComponent,
       {
         header: title,
         data: modalData,
-        showHeader: showHeader,
+        showHeader,
         dismissableMask: true
       }
     );

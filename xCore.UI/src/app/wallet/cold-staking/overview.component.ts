@@ -1,12 +1,10 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { Message } from 'primeng/api';
 import { DialogService } from 'primeng/dynamicdialog';
-
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-
 import { GlobalService } from '../../shared/services/global.service';
 import { ThemeService } from '../../shared/services/theme.service';
-import { FullNodeApiService } from '../../shared/services/fullnode.api.service';
+import { ApiService } from '../../shared/services/api.service';
 import { ColdStakingService } from '../../shared/services/coldstaking.service';
 import { ColdStakingCreateAddressComponent } from './create-address/create-address.component';
 import { ColdStakingWithdrawComponent } from './withdraw/withdraw.component';
@@ -24,30 +22,36 @@ import { finalize } from 'rxjs/operators';
   styleUrls: ['./overview.component.css']
 })
 export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
-
-  constructor(private apiService: FullNodeApiService, private globalService: GlobalService, private stakingService: ColdStakingService, public dialogService: DialogService, private fb: FormBuilder, private themeService: ThemeService) {
-    this.isDarkTheme = themeService.getCurrentTheme().themeType == 'dark';
+  constructor(
+    private apiService: ApiService,
+    private globalService: GlobalService,
+    private stakingService: ColdStakingService,
+    public dialogService: DialogService,
+    private fb: FormBuilder,
+    public themeService: ThemeService,
+  ) {
+    this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
   }
 
   public isLoading = true;
-  public coldWalletAccountExists: boolean = true;
-  public hotWalletAccountExists: boolean = true;
+  public coldWalletAccountExists = true;
+  public hotWalletAccountExists = true;
   public coldTransactions: TransactionInfo[];
   public hotTransactions: TransactionInfo[];
-  public pageNumber: number = 1;
-  public coldStakingAccount: string = "coldStakingColdAddresses";
-  public hotStakingAccount: string = "coldStakingHotAddresses";
+  public pageNumber = 1;
+  public coldStakingAccount = 'coldStakingColdAddresses';
+  public hotStakingAccount = 'coldStakingHotAddresses';
   public isDarkTheme = false;
-  public hasColdTransaction: boolean = true;
-  public hasHotTransaction: boolean = true;
+  public hasColdTransaction = true;
+  public hasHotTransaction = true;
   public loadingMessage: Message[] = [];
   public setupColdMessage: Message[] = [];
   public hotMessage: Message[] = [];
   public isColdHotWallet: boolean;
   public coinUnit: string;
 
-  public confirmedColdBalance: number = 0;
-  public confirmedHotBalance: number = 0;
+  public confirmedColdBalance = 0;
+  public confirmedHotBalance = 0;
 
   public unconfirmedColdBalance: number;
   public unconfirmedHotBalance: number;
@@ -55,8 +59,8 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
   public spendableColdBalance: number;
   public spendableHotBalance: number;
 
-  public hasColdBalance: boolean = false;
-  public hasHotBalance: boolean = false;
+  public hasColdBalance = false;
+  public hasHotBalance = false;
 
   private walletColdHistorySubscription: Subscription;
   private walletHotHistorySubscription: Subscription;
@@ -90,14 +94,12 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
 
   private buildSetupForm(): void {
     this.setupForm = this.fb.group({
-      "setupType": ["", Validators.compose([Validators.required])]
+      setupType: ['', Validators.compose([Validators.required])]
     });
   }
 
   onWalletGetFirstUnusedAddress(isColdStaking: boolean) {
-    let modalData = {
-      "isColdStaking": isColdStaking
-    };
+    const modalData = { isColdStaking };
 
     this.dialogService.open(ColdStakingCreateAddressComponent, {
       header: 'Hot Address',
@@ -106,9 +108,7 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
   }
 
   onWalletWithdraw(isColdStaking: boolean) {
-    let modalData = {
-      "isColdStaking": isColdStaking
-    };
+    const modalData = { isColdStaking };
 
     this.dialogService.open(ColdStakingWithdrawComponent, {
       header: 'Withdraw',
@@ -137,21 +137,22 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
       this.coldWalletAccountExists = x.coldWalletAccountExists;
       this.hotWalletAccountExists = x.hotWalletAccountExists;
 
-      let aWalletExists: boolean = this.coldWalletAccountExists || this.hotWalletAccountExists;
+      const aWalletExists: boolean = this.coldWalletAccountExists || this.hotWalletAccountExists;
 
       if (!aWalletExists) {
         this.cancelSubscriptions();
       }
 
-      if (!aWalletExists)
+      if (!aWalletExists) {
         setTimeout(() => {
           this.startSubscriptions();
         }, 2000);
+      }
     });
   }
 
   private getHistory(isCold: boolean) {
-    let walletInfo = new WalletInfo(this.globalService.getWalletName());
+    const walletInfo = new WalletInfo(this.globalService.getWalletName());
     if (isCold) {
       let coldHistoryResponse;
       walletInfo.accountName = this.coldStakingAccount;
@@ -191,7 +192,7 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
           }
         );
     }
-  };
+  }
 
   private getTransactionInfo(transactions: any, isCold: boolean) {
     if (isCold) {
@@ -200,27 +201,27 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
       this.hotTransactions = [];
     }
 
-    for (let transaction of transactions) {
+    for (const transaction of transactions) {
       let transactionType;
-      if (transaction.type === "send") {
-        transactionType = "sent";
-      } else if (transaction.type === "received") {
-        transactionType = "received";
-      } else if (transaction.type === "staked") {
-        transactionType = "staked";
+      if (transaction.type === 'send') {
+        transactionType = 'sent';
+      } else if (transaction.type === 'received') {
+        transactionType = 'received';
+      } else if (transaction.type === 'staked') {
+        transactionType = 'staked';
       } else {
-        transactionType = "unknown";
+        transactionType = 'unknown';
       }
-      let transactionId = transaction.id;
-      let transactionAmount = transaction.amount;
+      const transactionId = transaction.id;
+      const transactionAmount = transaction.amount;
       let transactionFee;
       if (transaction.fee) {
         transactionFee = transaction.fee;
       } else {
         transactionFee = 0;
       }
-      let transactionConfirmedInBlock = transaction.confirmedInBlock;
-      let transactionTimestamp = transaction.timestamp;
+      const transactionConfirmedInBlock = transaction.confirmedInBlock;
+      const transactionTimestamp = transaction.timestamp;
 
       if (isCold) {
         this.coldTransactions.push(new TransactionInfo(transactionType, transactionId, transactionAmount, transactionFee, transactionConfirmedInBlock, transactionTimestamp));
@@ -235,10 +236,10 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
         this.hasHotTransaction = true;
       }
     }
-  };
+  }
 
   private getWalletBalance() {
-    let walletInfo = new WalletInfo(this.globalService.getWalletName());
+    const walletInfo = new WalletInfo(this.globalService.getWalletName());
     walletInfo.accountName = this.coldStakingAccount;
 
     this.walletColdBalanceSubscription = this.apiService.getWalletBalance(walletInfo, true)
@@ -272,9 +273,7 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
   }
 
   public openTransactionDetailDialog(transaction: TransactionInfo) {
-    let modalData = {
-      "transaction": transaction
-    };
+    const modalData = { transaction };
 
     this.dialogService.open(TransactionDetailsComponent, {
       header: 'Transaction Details',
@@ -301,12 +300,12 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
     if (this.hotWalletAccountExists) {
       this.walletColdWalletExistsSubscription.unsubscribe();
     }
-  };
+  }
 
   private startSubscriptions() {
     this.getWalletsExists();
 
-    let aWalletExists: boolean = this.coldWalletAccountExists && this.hotWalletAccountExists;
+    const aWalletExists: boolean = this.coldWalletAccountExists && this.hotWalletAccountExists;
 
     if (!aWalletExists) {
       this.hasColdBalance = false;
@@ -317,5 +316,5 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
     this.getWalletBalance();
     this.getHistory(true);
     this.getHistory(false);
-  };
+  }
 }

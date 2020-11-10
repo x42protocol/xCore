@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable } from '@angular/core';
 export enum AddressTypes {
   Classic = 1,
   Segwit = 2
@@ -7,10 +7,10 @@ export enum AddressTypes {
 @Injectable()
 export class AddressType {
   constructor() {
-    let savedAddressType: string = localStorage.getItem('addressType');
+    const savedAddressType = localStorage.getItem('addressType');
 
-    if (savedAddressType === undefined || savedAddressType == null || savedAddressType == "") {
-      let defaultType = AddressTypes.Classic;
+    if (savedAddressType === undefined || savedAddressType === null || savedAddressType === '') {
+      const defaultType = AddressTypes.Classic;
       this.changeType(defaultType);
       this.Type = defaultType;
     } else {
@@ -21,7 +21,7 @@ export class AddressType {
   public Type: AddressTypes;
 
   public IsSegwit(): string {
-    return (this.Type == AddressTypes.Segwit).toString().toLowerCase();
+    return (this.Type === AddressTypes.Segwit).toString().toLowerCase();
   }
 
   public changeType(type: AddressTypes) {

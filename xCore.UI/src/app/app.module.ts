@@ -11,6 +11,7 @@ import { SetupModule } from './setup/setup.module';
 import { WalletModule } from './wallet/wallet.module';
 import { ThemeService } from './shared/services/theme.service';
 import { MainMenuModule } from './shared/components/main-menu/main-menu.module';
+import { ShutdownModule } from './shared/components/shutdown/shutdown.module';
 
 // PrimeNG Components.
 import { MessageService } from 'primeng/api';
@@ -64,7 +65,8 @@ import { ToolbarModule } from 'primeng/toolbar';
     SlideMenuModule,
     ContextMenuModule,
     ProgressBarModule,
-    ToolbarModule
+    ToolbarModule,
+    ShutdownModule,
   ],
   declarations: [
     AppComponent,

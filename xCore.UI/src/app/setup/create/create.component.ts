@@ -1,41 +1,63 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { FormGroup, Validators, FormBuilder } from '@angular/forms';
 import { Router } from '@angular/router';
-
-import { GlobalService } from '../../shared/services/global.service';
-import { FullNodeApiService } from '../../shared/services/fullnode.api.service';
-import { ModalService } from '../../shared/services/modal.service';
-
+import { ApiService } from '../../shared/services/api.service';
 import { PasswordValidationDirective } from '../../shared/directives/password-validation.directive';
-
 import { WalletCreation } from '../../shared/models/wallet-creation';
-
 import { Message } from 'primeng/api';
 import { DynamicDialogRef } from 'primeng/dynamicdialog';
 
 @Component({
-  selector: 'create-component',
+  selector: 'app-create-component',
   templateUrl: './create.component.html',
   styleUrls: ['./create.component.css'],
 })
 
 export class CreateComponent implements OnInit {
-  constructor(private apiService: FullNodeApiService, private router: Router, private fb: FormBuilder, public ref: DynamicDialogRef) { }
+  constructor(
+    private apiService: ApiService,
+    private router: Router,
+    private fb: FormBuilder,
+    public ref: DynamicDialogRef,
+  ) { }
 
   @Input() name: string;
   @Input() filename: string;
-
   @Output() isCreated: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   public createWalletForm: FormGroup;
-  public displayMnemonic: boolean = false;
-  public displayMnemonicConfirm: boolean = false;
+  public displayMnemonic = false;
+  public displayMnemonicConfirm = false;
   public queryParams: object;
   public resultMessage: Message[] = [];
-  public walletCreated: boolean = false;
+  public walletCreated = false;
 
   private newWallet: WalletCreation;
   private mnemonic: string;
+
+  formErrors = {
+    walletName: '',
+    walletPassphrase: '',
+    walletPassword: '',
+    walletPasswordConfirmation: ''
+  };
+
+  validationMessages = {
+    walletName: {
+      required: 'A wallet name is required.',
+      minlength: 'A wallet name must be at least one character long.',
+      maxlength: 'A wallet name cannot be more than 24 characters long.',
+      pattern: 'Please enter a valid wallet name. [a-Z] and [0-9] are the only characters allowed.'
+    },
+    walletPassword: {
+      required: 'A password is required.',
+      pattern: 'A password must be at least 10 characters long and contain one lowercase and uppercase alphabetical character and a number.'
+    },
+    walletPasswordConfirmation: {
+      required: 'Confirm your password.',
+      walletPasswordConfirmation: 'Passwords do not match.'
+    }
+  };
 
   ngOnInit() {
     this.getNewMnemonic();
@@ -44,7 +66,7 @@ export class CreateComponent implements OnInit {
 
   private buildCreateForm(): void {
     this.createWalletForm = this.fb.group({
-      "walletName": ["",
+      walletName: ['',
         Validators.compose([
           Validators.required,
           Validators.minLength(1),
@@ -52,15 +74,15 @@ export class CreateComponent implements OnInit {
           Validators.pattern(/^[a-zA-Z0-9]*$/)
         ])
       ],
-      "walletPassphrase": [""],
-      "walletPassword": ["",
+      walletPassphrase: [''],
+      walletPassword: ['',
         Validators.required,
         // Validators.compose([
-        //   Validators.required,
-        //   Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{10,})/)])
+        // Validators.required,
+        // Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{10,})/)])
       ],
-      "walletPasswordConfirmation": ["", Validators.required],
-      "selectNetwork": ["test", Validators.required]
+      walletPasswordConfirmation: ['', Validators.required],
+      selectNetwork: ['test', Validators.required]
     }, {
       validator: PasswordValidationDirective.MatchPassword
     });
@@ -74,11 +96,15 @@ export class CreateComponent implements OnInit {
   onValueChanged(data?: any) {
     if (!this.createWalletForm) { return; }
     const form = this.createWalletForm;
+
+    // tslint:disable-next-line:forin
     for (const field in this.formErrors) {
       this.formErrors[field] = '';
       const control = form.get(field);
       if (control && control.dirty && !control.valid) {
         const messages = this.validationMessages[field];
+
+        // tslint:disable-next-line:forin
         for (const key in control.errors) {
           this.formErrors[field] += messages[key] + ' ';
         }
@@ -86,32 +112,8 @@ export class CreateComponent implements OnInit {
     }
   }
 
-  formErrors = {
-    'walletName': '',
-    'walletPassphrase': '',
-    'walletPassword': '',
-    'walletPasswordConfirmation': ''
-  };
-
-  validationMessages = {
-    'walletName': {
-      'required': 'A wallet name is required.',
-      'minlength': 'A wallet name must be at least one character long.',
-      'maxlength': 'A wallet name cannot be more than 24 characters long.',
-      'pattern': 'Please enter a valid wallet name. [a-Z] and [0-9] are the only characters allowed.'
-    },
-    'walletPassword': {
-      'required': 'A password is required.',
-      'pattern': 'A password must be at least 10 characters long and contain one lowercase and uppercase alphabetical character and a number.'
-    },
-    'walletPasswordConfirmation': {
-      'required': 'Confirm your password.',
-      'walletPasswordConfirmation': 'Passwords do not match.'
-    }
-  };
-
   public onBackClicked() {
-    this.router.navigate(["/setup"]);
+    this.router.navigate(['/setup']);
   }
 
   public onClose() {
@@ -121,10 +123,10 @@ export class CreateComponent implements OnInit {
   public onContinueClicked() {
     if (this.mnemonic) {
       this.newWallet = new WalletCreation(
-        this.createWalletForm.get("walletName").value,
+        this.createWalletForm.get('walletName').value,
         this.mnemonic,
-        this.createWalletForm.get("walletPassword").value,
-        this.createWalletForm.get("walletPassphrase").value,
+        this.createWalletForm.get('walletPassword').value,
+        this.createWalletForm.get('walletPassphrase').value,
       );
 
       this.queryParams = { name: this.newWallet.name, mnemonic: this.newWallet.mnemonic, password: this.newWallet.password, passphrase: this.newWallet.passphrase };

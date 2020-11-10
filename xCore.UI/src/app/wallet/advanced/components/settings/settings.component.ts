@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { ElectronService } from 'ngx-electron';
 import { ThemeService } from '../../../../shared/services/theme.service';
-import { FullNodeApiService } from '../../../../shared/services/fullnode.api.service';
+import { ApiService } from '../../../../shared/services/api.service';
 import { GlobalService } from '../../../../shared/services/global.service';
 import { AddressType, AddressTypes } from '../../../../shared/models/address-type';
-import { SelectItemGroup, SelectItem } from 'primeng/api';
 import { ColdHotStateRequest } from '../../../../shared/models/coldhotstaterequest';
+import { SelectItemGroup, SelectItem } from 'primeng/api';
 
 @Component({
   selector: 'app-about',
@@ -13,8 +13,13 @@ import { ColdHotStateRequest } from '../../../../shared/models/coldhotstatereque
   styleUrls: ['./settings.component.css']
 })
 export class SettingsComponent implements OnInit {
-
-  constructor(private nodeApiService: FullNodeApiService, private globalService: GlobalService, private themeService: ThemeService, private electronService: ElectronService, private addressType: AddressType) { }
+  constructor(
+    private nodeApiService: ApiService,
+    private globalService: GlobalService,
+    private themeService: ThemeService,
+    private electronService: ElectronService,
+    private addressType: AddressType,
+  ) { }
 
   public groupedThemes: SelectItemGroup[];
   public addressTypeOptions: SelectItem[];
@@ -68,7 +73,7 @@ export class SettingsComponent implements OnInit {
   }
 
   isAddressTypeSegwit(): boolean {
-    return this.selectedAddressType == AddressTypes.Segwit;
+    return this.selectedAddressType === AddressTypes.Segwit;
   }
 
   onThemeChange(event) {
@@ -81,7 +86,7 @@ export class SettingsComponent implements OnInit {
   }
 
   onColdWalletTypeChange(event) {
-    let requestData = new ColdHotStateRequest(this.globalService.getWalletName(), event.value);
+    const requestData = new ColdHotStateRequest(this.globalService.getWalletName(), event.value);
     this.nodeApiService
       .toggleColdHotState(requestData)
       .subscribe();
@@ -92,10 +97,10 @@ export class SettingsComponent implements OnInit {
   }
 
   public openSegwit() {
-    this.electronService.shell.openExternal("https://en.bitcoin.it/wiki/Segregated_Witness");
+    this.electronService.shell.openExternal('https://en.bitcoin.it/wiki/Segregated_Witness');
   }
 
   public openColdHotSetup() {
-    this.electronService.shell.openExternal("https://github.com/x42protocol/documentation/blob/master/xCore-ColdStakingHotSetup.md");
+    this.electronService.shell.openExternal('https://github.com/x42protocol/documentation/blob/master/xCore-ColdStakingHotSetup.md');
   }
 }

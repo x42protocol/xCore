@@ -2,23 +2,26 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { SelectItem } from 'primeng/api';
 import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { Subscription } from 'rxjs';
-
-import { FullNodeApiService } from '../../shared/services/fullnode.api.service';
+import { ApiService } from '../../shared/services/api.service';
 import { GlobalService } from '../../shared/services/global.service';
-
 import { WalletInfo } from '../../shared/models/wallet-info';
 import { TransactionInfo } from '../../shared/models/transaction-info';
 
 @Component({
-  selector: 'transaction-details',
+  selector: 'app-transaction-details',
   templateUrl: './transaction-details.component.html',
   styleUrls: ['./transaction-details.component.css']
 })
 export class TransactionDetailsComponent implements OnInit, OnDestroy {
-  constructor(private FullNodeApiService: FullNodeApiService, private globalService: GlobalService, public ref: DynamicDialogRef, public config: DynamicDialogConfig) { }
+  constructor(
+    private apiService: ApiService,
+    private globalService: GlobalService,
+    public ref: DynamicDialogRef,
+    public config: DynamicDialogConfig,
+  ) { }
 
   public transaction: TransactionInfo;
-  public copied: boolean = false;
+  public copied = false;
   public coinUnit: string;
   public confirmations: number;
   public copyType: SelectItem[];
@@ -45,12 +48,12 @@ export class TransactionDetailsComponent implements OnInit, OnDestroy {
   }
 
   private getGeneralWalletInfo() {
-    let walletInfo = new WalletInfo(this.globalService.getWalletName())
-    this.generalWalletInfoSubscription = this.FullNodeApiService.getGeneralInfo(walletInfo)
+    const walletInfo = new WalletInfo(this.globalService.getWalletName());
+    this.generalWalletInfoSubscription = this.apiService.getGeneralInfo(walletInfo)
       .subscribe(
         response => {
           if (response != null) {
-            let generalWalletInfoResponse = response;
+            const generalWalletInfoResponse = response;
             this.lastBlockSyncedHeight = generalWalletInfoResponse.lastBlockSyncedHeight;
             this.getConfirmations(this.transaction);
           }
@@ -66,7 +69,7 @@ export class TransactionDetailsComponent implements OnInit, OnDestroy {
           }
         }
       );
-  };
+  }
 
   private getConfirmations(transaction: TransactionInfo) {
     if (transaction.transactionConfirmedInBlock) {
@@ -80,7 +83,7 @@ export class TransactionDetailsComponent implements OnInit, OnDestroy {
     if (this.generalWalletInfoSubscription) {
       this.generalWalletInfoSubscription.unsubscribe();
     }
-  };
+  }
 
   private startSubscriptions() {
     this.getGeneralWalletInfo();

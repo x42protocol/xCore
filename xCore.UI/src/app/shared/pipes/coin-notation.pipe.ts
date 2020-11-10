@@ -1,18 +1,26 @@
 import { Pipe, PipeTransform } from '@angular/core';
+import { GlobalService } from '../services/global.service';
 
 @Pipe({
-  name: 'coinNotation'
+    name: 'coinNotation'
 })
 export class CoinNotationPipe implements PipeTransform {
-  constructor() { }
-
-  private decimalLimit = 8;
-
-  transform(value: number): number {
-    let temp;
-    if (typeof value === 'number') {
-      temp = value / 100000000;
-      return temp.toFixed(this.decimalLimit);
+    constructor(private globalService: GlobalService) {
+        this.setCoinUnit();
     }
-  }
+
+    private coinUnit: string;
+    // private coinNotation: number;
+
+    transform(value: number): number {
+      return this.globalService.transform(value);
+    }
+
+    getCoinUnit() {
+        return this.coinUnit;
+    }
+
+    setCoinUnit() {
+        this.coinUnit = this.globalService.getCoinUnit();
+    }
 }

@@ -1,14 +1,15 @@
 import { Component } from '@angular/core';
-import {Location} from '@angular/common';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'setup-component',
+  selector: 'app-setup-component',
   templateUrl: './setup.component.html',
   styleUrls: ['./setup.component.css'],
 })
 export class SetupComponent {
-  constructor(private router: Router, private location: Location) {}
+  constructor(
+    private router: Router,
+  ) { }
   public onCreateClicked() {
     this.router.navigate(['setup/create']);
   }

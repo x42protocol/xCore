@@ -1,14 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, Validators, FormBuilder } from '@angular/forms';
 import { Router } from '@angular/router';
-
 import { GlobalService } from '../../shared/services/global.service';
-import { FullNodeApiService } from '../../shared/services/fullnode.api.service';
+import { ApiService } from '../../shared/services/api.service';
 import { ModalService } from '../../shared/services/modal.service';
 import { ThemeService } from '../../shared/services/theme.service';
-
 import { WalletRecovery } from '../../shared/models/wallet-recovery';
-
 import { Message } from 'primeng/api';
 import { DynamicDialogRef } from 'primeng/dynamicdialog';
 
@@ -19,21 +16,52 @@ import { DynamicDialogRef } from 'primeng/dynamicdialog';
 })
 export class RecoverComponent implements OnInit {
 
-  constructor(private globalService: GlobalService, private apiService: FullNodeApiService, private genericModalService: ModalService, private router: Router, private fb: FormBuilder, public ref: DynamicDialogRef, private themeService: ThemeService) {
+  constructor(
+    private apiService: ApiService,
+    private router: Router,
+    private fb: FormBuilder,
+    public ref: DynamicDialogRef,
+    public themeService: ThemeService,
+  ) {
     this.buildRecoverForm();
-    this.isDarkTheme = themeService.getCurrentTheme().themeType == 'dark';
+    this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
   }
 
   public recoverWalletForm: FormGroup;
   public creationDate: Date;
-  public isRecovering: boolean = false;
-  public minDate = new Date("2009-08-09");
+  public isRecovering = false;
+  public minDate = new Date('2009-08-09');
   public maxDate = new Date();
   public isDarkTheme = false;
   public resultMessage: Message[] = [];
-  public walletRestored: boolean = false;
+  public walletRestored = false;
 
   private walletRecovery: WalletRecovery;
+  formErrors = {
+    walletName: '',
+    walletMnemonic: '',
+    walletDate: '',
+    walletPassword: '',
+    walletPassphrase: '',
+  };
+
+  validationMessages = {
+    walletName: {
+      required: 'A wallet name is required.',
+      minlength: 'A wallet name must be at least one character long.',
+      maxlength: 'A wallet name cannot be more than 24 characters long.',
+      pattern: 'Please enter a valid wallet name. [a-Z] and [0-9] are the only characters allowed.'
+    },
+    walletMnemonic: {
+      required: 'Please enter your 12 word phrase.'
+    },
+    walletDate: {
+      required: 'Please choose the date the wallet should sync from.'
+    },
+    walletPassword: {
+      required: 'A password is required.'
+    },
+  };
 
   ngOnInit() {
 
@@ -41,18 +69,18 @@ export class RecoverComponent implements OnInit {
 
   private buildRecoverForm(): void {
     this.recoverWalletForm = this.fb.group({
-      "walletName": ["", [
+      walletName: ['', [
         Validators.required,
         Validators.minLength(1),
         Validators.maxLength(24),
         Validators.pattern(/^[a-zA-Z0-9]*$/)
       ]
       ],
-      "walletMnemonic": ["", Validators.required],
-      "walletDate": ["", Validators.required],
-      "walletPassphrase": [""],
-      "walletPassword": ["", Validators.required],
-      "selectNetwork": ["test", Validators.required]
+      walletMnemonic: ['', Validators.required],
+      walletDate: ['', Validators.required],
+      walletPassphrase: [''],
+      walletPassword: ['', Validators.required],
+      selectNetwork: ['test', Validators.required]
     });
 
     this.recoverWalletForm.valueChanges
@@ -64,45 +92,21 @@ export class RecoverComponent implements OnInit {
   onValueChanged(data?: any) {
     if (!this.recoverWalletForm) { return; }
     const form = this.recoverWalletForm;
+
+    // tslint:disable-next-line:forin
     for (const field in this.formErrors) {
       this.formErrors[field] = '';
       const control = form.get(field);
       if (control && control.dirty && !control.valid) {
         const messages = this.validationMessages[field];
+
+        // tslint:disable-next-line:forin
         for (const key in control.errors) {
           this.formErrors[field] += messages[key] + ' ';
         }
       }
     }
   }
-
-  formErrors = {
-    'walletName': '',
-    'walletMnemonic': '',
-    'walletDate': '',
-    'walletPassword': '',
-    'walletPassphrase': '',
-
-  };
-
-  validationMessages = {
-    'walletName': {
-      'required': 'A wallet name is required.',
-      'minlength': 'A wallet name must be at least one character long.',
-      'maxlength': 'A wallet name cannot be more than 24 characters long.',
-      'pattern': 'Please enter a valid wallet name. [a-Z] and [0-9] are the only characters allowed.'
-    },
-    'walletMnemonic': {
-      'required': 'Please enter your 12 word phrase.'
-    },
-    'walletDate': {
-      'required': 'Please choose the date the wallet should sync from.'
-    },
-    'walletPassword': {
-      'required': 'A password is required.'
-    },
-
-  };
 
   public onBackClicked() {
     this.ref.close();
@@ -115,14 +119,14 @@ export class RecoverComponent implements OnInit {
   public onRecoverClicked() {
     this.isRecovering = true;
 
-    let recoveryDate = new Date(this.recoverWalletForm.get("walletDate").value);
+    const recoveryDate = new Date(this.recoverWalletForm.get('walletDate').value);
     recoveryDate.setDate(recoveryDate.getDate() - 1);
 
     this.walletRecovery = new WalletRecovery(
-      this.recoverWalletForm.get("walletName").value,
-      this.recoverWalletForm.get("walletMnemonic").value,
-      this.recoverWalletForm.get("walletPassword").value,
-      this.recoverWalletForm.get("walletPassphrase").value,
+      this.recoverWalletForm.get('walletName').value,
+      this.recoverWalletForm.get('walletMnemonic').value,
+      this.recoverWalletForm.get('walletPassword').value,
+      this.recoverWalletForm.get('walletPassphrase').value,
       recoveryDate
     );
     this.recoverWallet(this.walletRecovery);
@@ -134,7 +138,7 @@ export class RecoverComponent implements OnInit {
         response => {
           this.walletRestored = true;
           this.resultMessage = [{ severity: 'success', summary: 'Wallet Recovered', detail: '<br>Your wallet has been recovered.' }];
-          this.router.navigate([''])
+          this.router.navigate(['']);
         },
         error => {
           this.isRecovering = false;

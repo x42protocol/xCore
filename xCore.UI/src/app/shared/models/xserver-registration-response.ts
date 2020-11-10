@@ -1,4 +1,4 @@
-export class xServerRegistrationResponse {
+export class XServerRegistrationResponse {
   constructor(success: boolean, resultMessage: string) {
     this.success = success;
     this.resultMessage = resultMessage;

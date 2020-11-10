@@ -1,4 +1,4 @@
-export class xServerTestResponse {
+export class XServerTestResponse {
   constructor(success: boolean, resultMessage: string) {
     this.success = success;
     this.resultMessage = resultMessage;

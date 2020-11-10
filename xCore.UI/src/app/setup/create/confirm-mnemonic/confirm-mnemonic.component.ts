@@ -1,12 +1,9 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { FormGroup, Validators, FormBuilder } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
-import { Subscription } from 'rxjs';
-
-import { FullNodeApiService } from '../../../shared/services/fullnode.api.service';
+import { Router } from '@angular/router';
+import { ApiService } from '../../../shared/services/api.service';
 import { WalletCreation } from '../../../shared/models/wallet-creation';
 import { SecretWordIndexGenerator } from './secret-word-index-generator';
-import { ModalService } from '../../../shared/services/modal.service';
 import { ThemeService } from '../../../shared/services/theme.service';
 
 @Component({
@@ -18,32 +15,68 @@ export class ConfirmMnemonicComponent implements OnInit {
 
   public secretWordIndexGenerator = new SecretWordIndexGenerator();
 
-  constructor(private apiService: FullNodeApiService, private genericModalService: ModalService, private router: Router, private fb: FormBuilder, private themeService: ThemeService) {
+  constructor(
+    private apiService: ApiService,
+    private router: Router,
+    private fb: FormBuilder,
+    public themeService: ThemeService,
+  ) {
     this.buildMnemonicForm();
-    this.isDarkTheme = themeService.getCurrentTheme().themeType == 'dark';
+    this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
   }
 
   @Input() queryParams: any;
-  @Output() success: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output() walletCreated: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   private newWallet: WalletCreation;
   public mnemonicForm: FormGroup;
-  public matchError: string = "";
+  public matchError = '';
   public isCreating: boolean;
   public isDarkTheme = false;
 
+  formErrors = {
+    word1: '',
+    word2: '',
+    word3: ''
+  };
+
+  validationMessages = {
+    word1: {
+      required: 'This secret word is required.',
+      minlength: 'A secret word must be at least one character long',
+      maxlength: 'A secret word can not be longer than 24 characters',
+      pattern: 'Please enter a valid scret word. [a-Z] are the only characters allowed.'
+    },
+    word2: {
+      required: 'This secret word is required.',
+      minlength: 'A secret word must be at least one character long',
+      maxlength: 'A secret word can not be longer than 24 characters',
+      pattern: 'Please enter a valid scret word. [a-Z] are the only characters allowed.'
+    },
+    word3: {
+      required: 'This secret word is required.',
+      minlength: 'A secret word must be at least one character long',
+      maxlength: 'A secret word can not be longer than 24 characters',
+      pattern: 'Please enter a valid scret word. [a-Z] are the only characters allowed.'
+    }
+  };
+
   ngOnInit() {
+    const nameKey = 'name';
+    const mnemonicKey = 'mnemonic';
+    const passwordKey = 'password';
+    const passphraseKey = 'passphrase';
     this.newWallet = new WalletCreation(
-      this.queryParams["name"],
-      this.queryParams["mnemonic"],
-      this.queryParams["password"],
-      this.queryParams["passphrase"]
+      this.queryParams[nameKey],
+      this.queryParams[mnemonicKey],
+      this.queryParams[passwordKey],
+      this.queryParams[passphraseKey]
     );
   }
 
   private buildMnemonicForm(): void {
     this.mnemonicForm = this.fb.group({
-      "word1": ["",
+      word1: ['',
         Validators.compose([
           Validators.required,
           Validators.minLength(1),
@@ -51,7 +84,7 @@ export class ConfirmMnemonicComponent implements OnInit {
           Validators.pattern(/^[a-zA-Z]*$/)
         ])
       ],
-      "word2": ["",
+      word2: ['',
         Validators.compose([
           Validators.required,
           Validators.minLength(1),
@@ -59,7 +92,7 @@ export class ConfirmMnemonicComponent implements OnInit {
           Validators.pattern(/^[a-zA-Z]*$/)
         ])
       ],
-      "word3": ["",
+      word3: ['',
         Validators.compose([
           Validators.required,
           Validators.minLength(1),
@@ -78,46 +111,23 @@ export class ConfirmMnemonicComponent implements OnInit {
   onValueChanged(data?: any) {
     if (!this.mnemonicForm) { return; }
     const form = this.mnemonicForm;
+
+    // tslint:disable-next-line:forin
     for (const field in this.formErrors) {
       this.formErrors[field] = '';
       const control = form.get(field);
       if (control && control.dirty && !control.valid) {
         const messages = this.validationMessages[field];
+
+        // tslint:disable-next-line:forin
         for (const key in control.errors) {
           this.formErrors[field] += messages[key] + ' ';
         }
       }
     }
 
-    this.matchError = "";
+    this.matchError = '';
   }
-
-  formErrors = {
-    'word1': '',
-    'word2': '',
-    'word3': ''
-  };
-
-  validationMessages = {
-    'word1': {
-      'required': 'This secret word is required.',
-      'minlength': 'A secret word must be at least one character long',
-      'maxlength': 'A secret word can not be longer than 24 characters',
-      'pattern': 'Please enter a valid scret word. [a-Z] are the only characters allowed.'
-    },
-    'word2': {
-      'required': 'This secret word is required.',
-      'minlength': 'A secret word must be at least one character long',
-      'maxlength': 'A secret word can not be longer than 24 characters',
-      'pattern': 'Please enter a valid scret word. [a-Z] are the only characters allowed.'
-    },
-    'word3': {
-      'required': 'This secret word is required.',
-      'minlength': 'A secret word must be at least one character long',
-      'maxlength': 'A secret word can not be longer than 24 characters',
-      'pattern': 'Please enter a valid scret word. [a-Z] are the only characters allowed.'
-    }
-  };
 
   public onConfirmClicked() {
     this.checkMnemonic();
@@ -128,19 +138,19 @@ export class ConfirmMnemonicComponent implements OnInit {
   }
 
   public onBackClicked() {
-    this.router.navigate(['/setup/create/show-mnemonic'], { queryParams : { name: this.newWallet.name, mnemonic: this.newWallet.mnemonic, password: this.newWallet.password, passphrase: this.newWallet.passphrase }});
+    this.router.navigate(['/setup/create/show-mnemonic'], { queryParams: { name: this.newWallet.name, mnemonic: this.newWallet.mnemonic, password: this.newWallet.password, passphrase: this.newWallet.passphrase } });
   }
 
   private checkMnemonic(): boolean {
-    let mnemonic = this.newWallet.mnemonic;
-    let mnemonicArray = mnemonic.split(" ");
+    const mnemonic = this.newWallet.mnemonic;
+    const mnemonicArray = mnemonic.split(' ');
 
     if (this.mnemonicForm.get('word1').value.trim() === mnemonicArray[this.secretWordIndexGenerator.index1] &&
-        this.mnemonicForm.get('word2').value.trim() === mnemonicArray[this.secretWordIndexGenerator.index2] &&
-        this.mnemonicForm.get('word3').value.trim() === mnemonicArray[this.secretWordIndexGenerator.index3]) {
+      this.mnemonicForm.get('word2').value.trim() === mnemonicArray[this.secretWordIndexGenerator.index2] &&
+      this.mnemonicForm.get('word3').value.trim() === mnemonicArray[this.secretWordIndexGenerator.index3]) {
       return true;
     } else {
-      this.matchError = 'The secret words do not match.'
+      this.matchError = 'The secret words do not match.';
       return false;
     }
   }
@@ -149,7 +159,7 @@ export class ConfirmMnemonicComponent implements OnInit {
     this.apiService.createX42Wallet(wallet)
       .subscribe(
         response => {
-          this.success.emit(true);
+          this.walletCreated.emit(true);
         },
         error => {
           this.isCreating = false;

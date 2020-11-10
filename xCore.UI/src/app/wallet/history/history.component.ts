@@ -1,36 +1,36 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { DialogService } from 'primeng/dynamicdialog';
 import { Router } from '@angular/router';
-
-import { FullNodeApiService } from '../../shared/services/fullnode.api.service';
+import { ApiService } from '../../shared/services/api.service';
 import { GlobalService } from '../../shared/services/global.service';
 import { ThemeService } from '../../shared/services/theme.service';
-
 import { WalletInfo } from '../../shared/models/wallet-info';
 import { TransactionInfo } from '../../shared/models/transaction-info';
-
 import { Subscription } from 'rxjs';
-
 import { TransactionDetailsComponent } from '../transaction-details/transaction-details.component';
 
 @Component({
-  selector: 'history-component',
+  selector: 'app-history-component',
   templateUrl: './history.component.html',
   styleUrls: ['./history.component.css'],
 })
-
-export class HistoryComponent {
-  constructor(private FullNodeApiService: FullNodeApiService, private globalService: GlobalService, private router: Router, public dialogService: DialogService, private themeService: ThemeService) {
-    this.isDarkTheme = themeService.getCurrentTheme().themeType == 'dark';
+export class HistoryComponent implements OnInit, OnDestroy {
+  constructor(
+    private apiService: ApiService,
+    private globalService: GlobalService,
+    private router: Router,
+    public dialogService: DialogService,
+    public themeService: ThemeService,
+  ) {
+    this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
   }
 
   public transactions: TransactionInfo[];
   public coinUnit: string;
-  public pageNumber: number = 1;
-  public hasTransaction: boolean = true;
+  public pageNumber = 1;
+  public hasTransaction = true;
   public isDarkTheme = false;
 
-  private errorMessage: string;
   private walletHistorySubscription: Subscription;
 
   ngOnInit() {
@@ -47,9 +47,7 @@ export class HistoryComponent {
   }
 
   public openTransactionDetailDialog(transaction: any) {
-    let modalData = {
-      "transaction": transaction
-    };
+    const modalData = { transaction };
 
     this.dialogService.open(TransactionDetailsComponent, {
       header: 'Receive',
@@ -57,15 +55,15 @@ export class HistoryComponent {
     });
   }
 
-  // todo: add history in seperate service to make it reusable
+  // TODO: add history in seperate service to make it reusable
   private getHistory() {
-    let walletInfo = new WalletInfo(this.globalService.getWalletName())
+    const walletInfo = new WalletInfo(this.globalService.getWalletName());
     let historyResponse;
-    this.walletHistorySubscription = this.FullNodeApiService.getWalletHistorySlim(walletInfo)
+    this.walletHistorySubscription = this.apiService.getWalletHistorySlim(walletInfo)
       .subscribe(
         response => {
           if (response != null) {
-            //TO DO - add account feature instead of using first entry in array
+            // TODO - add account feature instead of using first entry in array
             if (!!response.history && response.history[0].transactionsHistory.length > 0) {
               historyResponse = response.history[0].transactionsHistory;
               this.getTransactionInfo(historyResponse);
@@ -84,37 +82,35 @@ export class HistoryComponent {
             }
           }
         }
-      )
-      ;
-  };
+      );
+  }
 
   private getTransactionInfo(transactions: any) {
     this.transactions = [];
 
-    for (let transaction of transactions) {
+    for (const transaction of transactions) {
       let transactionType;
-      if (transaction.type === "send") {
-        transactionType = "sent";
-      } else if (transaction.type === "received") {
-        transactionType = "received";
-      } else if (transaction.type === "staked") {
-        transactionType = "staked";
+      if (transaction.type === 'send') {
+        transactionType = 'sent';
+      } else if (transaction.type === 'received') {
+        transactionType = 'received';
+      } else if (transaction.type === 'staked') {
+        transactionType = 'staked';
       }
-      let transactionId = transaction.id;
-      let transactionAmount = transaction.amount;
+      const transactionId = transaction.id;
+      const transactionAmount = transaction.amount;
       let transactionFee;
       if (transaction.fee) {
         transactionFee = transaction.fee;
       } else {
         transactionFee = 0;
       }
-      let transactionConfirmedInBlock = transaction.confirmedInBlock;
-      let transactionTimestamp = transaction.timestamp;
-      let transactionConfirmed;
+      const transactionConfirmedInBlock = transaction.confirmedInBlock;
+      const transactionTimestamp = transaction.timestamp;
 
       this.transactions.push(new TransactionInfo(transactionType, transactionId, transactionAmount, transactionFee, transactionConfirmedInBlock, transactionTimestamp));
     }
-    if (this.transactions === undefined || this.transactions.length == 0) {
+    if (this.transactions === undefined || this.transactions.length === 0) {
       this.hasTransaction = false;
     }
   }
@@ -123,7 +119,7 @@ export class HistoryComponent {
     if (this.walletHistorySubscription) {
       this.walletHistorySubscription.unsubscribe();
     }
-  };
+  }
 
   private startSubscriptions() {
     this.getHistory();

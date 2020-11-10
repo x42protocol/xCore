@@ -1,4 +1,4 @@
-import {Injectable} from "@angular/core";
+import { Injectable } from '@angular/core';
 import { ElectronService } from 'ngx-electron';
 import { XServerStatus } from '../models/xserver-status';
 
@@ -6,27 +6,19 @@ import { XServerStatus } from '../models/xserver-status';
   providedIn: 'root'
 })
 export class GlobalService {
-  constructor(private electronService: ElectronService) {
-    this.setApplicationVersion();
-    this.setSidechainEnabled();
-    this.setTestnetEnabled();
-    this.setApiPort();
-    this.setWalletName("");
-    this.setWalletName("");
+  constructor(
+    private electronService: ElectronService,
+  ) {
+    this.setWalletName('');
   }
 
-  private applicationVersion: string = "0.1.0";
-  private testnet: boolean = false;
-  private sidechain: boolean = false;
-  private mainApiPort: number = 42220;
-  private testApiPort: number = 42221;
-  private mainSideChainApiPort: number = 42221;
-  private testSideChainApiPort: number = 42221;
-  private apiPort: number;
   private walletPath: string;
   private currentWalletName: string;
+  private coinType: number;
+  private coinName: string;
   private coinUnit: string;
   private network: string;
+  private decimalLimit = 8;
   private walletKeyAddress: string;
   private blockHeight: number;
   private xServerStatus: XServerStatus;
@@ -35,55 +27,6 @@ export class GlobalService {
   quitApplication() {
     this.electronService.remote.app.quit();
   }
-
-  getApplicationVersion() {
-    return this.applicationVersion;
-  }
-
-  setApplicationVersion() {
-    if (this.electronService.isElectronApp) {
-      this.applicationVersion = this.electronService.remote.app.getVersion();
-    }
-  }
-
-  getTestnetEnabled() {
-    return this.testnet;
-  }
-
-  setTestnetEnabled() {
-    if (this.electronService.isElectronApp) {
-      this.testnet = this.electronService.ipcRenderer.sendSync('get-testnet');
-    }
-  }
-
-  getSidechainEnabled() {
-    return this.sidechain;
-  }
-
-  setSidechainEnabled() {
-    if (this.electronService.isElectronApp) {
-      this.sidechain = this.electronService.ipcRenderer.sendSync('get-sidechain');
-    }
-  }
-
-  getFullNodeApiPort() {
-    return this.apiPort;
-  }
-
-  setApiPort() {
-    if (this.electronService.isElectronApp) {
-      this.apiPort = this.electronService.ipcRenderer.sendSync('get-port');
-    } else if (this.testnet && !this.sidechain) {
-      this.apiPort = this.testApiPort;
-    } else if (!this.testnet && !this.sidechain) {
-      this.apiPort = this.mainApiPort;
-    } else if (this.testnet && this.sidechain) {
-      this.apiPort = this.testSideChainApiPort;
-    } else if (!this.testnet && this.sidechain) {
-      this.apiPort = this.mainSideChainApiPort;
-    }
-  }
-
   getWalletPath() {
     return this.walletPath;
   }
@@ -124,6 +67,14 @@ export class GlobalService {
     this.coinUnit = coinUnit;
   }
 
+  getCoinName() {
+    return this.coinName;
+  }
+
+  setCoinName(coinName: string) {
+    this.coinName = coinName;
+  }
+
   setBlockHeight(height: number) {
     this.blockHeight = height;
   }
@@ -151,78 +102,104 @@ export class GlobalService {
   public getSymbolCharacter(symbol: string): string {
     let result: string;
     switch (symbol) {
-      case "AED":
-        result = "د.إ";
+      case 'AED':
+        result = 'د.إ';
         break;
-      case "BDT":
-        result = "৳";
+      case 'BDT':
+        result = '৳';
         break;
-      case "BRL":
-        result = "R$";
+      case 'BRL':
+        result = 'R$';
         break;
-      case "CHF":
-        result = "CHF";
+      case 'CHF':
+        result = 'CHF';
         break;
-      case "CZK":
-        result = "Kč";
+      case 'CZK':
+        result = 'Kč';
         break;
-      case "DKK":
-        result = "kr";
+      case 'DKK':
+        result = 'kr';
         break;
-      case "GBP":
-        result = "£";
+      case 'GBP':
+        result = '£';
         break;
-      case "HKD":
-        result = "“元”";
+      case 'HKD':
+        result = '“元”';
         break;
-      case "HUF":
-        result = "ft";
+      case 'HUF':
+        result = 'ft';
         break;
-      case "ILS":
-        result = "₪";
+      case 'ILS':
+        result = '₪';
         break;
-      case "INR":
-        result = "₹";
+      case 'INR':
+        result = '₹';
         break;
-      case "LKR":
-        result = "Rs";
+      case 'LKR':
+        result = 'Rs';
         break;
-      case "MYR":
-        result = "RM";
+      case 'MYR':
+        result = 'RM';
         break;
-      case "NOK":
-        result = "kr";
+      case 'NOK':
+        result = 'kr';
         break;
-      case "PHP":
-        result = "₱";
+      case 'PHP':
+        result = '₱';
         break;
-      case "PKR":
-        result = "Rs";
+      case 'PKR':
+        result = 'Rs';
         break;
-      case "PLN":
-        result = "zł";
+      case 'PLN':
+        result = 'zł';
         break;
-      case "SEK":
-        result = "kr";
+      case 'SEK':
+        result = 'kr';
         break;
-      case "THB":
-        result = "฿";
+      case 'THB':
+        result = '฿';
         break;
-      case "TRY":
-        result = "₺";
+      case 'TRY':
+        result = '₺';
         break;
-      case "UAH":
-        result = "₴";
+      case 'UAH':
+        result = '₴';
         break;
-      case "VND":
-        result = "₫";
+      case 'VND':
+        result = '₫';
         break;
-      case "ZAR":
-        result = "R";
+      case 'ZAR':
+        result = 'R';
         break;
       default:
-        result = "$";
+        result = '$';
     }
     return result;
+  }
+
+  transform(value: number) {
+    let temp;
+    if (typeof value === 'number') {
+      switch (this.getCoinUnit()) {
+        case 'x42':
+          temp = value / 100000000;
+          return temp.toFixed(this.decimalLimit);
+        case 'mx42':
+          temp = value / 100000;
+          return temp.toFixed(this.decimalLimit);
+        case 'ux42':
+          temp = value / 100;
+          return temp.toFixed(this.decimalLimit);
+        case 'Tx42':
+          temp = value / 100000000;
+          return temp.toFixed(this.decimalLimit);
+        case 'Tmx42':
+          temp = value / 100000;
+          return temp.toFixed(this.decimalLimit);
+        case 'Tux42':
+          temp = value / 100;
+          return temp.toFixed(this.decimalLimit);
+      }
+    }
   }
 }

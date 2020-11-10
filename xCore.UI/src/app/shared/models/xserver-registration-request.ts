@@ -1,4 +1,4 @@
-export class xServerRegistrationRequest {
+export class XServerRegistrationRequest {
   constructor(profileName: string, networkProtocol: number, networkAddress: string, networkPort: number, signature: string, keyAddress: string, signAddress: string, feeAddress: string, tier: number) {
     this.profileName = profileName;
     this.networkProtocol = networkProtocol;

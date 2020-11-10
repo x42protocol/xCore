@@ -1,4 +1,4 @@
-export class xServerTestRequest {
+export class XServerTestRequest {
   constructor(networkProtocol: number, networkAddress: string, networkPort: number, blockHeight: number) {
     this.networkProtocol = networkProtocol;
     this.networkAddress = networkAddress;
