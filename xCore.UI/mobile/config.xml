@@ -2,10 +2,10 @@
 <widget id="xCore.x42" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>xCore</name>
     <description>
-        xCire for mobile devices
+        xCore for mobile devices
     </description>
     <author email="contact@x42.info" href="https://www.x42.info">
-        x42 Procol
+        x42 Protocol
     </author>
     <content src="index.html" />
     <access origin="*" />
