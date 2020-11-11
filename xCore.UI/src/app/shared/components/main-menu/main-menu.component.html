@@ -3,7 +3,8 @@
   <div>
     <app-status-bar [isUnLocked]="isUnLocked"></app-status-bar>
     <button pButton icon="pi pi-cog" type="button" (click)="settingsMenu = true" *ngIf="!isUnLocked"></button>
-    <button pButton icon="pi pi-cog" type="button" (click)="openAdvanced()" *ngIf="isUnLocked"></button>
+    <button pButton icon="pi pi-cog" type="button" (click)="openAdvanced()" *ngIf="isUnLocked && !updateService.available"></button>
+    <button pButton class="ui-button-danger" icon="pi pi-bell" type="button" (click)="openAdvanced()" *ngIf="isUnLocked && updateService.info && updateService.available"></button>
   </div>
 </p-menubar>
 

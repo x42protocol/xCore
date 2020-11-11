@@ -10,6 +10,7 @@ export class UpdateService {
 
   static singletonInstance: UpdateService;
   private ipc: Electron.IpcRenderer;
+  private userNotifiedOfUpdate = false;
   public info: UpdateInfo;
   public progress: any;
   public downloaded = false;
@@ -32,7 +33,10 @@ export class UpdateService {
         });
 
         this.ipc.on('update-available', (event, info: UpdateInfo) => {
-          // notificationService.show({ title: 'Update available!', body: JSON.stringify(info)});
+          if (!this.userNotifiedOfUpdate) {
+            this.notificationService.show({ title: 'Update available!', body: info.releaseName + ' ' + info.version });
+            this.userNotifiedOfUpdate = true;
+          }
           console.log('update-available: ', info);
           this.info = info;
           this.available = true;
