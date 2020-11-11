@@ -114,14 +114,5 @@ jobs:
       run: |
         cd ${{ env.UI_PATH }}
         npm run publish:${{ matrix.platform }}
-
-    - name: Release Package
-      uses: DennisAMenace/action-release@master
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        files: "${{ env.UI_PATH }}app-builds/${{ env.RELEASE_NAME }};${{ env.UI_PATH }}app-builds/latest${{matrix.update}}.yml"
-        draft: true
-        prerelease: true
-        body: ''
-        name: "${{env.NAME}} (Release ${{env.VERSION}})"
-        tag: v${{env.VERSION}}  
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
