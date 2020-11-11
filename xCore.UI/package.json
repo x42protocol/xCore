@@ -1,7 +1,7 @@
 {
   "name": "xCore",
   "description": "xCore is the main application for everything on x42.",
-  "version": "5.0.0-b29",
+  "version": "5.0.0-b28",
   "bc_version": "1.1.17",
   "license": "MIT",
   "author": {
@@ -61,6 +61,7 @@
   },
   "private": true,
   "dependencies": {
+    "@angular/localize": "^9.1.12",
     "@blockcore/message": "^1.0.0",
     "@techiediaries/ngx-qrcode": "^9.1.0",
     "base64url": "^3.0.1",
@@ -76,20 +77,20 @@
     "electron-context-menu": "2.3.0",
     "electron-log": "4.3.0",
     "electron-updater": "4.3.5",
+    "font-awesome": "^4.7.0",
     "lodash": "^4.17.20",
+    "ng-circle-progress": "^1.5.1",
     "ngx-image-cropper": "^3.2.1",
     "ngx-material-file-input": "^2.1.1",
     "npm-check-updates": "^7.0.3",
+    "primeflex": "1.3.1",
+    "primeicons": "4.0.0",
+    "primeng": "9.1.3",
     "read-chunk": "3.2.0",
     "safe-buffer": "~5.1.1",
     "scryptsy": "^2.1.0",
     "tslib": "^2.0.1",
-    "utf8": "^3.0.0",
-    "font-awesome": "^4.7.0",
-    "ng-circle-progress": "^1.5.1",
-    "primeflex": "1.3.1",
-    "primeicons": "4.0.0",
-    "primeng": "9.1.3"
+    "utf8": "^3.0.0"
   },
   "devDependencies": {
     "@angular-builders/custom-webpack": "9.2.0",
