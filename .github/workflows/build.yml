@@ -61,8 +61,8 @@ jobs:
     - name: Release Variables
       run: |
         cd ${{ env.UI_PATH }}
-        echo "::set-env name=RELEASE_CONFIGURATION::${{ matrix.runtime }}"
-        echo "::set-env name=RELEASE_NAME::${{ env.NAME }}-v${{ env.VERSION }}-${{ matrix.runtime }}${{ matrix.extension }}"
+        echo RELEASE_CONFIGURATION=${{ matrix.runtime }} >> $GITHUB_ENV
+        echo RELEASE_NAME=$NAME-v$VERSION-${{ matrix.runtime }}${{ matrix.extension }} >> $GITHUB_ENV
 
     - name: Tooling
       if: matrix.os == 'ubuntu-latest'
@@ -77,7 +77,7 @@ jobs:
         cd ${{ env.UI_PATH }}
         echo ${env:PATH}
         [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-        $url = "https://github.com/x42protocol/x42-BlockCore/releases/download/v${{ env.BLOCKCORE_DAEMON_VERSION }}/x42.Node-${{ env.BLOCKCORE_DAEMON_VERSION }}-${{ matrix.platform }}-${{ env.ARCH }}${{ matrix.bc_extension }}"
+        $url = "https://github.com/x42protocol/x42-BlockCore/releases/download/v$BLOCKCORE_DAEMON_VERSION/x42.Node-$BLOCKCORE_DAEMON_VERSION-${{ matrix.platform }}-${{ env.ARCH }}${{ matrix.bc_extension }}"
         $output = Join-Path -Path "${{ env.UI_PATH }}" -ChildPath "daemon${{ matrix.bc_extension }}"
         Write-Output "Url: $url"
         Write-Output "Path: $output"
@@ -118,9 +118,9 @@ jobs:
       uses: DennisAMenace/action-release@master
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        files: "${{ env.UI_PATH }}app-builds/${{ env.RELEASE_NAME }};${{ env.UI_PATH }}app-builds/latest${{matrix.update}}.yml"
+        files: "${{ env.UI_PATH }}app-builds/$RELEASE_NAME;${{ env.UI_PATH }}app-builds/latest${{matrix.update}}.yml"
         draft: true
         prerelease: true
         body: ''
-        name: "${{env.NAME}} (Release ${{env.VERSION}})"
-        tag: v${{env.VERSION}}  
+        name: "$NAME (Release $VERSION)"
+        tag: v$VERSION  
