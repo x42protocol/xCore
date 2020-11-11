@@ -91,7 +91,7 @@
     "scryptsy": "^2.1.0",
     "tslib": "^2.0.3",
     "utf8": "^3.0.0",
-    "webpack": "^5.4.0"
+    "webpack": "^4.44.1"
   },
   "devDependencies": {
     "@angular-builders/custom-webpack": "10.0.1",
