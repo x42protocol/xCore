@@ -29,7 +29,7 @@ export class AboutComponent implements OnInit {
     this.electron.shell.showItemInFolder(directory);
   }
 
-  updateTime() {
+  releaseDateFormatted() {
     const updatedTime = new Date(this.updateService.info.releaseDate);
     return updatedTime.toLocaleDateString();
   }

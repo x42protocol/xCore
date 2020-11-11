@@ -61,7 +61,7 @@
     <div *ngIf="updateService.info && updateService.available" class="update-card">
       <div class="h5"><span class="pi pi-exclamation-triangle text-danger"></span> {{updateService.info.releaseName}} Update Available</div>
       <div>
-        <div><strong>Version: {{updateService.info.version}} ({{updateTime()}})</strong></div>
+        <div><strong>Version: {{updateService.info.version}} ({{releaseDateFormatted()}})</strong></div>
       </div>
       <div>
         <p>
@@ -84,13 +84,13 @@
     </div>
 
     <div *ngIf="updateService.info && !updateService.available" class="update-card">
+      <div class="h5"><span class="pi pi-check-circle text-success"></span> You are running the latest version.</div>
       <div>
         <div></div>
         <div>Installed {{updateService.info.releaseName}}</div>
-        <div>Version: {{updateService.info.version}} ({{updateService.info.releaseDate}})</div>
+        <div>Version: {{updateService.info.version}} ({{releaseDateFormatted()}})</div>
       </div>
       <div>
-        <p>You are running the latest version.</p>
         <p [innerHTML]="updateService.info.releaseNotes"></p>
       </div>
     </div>
