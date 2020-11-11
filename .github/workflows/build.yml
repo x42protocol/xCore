@@ -16,21 +16,15 @@ jobs:
           - os: windows-latest
             extension: ".exe"
             bc_extension: ".zip"
-            runtime: "win"
             platform: "win"
-            update: ""
           - os: ubuntu-latest
             extension: ".deb"
             bc_extension: ".tar.gz"
-            runtime: "linux-amd64"
             platform: "linux"
-            update: "-linux"
           - os: macos-latest
-            runtime: "mac"
             extension: ".dmg"
             bc_extension: ".zip"
             platform: "mac"
-            update: "-mac"
         node_version: [14.x]
         dotnet_version: ['3.1.404']
       fail-fast: false
