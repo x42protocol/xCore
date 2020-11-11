@@ -57,6 +57,7 @@ jobs:
         echo NAME=$(npm run name --silent) >> $GITHUB_ENV
         echo VERSION=$(npm run version --silent) >> $GITHUB_ENV
         echo BLOCKCORE_DAEMON_VERSION=$(npm run blockcore_version --silent) >> $GITHUB_ENV
+      shell: bash
 
     - name: Tooling
       if: matrix.os == 'ubuntu-latest'
