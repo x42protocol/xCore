@@ -58,6 +58,7 @@ jobs:
         echo NAME=$(npm run name --silent) >> $GITHUB_ENV
         echo VERSION=$(npm run version --silent) >> $GITHUB_ENV
         echo BLOCKCORE_DAEMON_VERSION=$(npm run blockcore_version --silent) >> $GITHUB_ENV
+
     - name: Release Variables
       run: |
         cd ${{ env.UI_PATH }}
@@ -109,10 +110,10 @@ jobs:
         cd ${{ env.UI_PATH }}
         npm install
 
-    - name: Package (npm)
+    - name: Publish (npm)
       run: |
         cd ${{ env.UI_PATH }}
-        npm run package:${{ matrix.platform }}
+        npm run publish:${{ matrix.platform }}
 
     - name: Release Package
       uses: DennisAMenace/action-release@master
