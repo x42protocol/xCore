@@ -31,8 +31,8 @@ jobs:
             bc_extension: ".zip"
             platform: "mac"
             update: "-mac"
-        node_version: [12.x]
-        dotnet_version: ['3.1.300']
+        node_version: [14.x]
+        dotnet_version: ['3.1.404']
       fail-fast: false
 
     runs-on: ${{ matrix.os }}
