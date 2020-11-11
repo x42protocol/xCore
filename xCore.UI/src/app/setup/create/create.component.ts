@@ -148,8 +148,8 @@ export class CreateComponent implements OnInit {
     this.displayMnemonicConfirm = true;
   }
 
-  walletCreateResult(success: boolean): void {
-    if (success) {
+  walletCreateResult(walletCreated: boolean): void {
+    if (walletCreated) {
       this.resultMessage = [{ severity: 'success', summary: 'Wallet Created', detail: ' Your wallet has been created. Keep your secret words, password and passphrase safe!' }];
       this.walletCreated = true;
       this.isCreated.emit(true);
