@@ -41,6 +41,7 @@
   "linux": {
     "icon": "dist/assets/images/icons/",
     "target": [
+      "AppImage:x64",
       "deb",
       "tar.gz"
     ],
