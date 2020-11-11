@@ -54,16 +54,9 @@ jobs:
     - name: Package NPM Variables
       run: |
         cd ${{ env.UI_PATH }}
-
         echo NAME=$(npm run name --silent) >> $GITHUB_ENV
         echo VERSION=$(npm run version --silent) >> $GITHUB_ENV
         echo BLOCKCORE_DAEMON_VERSION=$(npm run blockcore_version --silent) >> $GITHUB_ENV
-
-    - name: Release Variables
-      run: |
-        cd ${{ env.UI_PATH }}
-        echo RELEASE_CONFIGURATION=${{ matrix.runtime }} >> $GITHUB_ENV
-        echo RELEASE_NAME=${{ env.NAME }}-v${{ env.VERSION }}-${{ matrix.runtime }}${{ matrix.extension }} >> $GITHUB_ENV
 
     - name: Tooling
       if: matrix.os == 'ubuntu-latest'
