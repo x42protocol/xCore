@@ -6,8 +6,9 @@ import { Logger } from '../app/shared/services/logger.service';
 import { NodeStatus } from '../app/shared/models/node-status';
 import { ElectronService } from 'ngx-electron';
 import { ThemeService } from './shared/services/theme.service';
+import { TitleService } from './shared/services/title.service';
 import { MenuItem } from 'primeng/api';
-import { Subscription } from 'rxjs';
+import { Subscription, Observable } from 'rxjs';
 import { delay, retryWhen, tap } from 'rxjs/operators';
 import { environment } from '../environments/environment';
 import * as signalR from '@aspnet/signalr';
@@ -56,6 +57,7 @@ export class AppComponent implements OnInit, OnDestroy {
     private zone: NgZone,
     private apiService: ApiService,
     public appState: ApplicationStateService,
+    private readonly titleService: TitleService,
   ) {
 
     this.modes = [
@@ -93,6 +95,10 @@ export class AppComponent implements OnInit, OnDestroy {
         icon: 'pi goat-icon'
       }
     ];
+  }
+
+  get appTitle$(): Observable<string> {
+    return this.titleService.$title;
   }
 
   initialize() {

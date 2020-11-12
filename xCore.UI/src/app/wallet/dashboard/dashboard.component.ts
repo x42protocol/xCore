@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { DialogService } from 'primeng/dynamicdialog';
 import { ApiService } from '../../shared/services/api.service';
 import { GlobalService } from '../../shared/services/global.service';
+import { Logger } from '../../shared/services/logger.service';
 import { WalletInfo } from '../../shared/models/wallet-info';
 import { TransactionInfo } from '../../shared/models/transaction-info';
 import { ThemeService } from '../../shared/services/theme.service';
@@ -12,6 +13,8 @@ import { ReceiveComponent } from '../receive/receive.component';
 import { TransactionDetailsComponent } from '../transaction-details/transaction-details.component';
 import { CreateProfileComponent } from '../profile/create/create-profile.component';
 import { Subscription } from 'rxjs';
+import { finalize } from 'rxjs/operators';
+import { TaskTimer } from 'tasktimer';
 
 @Component({
   selector: 'app-dashboard-component',
@@ -26,11 +29,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private router: Router,
     private fb: FormBuilder,
     public themeService: ThemeService,
+    private log: Logger,
   ) {
     this.buildStakingForm();
     this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
   }
 
+  public balanceLoaded: boolean;
   public walletName: string;
   public coinUnit: string;
   public confirmedBalance: number;
@@ -60,24 +65,28 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public profileAddress: string;
   public profile: any;
 
-  private walletBalanceSubscription: Subscription;
-  private walletHotBalanceSubscription: Subscription;
-  private walletHistorySubscription: Subscription;
-  private stakingInfoSubscription: Subscription;
+  private walletAccountBalanceWorker = new TaskTimer(5000);
+  private walletHotBalanceWorker = new TaskTimer(5000);
+  private historyWorker = new TaskTimer(5000);
 
   ngOnInit() {
     this.walletName = this.globalService.getWalletName();
     this.coinUnit = this.globalService.getCoinUnit();
-    this.startSubscriptions();
     this.getProfileOnConnection();
 
     this.apps = [
       { name: 'Search For Apps', image: 'https://cdn1.iconfinder.com/data/icons/hawcons/32/698628-icon-112-search-plus-512.png' }
     ];
+
+    this.walletAccountBalanceWorker.add(() => this.updateAccountWalletDetails()).start();
+    this.walletHotBalanceWorker.add(() => this.updateHotWalletDetails()).start();
+    this.historyWorker.add(() => this.updateWalletHistory());
   }
 
   ngOnDestroy() {
-    this.cancelSubscriptions();
+    this.walletAccountBalanceWorker.stop();
+    this.walletHotBalanceWorker.stop();
+    this.historyWorker.stop();
   }
 
   private buildStakingForm(): void {
@@ -169,65 +178,87 @@ export class DashboardComponent implements OnInit, OnDestroy {
       );
   }
 
-  private getWalletBalance() {
+  private updateAccountWalletDetails() {
+    this.walletAccountBalanceWorker.pause();
     const walletInfo = new WalletInfo(this.globalService.getWalletName());
-    this.walletBalanceSubscription = this.apiService.getWalletBalance(walletInfo)
-      .subscribe(
+    this.apiService.getWalletBalanceOnce(walletInfo)
+      .pipe(finalize(() => {
+        this.walletAccountBalanceWorker.resume();
+      }),
+      ).subscribe(
         response => {
-          if (response != null) {
-            const balanceResponse = response;
-            // TODO - add account feature instead of using first entry in array
-            this.confirmedBalance = balanceResponse.balances[0].amountConfirmed;
-            this.unconfirmedBalance = balanceResponse.balances[0].amountUnconfirmed;
-            this.spendableBalance = balanceResponse.balances[0].spendableAmount;
-            if ((this.confirmedBalance + this.unconfirmedBalance) > 0) {
-              this.hasBalance = true;
-            } else {
-              this.hasBalance = false;
-            }
+          this.log.info('Get account balance result:', response);
+          const balanceResponse = response;
+          // TODO - add account feature instead of using first entry in array
+          this.confirmedBalance = balanceResponse.balances[0].amountConfirmed;
+          this.unconfirmedBalance = balanceResponse.balances[0].amountUnconfirmed;
+          this.spendableBalance = balanceResponse.balances[0].spendableAmount;
+          if ((this.confirmedBalance + this.unconfirmedBalance) > 0) {
+            this.hasBalance = true;
+          } else {
+            this.hasBalance = false;
           }
+          this.balanceLoaded = true;
+          this.startHistoryWorker();
         },
         error => {
-          this.cancelSubscriptions();
-          this.startSubscriptions();
+          this.apiService.handleException(error);
         }
       );
+  }
 
+  private updateHotWalletDetails() {
+    this.walletAccountBalanceWorker.pause();
+    this.walletHotBalanceWorker.pause();
+    const walletInfo = new WalletInfo(this.globalService.getWalletName());
     walletInfo.accountName = this.hotStakingAccount;
-    this.walletHotBalanceSubscription = this.apiService.getWalletBalance(walletInfo, true)
-      .subscribe(
+    this.apiService.getWalletBalanceOnce(walletInfo)
+      .pipe(finalize(() => {
+        this.walletHotBalanceWorker.resume();
+      }),
+      ).subscribe(
         hotBalanceResponse => {
-          if (hotBalanceResponse != null) {
-            if (hotBalanceResponse.balances[0].amountConfirmed > 0 || hotBalanceResponse.balances[0].amountUnconfirmed > 0) {
-              this.hasHotBalance = true;
-            }
-            this.confirmedHotBalance = hotBalanceResponse.balances[0].amountConfirmed;
-            this.unconfirmedHotBalance = hotBalanceResponse.balances[0].amountUnconfirmed;
-            this.spendableHotBalance = hotBalanceResponse.balances[0].spendableAmount;
+          this.log.info('Get hot balance result:', hotBalanceResponse);
+          if (hotBalanceResponse.balances[0].amountConfirmed > 0 || hotBalanceResponse.balances[0].amountUnconfirmed > 0) {
+            this.hasHotBalance = true;
           }
+          this.confirmedHotBalance = hotBalanceResponse.balances[0].amountConfirmed;
+          this.unconfirmedHotBalance = hotBalanceResponse.balances[0].amountUnconfirmed;
+          this.spendableHotBalance = hotBalanceResponse.balances[0].spendableAmount;
+        },
+        error => {
+          this.apiService.handleException(error);
         }
       );
+  }
 
+  startHistoryWorker() {
+    if (this.historyWorker.state === TaskTimer.State.IDLE) {
+      this.log.info('History is not running, starting...');
+      this.hasTX = true;
+      this.historyWorker.start();
+    }
   }
 
   // TODO: add history in seperate service to make it reusable
-  private getHistory() {
+  private updateWalletHistory() {
+    this.historyWorker.pause();
     const walletInfo = new WalletInfo(this.globalService.getWalletName());
     let historyResponse;
-    this.walletHistorySubscription = this.apiService.getWalletHistorySlim(walletInfo, 0, 10)
-      .subscribe(
+    this.apiService.getWalletHistoryOnce(walletInfo, 0, 10)
+      .pipe(finalize(() => {
+        this.historyWorker.resume();
+      }),
+      ).subscribe(
         response => {
-          if (response != null) {
-            // TODO - add account feature instead of using first entry in array
-            if (!!response.history && response.history[0].transactionsHistory.length > 0) {
-              historyResponse = response.history[0].transactionsHistory;
-              this.getTransactionInfo(historyResponse);
-            }
+          // TODO - add account feature instead of using first entry in array
+          if (!!response.history && response.history[0].transactionsHistory.length > 0) {
+            historyResponse = response.history[0].transactionsHistory;
+            this.getTransactionInfo(historyResponse);
           }
         },
         error => {
-          this.cancelSubscriptions();
-          this.startSubscriptions();
+          this.apiService.handleException(error);
         }
       );
   }
@@ -395,8 +426,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private startSubscriptions() {
-    this.getWalletBalance();
-    this.getHistory();
     this.getStakingInfo();
   }
 }

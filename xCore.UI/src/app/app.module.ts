@@ -5,13 +5,15 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { SharedModule } from './shared/shared.module';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { ApiInterceptor } from './shared/http-interceptors/api-interceptor';
 import { LoginComponent } from './login/login.component';
 import { SetupModule } from './setup/setup.module';
 import { WalletModule } from './wallet/wallet.module';
 import { ThemeService } from './shared/services/theme.service';
 import { MainMenuModule } from './shared/components/main-menu/main-menu.module';
 import { ShutdownModule } from './shared/components/shutdown/shutdown.module';
+import { HttpErrorHandler } from './shared/services/http-error-handler.service';
+import { httpInterceptorProviders } from './shared/http-interceptors/index';
+import { APP_TITLE } from './shared/services/title.service';
 
 // PrimeNG Components.
 import { MessageService } from 'primeng/api';
@@ -73,10 +75,12 @@ import { ToolbarModule } from 'primeng/toolbar';
     LoginComponent
   ],
   providers: [
-    { provide: HTTP_INTERCEPTORS, useClass: ApiInterceptor, multi: true },
+    HttpErrorHandler,
+    httpInterceptorProviders,
     ThemeService,
     MessageService,
-    DialogService
+    DialogService,
+    { provide: APP_TITLE, useValue: 'xCore' },
   ],
   bootstrap: [AppComponent]
 })

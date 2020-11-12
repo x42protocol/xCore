@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
 import { Observable, interval, throwError } from 'rxjs';
-import { catchError, switchMap, startWith } from 'rxjs/operators';
+import { catchError, switchMap, startWith, map } from 'rxjs/operators';
 import { ModalService } from './modal.service';
 import { AddressLabel } from '../models/address-label';
 import { WalletCreation } from '../models/wallet-creation';
@@ -61,6 +61,7 @@ export class ApiService {
   }
 
   private pollingInterval = interval(5000);
+  private pollingIntervalMiliseconds = 60000;
   private x42ApiUrl;
   private daemon;
   private nodeStatusPolling = false;
@@ -69,7 +70,7 @@ export class ApiService {
   private generalInfoPolling = false;
   private stakingInfoPolling = false;
   private txOutPolling = false;
-  private walletBalancePolling = false;
+  private walletColdBalancePolling = false;
   private walletHistoryPolling = false;
   private walletHistorySlimPolling = false;
 
@@ -139,7 +140,8 @@ export class ApiService {
   private async getNodeStatusPolling() {
     if (!this.nodeStatusPolling) {
       this.nodeStatusPolling = true;
-      const response = await this.http.get<NodeStatus>(this.x42ApiUrl + '/node/status').toPromise();
+      const response = await this.http.get<NodeStatus>(this.x42ApiUrl + '/node/status').pipe(
+        catchError(err => this.handleHttpError(err, true))).toPromise();
       this.nodeStatusPolling = false;
       return response;
     }
@@ -156,7 +158,8 @@ export class ApiService {
   private async getxServerStatusPolling() {
     if (!this.xserverStatusPolling) {
       this.xserverStatusPolling = true;
-      const response = await this.http.get<XServerStatus>(this.x42ApiUrl + '/xServer/getxserverstats').toPromise();
+      const response = await this.http.get<XServerStatus>(this.x42ApiUrl + '/xServer/getxserverstats').pipe(
+        catchError(err => this.handleHttpError(err, true))).toPromise();
       this.xserverStatusPolling = false;
       return response;
     }
@@ -230,7 +233,8 @@ export class ApiService {
   private async getAddressBookAddressesPolling() {
     if (!this.addressBookPolling) {
       this.addressBookPolling = true;
-      const response = await this.http.get(this.x42ApiUrl + '/AddressBook').toPromise();
+      const response = await this.http.get(this.x42ApiUrl + '/AddressBook').pipe(
+        catchError(err => this.handleHttpError(err, true))).toPromise();
       this.addressBookPolling = false;
       return response;
     }
@@ -340,7 +344,8 @@ export class ApiService {
   private async getGeneralInfoPolling(params) {
     if (!this.generalInfoPolling) {
       this.generalInfoPolling = true;
-      const response = await this.http.get(this.x42ApiUrl + '/wallet/general-info', { params }).toPromise();
+      const response = await this.http.get(this.x42ApiUrl + '/wallet/general-info', { params }).pipe(
+        catchError(err => this.handleHttpError(err, true))).toPromise();
       this.generalInfoPolling = false;
       return response;
     }
@@ -367,24 +372,57 @@ export class ApiService {
     }
   }
 
-  // Get wallet balance info from the API.
-  getWalletBalance(data: WalletInfo, silent?: boolean): Observable<any> {
+  // Get wallet balance from the API once.
+  getWalletBalanceOnce(data: WalletInfo): Observable<any> {
     const params = new HttpParams()
       .set('walletName', data.walletName)
       .set('accountName', data.accountName);
-    return this.pollingInterval.pipe(
-      startWith(0),
-      switchMap(() => this.getWalletBalancePolling(params)),
-      catchError(err => this.handleHttpError(err, silent))
+    return this.http.get(this.x42ApiUrl + '/wallet/balance', { params }).pipe(
+      catchError(err => this.handleHttpError(err))
     );
   }
 
-  private async getWalletBalancePolling(params) {
-    if (!this.walletBalancePolling) {
-      this.walletBalancePolling = true;
-      const response = await this.http.get(this.x42ApiUrl + '/wallet/balance', { params }).toPromise();
-      this.walletBalancePolling = false;
+  // Get wallet balance info from the API.
+  getWalletBalance(data: WalletInfo, silent?: boolean, isCold?: boolean): Observable<any> {
+    const params = new HttpParams()
+      .set('walletName', data.walletName)
+      .set('accountName', data.accountName);
+    if (isCold) {
+      return interval(this.pollingIntervalMiliseconds)
+        .pipe(startWith(0))
+        .pipe(switchMap(() => this.getWalletBalancePollingCold(params)))
+        .pipe(catchError(this.handleError.bind(this)))
+        .pipe(map((response: Response) => response));
+    } else {
+      return interval(this.pollingIntervalMiliseconds)
+        .pipe(startWith(0))
+        .pipe(switchMap(() => this.getWalletBalancePollingHot(params)))
+        .pipe(catchError(this.handleError.bind(this)))
+        .pipe(map((response: Response) => response));
+    }
+  }
+
+  private getWalletBalancePollingHot(params): Observable<any> {
+    if (!this.walletColdBalancePolling) {
+      this.walletColdBalancePolling = true;
+      const response = this.http.get(this.x42ApiUrl + '/wallet/balance', { params });
+      this.walletColdBalancePolling = false;
       return response;
+    } else {
+      console.log('HOT ALREADY RUNNING');
+      return null;
+    }
+  }
+
+  private getWalletBalancePollingCold(params): Observable<any> {
+    if (!this.walletColdBalancePolling) {
+      this.walletColdBalancePolling = true;
+      const response = this.http.get(this.x42ApiUrl + '/wallet/balance', { params });
+      this.walletColdBalancePolling = false;
+      return response;
+    } else {
+      console.log('COLD ALREADY RUNNING');
+      return null;
     }
   }
 
@@ -405,6 +443,19 @@ export class ApiService {
   /**
    * Get a wallets transaction history info from the API.
    */
+  getWalletHistoryOnce(data: WalletInfo, skip: number = -1, take: number = -1, silent?: boolean): Observable<any> {
+    let params = new HttpParams()
+      .set('walletName', data.walletName)
+      .set('accountName', data.accountName);
+    if (take > 0) {
+      params = params.set('Skip', skip.toString())
+        .set('Take', take.toString());
+    }
+    return this.http.get(this.x42ApiUrl + '/wallet/historyslim', { params }).pipe(
+      catchError(err => this.handleHttpError(err))
+    );
+  }
+
   getWalletHistory(data: WalletInfo, skip: number = -1, take: number = -1, silent?: boolean): Observable<any> {
     let params = new HttpParams()
       .set('walletName', data.walletName)
@@ -423,7 +474,8 @@ export class ApiService {
   private async getWalletHistoryBalancePolling(params) {
     if (!this.walletHistoryPolling) {
       this.walletHistoryPolling = true;
-      const response = await this.http.get(this.x42ApiUrl + '/wallet/history', { params }).toPromise();
+      const response = await this.http.get(this.x42ApiUrl + '/wallet/history', { params }).pipe(
+        catchError(err => this.handleHttpError(err, false))).toPromise();
       this.walletHistoryPolling = false;
       return response;
     }
@@ -450,7 +502,8 @@ export class ApiService {
   private async getWalletHistorySlimBalancePolling(params) {
     if (!this.walletHistorySlimPolling) {
       this.walletHistorySlimPolling = true;
-      const response = await this.http.get(this.x42ApiUrl + '/wallet/historyslim', { params }).toPromise();
+      const response = await this.http.get(this.x42ApiUrl + '/wallet/historyslim', { params }).pipe(
+        catchError(err => this.handleHttpError(err, true))).toPromise();
       this.walletHistorySlimPolling = false;
       return response;
     }
@@ -635,7 +688,8 @@ export class ApiService {
   private async getStakingInfoPolling() {
     if (!this.stakingInfoPolling) {
       this.stakingInfoPolling = true;
-      const response = await this.http.get(this.x42ApiUrl + '/staking/getstakinginfo').toPromise();
+      const response = await this.http.get(this.x42ApiUrl + '/staking/getstakinginfo').pipe(
+        catchError(err => this.handleHttpError(err, true))).toPromise();
       this.stakingInfoPolling = false;
       return response;
     }
@@ -793,14 +847,16 @@ export class ApiService {
     if (error.error instanceof ErrorEvent) {
       errorMessage = 'An error occurred:' + error.error.message;
       // A client-side or network error occurred. Handle it accordingly.
-    } else if (error.error.errors) {
+    } else if (error.error !== undefined && error.error.errors) {
       errorMessage = `${error.error.errors[0].message} (Code: ${error.error.errors[0].status})`;
     } else if (error.name === 'HttpErrorResponse') {
       errorMessage = `Unable to connect with background daemon: ${error.message} (${error.status})`;
       // if (error.error.target.__zone_symbol__xhrURL.indexOf('api/wallet/files') > -1) {
       // }
-    } else {
+    } else if (error.message !== undefined) {
       errorMessage = `Error: ${error.message} (${error.status})`;
+    } else {
+      errorMessage = `Error: ${error.message}`;
     }
 
     this.log.error(errorMessage);

@@ -1,7 +1,7 @@
 {
   "name": "xCore",
   "description": "xCore is the main application for everything on x42.",
-  "version": "5.0.0-b29",
+  "version": "5.0.0-b30",
   "bc_version": "1.1.17",
   "license": "MIT",
   "author": {
@@ -89,6 +89,7 @@
     "read-chunk": "3.2.0",
     "safe-buffer": "~5.2.1",
     "scryptsy": "^2.1.0",
+    "tasktimer": "^3.0.0",
     "tslib": "^2.0.3",
     "utf8": "^3.0.0",
     "webpack": "^4.44.1"
@@ -115,7 +116,6 @@
     "@types/node": "^14.14.7",
     "bip39": "3.0.2",
     "x42-coininfo": "git+https://github.com/x42protocol/x42-coininfo.git",
-    "x42js-lib": "git+https://github.com/visionmedia/express.git",
     "codelyzer": "^6.0.1",
     "core-js": "3.7.0",
     "dexie": "3.0.2",
