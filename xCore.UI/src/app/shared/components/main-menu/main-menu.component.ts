@@ -44,6 +44,7 @@ export class MainMenuComponent implements OnInit {
   toolTip = '';
   connectedNodesTooltip = '';
 
+  private updateCheckWorker = new TaskTimer(600000); // Check every 10 minutes
   private coldTypeWorker = new TaskTimer(1000);
   private isDelegated = false;
 
@@ -180,6 +181,7 @@ export class MainMenuComponent implements OnInit {
         );
     }
 
+    this.updateCheckWorker.add(() => this.checkForUpdates()).start();
     this.coldTypeWorker.add(() => this.checkForColdTypeChange()).start();
   }
 
