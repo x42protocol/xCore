@@ -65,6 +65,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public profileAddress: string;
   public profile: any;
 
+  private stakingInfoSubscription: Subscription;
   private walletAccountBalanceWorker = new TaskTimer(5000);
   private walletHotBalanceWorker = new TaskTimer(5000);
   private historyWorker = new TaskTimer(5000);
@@ -408,20 +409,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private cancelSubscriptions() {
-    if (this.walletBalanceSubscription) {
-      this.walletBalanceSubscription.unsubscribe();
-    }
-
-    if (this.walletHistorySubscription) {
-      this.walletHistorySubscription.unsubscribe();
-    }
-
     if (this.stakingInfoSubscription) {
       this.stakingInfoSubscription.unsubscribe();
-    }
-
-    if (this.walletHotBalanceSubscription) {
-      this.walletHotBalanceSubscription.unsubscribe();
     }
   }
 
