@@ -5,6 +5,8 @@ import { GlobalService } from '../../shared/services/global.service';
 import { NodeStatus } from '../../shared/models/node-status';
 import { XServerStatus } from '../../shared/models/xserver-status';
 import { WalletInfo } from '../../shared/models/wallet-info';
+import { finalize } from 'rxjs/operators';
+import { TaskTimer } from 'tasktimer';
 
 @Component({
   selector: 'app-status-bar',
@@ -12,9 +14,8 @@ import { WalletInfo } from '../../shared/models/wallet-info';
   styleUrls: ['./status-bar.component.css']
 })
 export class StatusBarComponent implements OnInit, OnDestroy {
-
+  private stakingInfoWorker = new TaskTimer(5000);
   private generalWalletInfoSubscription: Subscription;
-  private stakingInfoSubscription: Subscription;
   private nodeStatusSubscription: Subscription;
   private xServerStatusSubscription: Subscription;
   private connectedNodesTooltip = '';
@@ -42,9 +43,11 @@ export class StatusBarComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.setDefaultConnectionToolTip();
     this.startSubscriptions();
+    this.stakingInfoWorker.add(() => this.updateStakingInfoDetails()).start();
   }
 
   ngOnDestroy() {
+    this.stakingInfoWorker.stop();
     this.cancelSubscriptions();
   }
 
@@ -182,35 +185,24 @@ export class StatusBarComponent implements OnInit, OnDestroy {
     }
   }
 
-  private getStakingInfo() {
-    this.stakingInfoSubscription = this.apiService.getStakingInfo()
-      .subscribe(
-        response => {
-          if (response != null) {
-            const stakingResponse = response;
-            this.stakingEnabled = stakingResponse.enabled;
-          }
+  private updateStakingInfoDetails() {
+    this.stakingInfoWorker.pause();
+    this.apiService.getStakingInfo()
+      .pipe(finalize(() => {
+        this.stakingInfoWorker.resume();
+      }),
+      ).subscribe(
+        stakingResponse => {
+          this.stakingEnabled = stakingResponse.enabled;
         }, error => {
-          if (error.status === 0) {
-            this.cancelSubscriptions();
-          } else if (error.status >= 400) {
-            if (!error.error.errors[0].message) {
-              this.cancelSubscriptions();
-              this.startSubscriptions();
-            }
-          }
+          this.apiService.handleException(error);
         }
-      )
-      ;
+      );
   }
 
   private cancelSubscriptions() {
     if (this.generalWalletInfoSubscription) {
       this.generalWalletInfoSubscription.unsubscribe();
-    }
-
-    if (this.stakingInfoSubscription) {
-      this.stakingInfoSubscription.unsubscribe();
     }
 
     if (this.nodeStatusSubscription) {
@@ -225,6 +217,5 @@ export class StatusBarComponent implements OnInit, OnDestroy {
   private startSubscriptions() {
     this.getGeneralWalletInfo();
     this.getGeneralxServerInfo();
-    this.getStakingInfo();
   }
 }

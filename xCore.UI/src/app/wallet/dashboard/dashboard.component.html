@@ -31,7 +31,7 @@
             </svg>
           </span>
           <strong *ngIf="balanceLoaded">{{ (confirmedBalance | coinNotation) || (0 | coinNotation) }}</strong>
-          <small *ngIf="balanceLoaded" class="text-uppercase"> {{ coinUnit }}</small>
+          <small *ngIf="balanceLoaded"> {{ coinUnit }}</small>
         </span>
 
         <span class="ml-2 ui-message ui-widget ui-corner-all ui-message-warn ng-star-inserted" *ngIf="unconfirmedBalance > 0.00000000">

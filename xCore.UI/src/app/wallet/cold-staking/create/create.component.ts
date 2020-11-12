@@ -4,6 +4,7 @@ import { FormGroup, Validators, FormBuilder, AbstractControl } from '@angular/fo
 import { GlobalService } from '../../../shared/services/global.service';
 import { CoinNotationPipe } from '../../../shared/pipes/coin-notation.pipe';
 import { ApiService } from '../../../shared/services/api.service';
+import { Logger } from '../../../shared/services/logger.service';
 import { ThemeService } from '../../../shared/services/theme.service';
 import { FeeEstimation } from '../../../shared/models/fee-estimation';
 import { ColdStakingService } from '../../../shared/services/coldstaking.service';
@@ -11,8 +12,8 @@ import { TransactionSending } from '../../../shared/models/transaction-sending';
 import { ColdStakingSetup } from '../../../shared/models/coldstakingsetup';
 import { ColdStakingCreateSuccessComponent } from '../create-success/create-success.component';
 import { WalletInfo } from '../../../shared/models/wallet-info';
-import { Subscription } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, finalize } from 'rxjs/operators';
+import { TaskTimer } from 'tasktimer';
 
 type FeeType = { id: number, display: string, value: number };
 
@@ -33,17 +34,18 @@ export class ColdStakingCreateComponent implements OnInit, OnDestroy {
     public dialogService: DialogService,
     private fb: FormBuilder,
     public themeService: ThemeService,
+    private log: Logger,
   ) {
     this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
     this.setCoinUnit();
     this.buildSendForm();
   }
 
+  public balanceLoaded: boolean;
   public sendForm: FormGroup;
   public coinUnit: string;
   public spendableBalance = 0;
   public apiError: string;
-  private walletBalanceSubscription: Subscription;
   public totalBalance = 0;
   public isSending = false;
   public estimatedFee = 0;
@@ -75,8 +77,14 @@ export class ColdStakingCreateComponent implements OnInit, OnDestroy {
     }
   };
 
+  private walletAccountBalanceWorker = new TaskTimer(5000);
+
   public ngOnInit() {
-    this.startSubscriptions();
+    this.walletAccountBalanceWorker.add(() => this.updateAccountBalanceDetails()).start();
+  }
+
+  public ngOnDestroy() {
+    this.walletAccountBalanceWorker.stop();
   }
 
   private setCoinUnit(): void {
@@ -120,26 +128,23 @@ export class ColdStakingCreateComponent implements OnInit, OnDestroy {
     }
   }
 
-  private getWalletBalance() {
+  private updateAccountBalanceDetails() {
+    this.walletAccountBalanceWorker.pause();
     const walletInfo = new WalletInfo(this.globalService.getWalletName());
-    this.walletBalanceSubscription = this.apiService.getWalletBalance(walletInfo)
-      .subscribe(
+    this.apiService.getWalletBalanceOnce(walletInfo)
+      .pipe(finalize(() => {
+        this.walletAccountBalanceWorker.resume();
+      }),
+      ).subscribe(
         response => {
-          if (response != null) {
-            const balanceResponse = response;
-            this.totalBalance = balanceResponse.balances[0].amountConfirmed + balanceResponse.balances[0].amountUnconfirmed;
-            this.spendableBalance = balanceResponse.balances[0].spendableAmount;
-          }
+          this.log.info('Get account balance result:', response);
+          const balanceResponse = response;
+          this.totalBalance = balanceResponse.balances[0].amountConfirmed + balanceResponse.balances[0].amountUnconfirmed;
+          this.spendableBalance = balanceResponse.balances[0].spendableAmount;
+          this.balanceLoaded = true;
         },
         error => {
-          if (error.status === 0) {
-            this.cancelSubscriptions();
-          } else if (error.status >= 400) {
-            if (!error.error.errors[0].message) {
-              this.cancelSubscriptions();
-              this.startSubscriptions();
-            }
-          }
+          this.apiService.handleException(error);
         }
       );
   }
@@ -167,23 +172,9 @@ export class ColdStakingCreateComponent implements OnInit, OnDestroy {
       );
   }
 
-  private startSubscriptions() {
-    this.getWalletBalance();
-  }
-
-  private cancelSubscriptions() {
-    if (this.walletBalanceSubscription) {
-      this.walletBalanceSubscription.unsubscribe();
-    }
-  }
-
   public send() {
     this.isSending = true;
     this.buildTransaction();
-  }
-
-  public ngOnDestroy() {
-    this.cancelSubscriptions();
   }
 
   public estimateFee() {

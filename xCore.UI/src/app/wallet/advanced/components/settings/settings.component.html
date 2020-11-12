@@ -6,7 +6,7 @@
           <div class="form-group">
             <h5 style="font-weight:normal">Cold Staking Wallet Type</h5>
             <p-selectButton [options]="coldWalletTypeOptions" [(ngModel)]="isColdHotWallet" (onChange)="onColdWalletTypeChange($event)"></p-selectButton>
-            <label *ngIf="isColdHotWallet">Using a hot wallet will allow you to stake on behalf of cold funds. <a class="text-primary" (click)="openColdHotSetup()"><u class="mr-1">Read the setup guide here.</u> <i class="fa fa-external-link"></i></a></label>
+            <label *ngIf="isColdHotWallet">Using a hot wallet will allow you to stake on behalf of cold funds enabling delegated staking. <br /><a class="text-primary" (click)="openColdHotSetup()" style="cursor: pointer;"><u class="mr-1">Read the setup guide here.</u> <i class="fa fa-external-link"></i></a></label>
           </div>
         </p-fieldset>
       </div>
@@ -16,7 +16,7 @@
             <h5 style="font-weight:normal">Addresses</h5>
             <p-selectButton [options]="addressTypeOptions" [(ngModel)]="selectedAddressType" (onChange)="onAddressTypeChange($event)"></p-selectButton>
             <label *ngIf="!isAddressTypeSegwit()">Classic address is the legacy address for x42. Use this option when needing to accept transactions from exchanges and services that have not implemented segwit.</label>
-            <label *ngIf="isAddressTypeSegwit()">Segwit is the improved address used with x42, introduced wtih xCore. <a class="text-primary" (click)="openSegwit()"><u class="mr-1">Read more about segwit</u> <i class="fa fa-external-link"></i></a></label>
+            <label *ngIf="isAddressTypeSegwit()">Segwit is the improved address used with x42, introduced wtih xCore. <a class="text-primary" (click)="openSegwit()" style="cursor: pointer;"><u class="mr-1">Read more about segwit</u> <i class="fa fa-external-link"></i></a></label>
           </div>
           <div class="form-group">
             <h5 style="font-weight:normal">Look and feel</h5>
@@ -26,6 +26,10 @@
                 <span style="margin-left:.25em">{{group.label}}</span>
               </ng-template>
             </p-dropdown>
+          </div>
+          <div class="form-group">
+            <h5 style="font-weight:normal">Mode</h5>
+            <p-selectButton [options]="modeTypeOptions" [(ngModel)]="isDeveloper" (onChange)="onModeChange($event)"></p-selectButton>
           </div>
         </p-fieldset>
       </div>

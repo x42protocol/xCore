@@ -54,8 +54,8 @@
           </ul>
           <p-messages [value]="hotMessage" [closable]="false" [escape]="false"></p-messages>
         </div>
-        <p class="text-center mt-3" *ngIf="!coldWalletAccountExists">
-          <button type="button" pButton (click)="onHotSetup()" label="Setup Hot Wallet" class="ui-button-success" icon="pi pi-arrow-circle-up" style="width: 150px;"></button>
+        <p class="text-center mt-3" *ngIf="!hotWalletAccountExists">
+          <button type="button" pButton (click)="onHotSetup()" label="Setup Hot Wallet" class="ui-button-success" icon="pi pi-arrow-circle-up"></button>
         </p>
       </p-panel>
     </div>

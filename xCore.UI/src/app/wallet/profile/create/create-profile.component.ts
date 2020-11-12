@@ -2,15 +2,17 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormGroup, Validators, FormBuilder } from '@angular/forms';
 import { ApiService } from '../../../shared/services/api.service';
 import { GlobalService } from '../../../shared/services/global.service';
+import { Logger } from '../../../shared/services/logger.service';
 import { TransactionBuilding } from '../../../shared/models/transaction-building';
 import { WalletInfo } from '../../../shared/models/wallet-info';
 import { ThemeService } from '../../../shared/services/theme.service';
 import { Subscription } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, finalize } from 'rxjs/operators';
 import { DynamicDialogRef, DynamicDialogConfig, DialogService } from 'primeng/dynamicdialog';
 import { SubmitPaymentRequest } from '../../../shared/models/xserver-submit-payment-request';
 import { SignMessageRequest } from '../../../shared/models/wallet-signmessagerequest';
 import { ProfileReserveRequest } from '../../../shared/models/xserver-profile-reserve-request';
+import { TaskTimer } from 'tasktimer';
 
 interface TxDetails {
   transactionFee?: number;
@@ -34,11 +36,13 @@ export class CreateProfileComponent implements OnInit, OnDestroy {
     public ref: DynamicDialogRef,
     public config: DynamicDialogConfig,
     public themeService: ThemeService,
+    private log: Logger,
   ) {
     this.buildPaymentForm();
     this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
   }
 
+  public balanceLoaded = false;
   public paymentForm: FormGroup;
   public coinUnit: string;
   public isSending = false;
@@ -46,7 +50,6 @@ export class CreateProfileComponent implements OnInit, OnDestroy {
   public estimatedFee = 0;
   public totalBalance = 0;
   public apiError: string;
-  public transactionComplete: boolean;
   public transactionDetails: TxDetails;
   public transaction: TransactionBuilding;
   public isPayment: boolean;
@@ -81,7 +84,7 @@ export class CreateProfileComponent implements OnInit, OnDestroy {
   public innerColor = '#C7E596';
 
   private paymentPairId: number;
-  private walletBalanceSubscription: Subscription;
+  private walletAccountBalanceWorker = new TaskTimer(5000);
 
   public mainAccount = 'account 0';
   public coldStakingAccount = 'coldStakingColdAddresses';
@@ -99,7 +102,6 @@ export class CreateProfileComponent implements OnInit, OnDestroy {
 
 
   ngOnInit() {
-    this.startSubscriptions();
     this.coinUnit = this.globalService.getCoinUnit();
 
     if (this.config.data !== undefined && this.config.data.priceLockId !== '') {
@@ -107,10 +109,12 @@ export class CreateProfileComponent implements OnInit, OnDestroy {
       this.priceLockId = this.config.data.priceLockId;
       this.getPriceLock(this.priceLockId);
     }
+
+    this.walletAccountBalanceWorker.add(() => this.updateAccountBalanceDetails()).start();
   }
 
   ngOnDestroy() {
-    this.cancelSubscriptions();
+    this.walletAccountBalanceWorker.stop();
   }
 
   private buildPaymentForm(): void {
@@ -451,26 +455,21 @@ export class CreateProfileComponent implements OnInit, OnDestroy {
       );
   }
 
-  private getWalletBalance() {
+  private updateAccountBalanceDetails() {
+    this.walletAccountBalanceWorker.pause();
     const walletInfo = new WalletInfo(this.globalService.getWalletName());
-    this.walletBalanceSubscription = this.apiService.getWalletBalance(walletInfo)
-      .subscribe(
-        response => {
-          if (response !== null) {
-            const balanceResponse = response;
-            // TO DO - add account feature instead of using first entry in array
-            this.totalBalance = balanceResponse.balances[0].amountConfirmed + balanceResponse.balances[0].amountUnconfirmed;
-          }
+    this.apiService.getWalletBalanceOnce(walletInfo)
+      .pipe(finalize(() => {
+        this.walletAccountBalanceWorker.resume();
+      }),
+      ).subscribe(
+        balanceResponse => {
+          this.log.info('Get account balance result:', balanceResponse);
+          this.totalBalance = balanceResponse.balances[0].amountConfirmed + balanceResponse.balances[0].amountUnconfirmed;
+          this.balanceLoaded = true;
         },
         error => {
-          if (error.status === 0) {
-            this.cancelSubscriptions();
-          } else if (error.status >= 400) {
-            if (!error.error.errors[0].message) {
-              this.cancelSubscriptions();
-              this.startSubscriptions();
-            }
-          }
+          this.apiService.handleException(error);
         }
       );
   }
@@ -480,13 +479,4 @@ export class CreateProfileComponent implements OnInit, OnDestroy {
     this.apiError = '';
   }
 
-  private cancelSubscriptions() {
-    if (this.walletBalanceSubscription) {
-      this.walletBalanceSubscription.unsubscribe();
-    }
-  }
-
-  private startSubscriptions() {
-    this.getWalletBalance();
-  }
 }

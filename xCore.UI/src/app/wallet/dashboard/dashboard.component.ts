@@ -12,7 +12,6 @@ import { SendComponent } from '../send/send.component';
 import { ReceiveComponent } from '../receive/receive.component';
 import { TransactionDetailsComponent } from '../transaction-details/transaction-details.component';
 import { CreateProfileComponent } from '../profile/create/create-profile.component';
-import { Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { TaskTimer } from 'tasktimer';
 
@@ -65,7 +64,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public profileAddress: string;
   public profile: any;
 
-  private stakingInfoSubscription: Subscription;
+  private stakingInfoWorker = new TaskTimer(5000);
   private walletAccountBalanceWorker = new TaskTimer(5000);
   private walletHotBalanceWorker = new TaskTimer(5000);
   private historyWorker = new TaskTimer(5000);
@@ -79,12 +78,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
       { name: 'Search For Apps', image: 'https://cdn1.iconfinder.com/data/icons/hawcons/32/698628-icon-112-search-plus-512.png' }
     ];
 
-    this.walletAccountBalanceWorker.add(() => this.updateAccountWalletDetails()).start();
-    this.walletHotBalanceWorker.add(() => this.updateHotWalletDetails()).start();
+    this.stakingInfoWorker.add(() => this.updateStakingInfoDetails());
+    this.walletAccountBalanceWorker.add(() => this.updateAccountBalanceDetails()).start();
+    this.walletHotBalanceWorker.add(() => this.updateHotBalanceDetails()).start();
     this.historyWorker.add(() => this.updateWalletHistory());
   }
 
   ngOnDestroy() {
+    this.stakingInfoWorker.stop();
     this.walletAccountBalanceWorker.stop();
     this.walletHotBalanceWorker.stop();
     this.historyWorker.stop();
@@ -179,7 +180,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       );
   }
 
-  private updateAccountWalletDetails() {
+  private updateAccountBalanceDetails() {
     this.walletAccountBalanceWorker.pause();
     const walletInfo = new WalletInfo(this.globalService.getWalletName());
     this.apiService.getWalletBalanceOnce(walletInfo)
@@ -208,12 +209,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
       );
   }
 
-  private updateHotWalletDetails() {
-    this.walletAccountBalanceWorker.pause();
+  private updateHotBalanceDetails() {
     this.walletHotBalanceWorker.pause();
     const walletInfo = new WalletInfo(this.globalService.getWalletName());
     walletInfo.accountName = this.hotStakingAccount;
-    this.apiService.getWalletBalanceOnce(walletInfo)
+    this.apiService.getWalletBalanceOnce(walletInfo, true)
       .pipe(finalize(() => {
         this.walletHotBalanceWorker.resume();
       }),
@@ -256,6 +256,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
           if (!!response.history && response.history[0].transactionsHistory.length > 0) {
             historyResponse = response.history[0].transactionsHistory;
             this.getTransactionInfo(historyResponse);
+          } else {
+            this.hasTX = false;
           }
         },
         error => {
@@ -319,15 +321,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
           this.makeLatestTxListSmall();
           this.stakingEnabled = true;
           this.stakingForm.patchValue({ walletPassword: '' });
-          this.getStakingInfo();
+          this.stakingInfoWorker.start();
         },
         error => {
           this.isStarting = false;
           this.stakingEnabled = false;
           this.stakingForm.patchValue({ walletPassword: '' });
         }
-      )
-      ;
+      );
   }
 
   public stopStaking() {
@@ -338,36 +339,36 @@ export class DashboardComponent implements OnInit, OnDestroy {
         response => {
           this.stakingEnabled = false;
         }
-      )
-      ;
+      );
   }
 
-  private getStakingInfo() {
-    this.stakingInfoSubscription = this.apiService.getStakingInfo()
-      .subscribe(
+  private updateStakingInfoDetails() {
+    this.stakingInfoWorker.pause();
+    this.apiService.getStakingInfo()
+      .pipe(finalize(() => {
+        this.stakingInfoWorker.resume();
+      }),
+      ).subscribe(
         response => {
-          if (response != null) {
-            const stakingResponse = response;
-            this.stakingEnabled = stakingResponse.enabled;
-            this.stakingActive = stakingResponse.staking;
-            this.stakingWeight = stakingResponse.weight;
-            this.netStakingWeight = stakingResponse.netStakeWeight;
-            this.awaitingMaturity = (this.unconfirmedBalance + this.confirmedBalance) - this.spendableBalance;
-            this.expectedTime = stakingResponse.expectedTime;
-            this.dateTime = this.secondsToString(this.expectedTime);
-            if (this.stakingActive) {
-              this.makeLatestTxListSmall();
-              this.isStarting = false;
-            } else {
-              this.isStopping = false;
-            }
+          this.log.info('Get staking info result:', response);
+          const stakingResponse = response;
+          this.stakingEnabled = stakingResponse.enabled;
+          this.stakingActive = stakingResponse.staking;
+          this.stakingWeight = stakingResponse.weight;
+          this.netStakingWeight = stakingResponse.netStakeWeight;
+          this.awaitingMaturity = (this.unconfirmedBalance + this.confirmedBalance) - this.spendableBalance;
+          this.expectedTime = stakingResponse.expectedTime;
+          this.dateTime = this.secondsToString(this.expectedTime);
+          if (this.stakingActive) {
+            this.makeLatestTxListSmall();
+            this.isStarting = false;
+          } else {
+            this.isStopping = false;
           }
         }, error => {
-          this.cancelSubscriptions();
-          this.startSubscriptions();
+          this.apiService.handleException(error);
         }
-      )
-      ;
+      );
   }
 
   private secondsToString(seconds: number) {
@@ -408,13 +409,4 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return dateString;
   }
 
-  private cancelSubscriptions() {
-    if (this.stakingInfoSubscription) {
-      this.stakingInfoSubscription.unsubscribe();
-    }
-  }
-
-  private startSubscriptions() {
-    this.getStakingInfo();
-  }
 }

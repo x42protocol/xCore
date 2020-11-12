@@ -6,12 +6,13 @@ import { GlobalService } from '../../../shared/services/global.service';
 import { ThemeService } from '../../../shared/services/theme.service';
 import { CoinNotationPipe } from '../../../shared/pipes/coin-notation.pipe';
 import { ColdStakingService } from '../../../shared/services/coldstaking.service';
+import { Logger } from '../../../shared/services/logger.service';
 import { FeeEstimation } from '../../../shared/models/fee-estimation';
 import { TransactionSending } from '../../../shared/models/transaction-sending';
 import { WalletInfo } from '../../../shared/models/wallet-info';
 import { ColdStakingWithdrawalRequest } from '../../../shared/models/coldstakingwithdrawalrequest';
-import { Subscription } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, finalize } from 'rxjs/operators';
+import { TaskTimer } from 'tasktimer';
 
 type FeeType = { id: number, display: string, value: number };
 
@@ -36,6 +37,7 @@ export class ColdStakingWithdrawComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private stakingService: ColdStakingService,
     public themeService: ThemeService,
+    private log: Logger,
   ) {
     this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
     this.setCoinUnit();
@@ -43,6 +45,7 @@ export class ColdStakingWithdrawComponent implements OnInit, OnDestroy {
     this.buildSendForm();
   }
 
+  public balanceLoaded: boolean;
   public sendForm: FormGroup;
   public hasOpReturn: boolean;
   public coinUnit: string;
@@ -59,7 +62,8 @@ export class ColdStakingWithdrawComponent implements OnInit, OnDestroy {
   public transactionComplete: boolean;
 
   private transactionHex: string;
-  private walletBalanceSubscription: Subscription;
+  private walletAccountBalanceWorker = new TaskTimer(5000);
+
   private coldStakingAccount = 'coldStakingColdAddresses';
   private hotStakingAccount = 'coldStakingHotAddresses';
 
@@ -92,11 +96,11 @@ export class ColdStakingWithdrawComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.isColdStaking = this.config.data.isColdStaking;
 
-    this.startSubscriptions();
+    this.walletAccountBalanceWorker.add(() => this.updateAccountBalanceDetails()).start();
   }
 
   ngOnDestroy() {
-    this.cancelSubscriptions();
+    this.walletAccountBalanceWorker.stop();
   }
 
   private setCoinUnit(): void {
@@ -153,26 +157,7 @@ export class ColdStakingWithdrawComponent implements OnInit, OnDestroy {
   }
 
   public getMaxBalance() {
-    const data = {
-      walletName: this.globalService.getWalletName(),
-      feeType: this.sendForm.get('fee').value
-    };
-
-    let balanceResponse;
-
-    this.apiService.getMaximumBalance(data)
-      .subscribe(
-        response => {
-          balanceResponse = response;
-        },
-        error => {
-          this.apiError = error.error.errors[0].message;
-        },
-        () => {
-          this.sendForm.patchValue({ amount: +new CoinNotationPipe(this.globalService).transform(this.spendableBalance) });
-          this.estimatedFee = balanceResponse.fee;
-        }
-      );
+    this.sendForm.patchValue({ amount: +new CoinNotationPipe(this.globalService).transform(this.totalBalance) });
   }
 
   public estimateFee() {
@@ -238,39 +223,27 @@ export class ColdStakingWithdrawComponent implements OnInit, OnDestroy {
       );
   }
 
-  private getWalletBalance() {
-    const walletInfo = new WalletInfo(this.globalService.getWalletName());
-    walletInfo.accountName = this.getAccount();
-
-    this.walletBalanceSubscription = this.apiService.getWalletBalance(walletInfo)
-      .subscribe(
+  private updateAccountBalanceDetails() {
+    this.walletAccountBalanceWorker.pause();
+    const maxBalanceRequest = {
+      walletName: this.globalService.getWalletName(),
+      feeType: this.sendForm.get('fee').value
+    };
+    this.apiService.getMaximumBalance(maxBalanceRequest)
+      .pipe(finalize(() => {
+        this.walletAccountBalanceWorker.resume();
+      }),
+      ).subscribe(
         response => {
-          if (response != null) {
-            const balanceResponse = response;
-            this.totalBalance = balanceResponse.balances[0].amountConfirmed + balanceResponse.balances[0].amountUnconfirmed;
-            this.spendableBalance = balanceResponse.balances[0].spendableAmount;
-          }
+          this.log.info('Get max balance result:', response);
+          this.estimatedFee = response.fee;
+          this.totalBalance = response.maxSpendableAmount;
+          this.balanceLoaded = true;
         },
         error => {
-          if (error.status === 0) {
-            this.cancelSubscriptions();
-          } else if (error.status >= 400) {
-            if (!error.error.errors[0].message) {
-              this.cancelSubscriptions();
-              this.startSubscriptions();
-            }
-          }
+          this.apiService.handleException(error);
         }
       );
   }
 
-  private cancelSubscriptions() {
-    if (this.walletBalanceSubscription) {
-      this.walletBalanceSubscription.unsubscribe();
-    }
-  }
-
-  private startSubscriptions() {
-    this.getWalletBalance();
-  }
 }

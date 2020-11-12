@@ -50,7 +50,7 @@
 </div>
 <!-- /row -->
 <!-- Confirmation Modal -->
-<p-dialog header="Secret Words" [(visible)]="displayMnemonic" [modal]="true" [responsive]="true" [style]="{width: '600px', minWidth: '450px'}" [minY]="70" [maximizable]="false" appendTo="body">
+<p-dialog header="Secret Words" [(visible)]="displayMnemonic" [modal]="true" [style]="{width: '600px', minWidth: '450px'}" [minY]="70" [maximizable]="false" appendTo="body">
   <span>
     <app-show-mnemonic *ngIf="displayMnemonic" [queryParams]="queryParams"></app-show-mnemonic>
   </span>
@@ -61,7 +61,7 @@
 </p-dialog>
 
 <!-- Confirmation Modal -->
-<p-dialog header="Confirm Secret Words" [(visible)]="displayMnemonicConfirm" [modal]="true" [responsive]="true" [style]="{width: '600px', minWidth: '450px'}" [minY]="70" [maximizable]="false" appendTo="body">
+<p-dialog header="Confirm Secret Words" [(visible)]="displayMnemonicConfirm" [modal]="true" [style]="{width: '600px', minWidth: '450px'}" [minY]="70" [maximizable]="false" appendTo="body">
   <span>
     <app-confirm-mnemonic *ngIf="displayMnemonicConfirm" [queryParams]="queryParams" (walletCreated)="walletCreateResult($event)"></app-confirm-mnemonic>
   </span>

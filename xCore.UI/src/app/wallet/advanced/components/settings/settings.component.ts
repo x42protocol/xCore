@@ -3,6 +3,7 @@ import { ElectronService } from 'ngx-electron';
 import { ThemeService } from '../../../../shared/services/theme.service';
 import { ApiService } from '../../../../shared/services/api.service';
 import { GlobalService } from '../../../../shared/services/global.service';
+import { ApplicationStateService } from '../../../../shared/services/application-state.service';
 import { AddressType, AddressTypes } from '../../../../shared/models/address-type';
 import { ColdHotStateRequest } from '../../../../shared/models/coldhotstaterequest';
 import { SelectItemGroup, SelectItem } from 'primeng/api';
@@ -14,20 +15,23 @@ import { SelectItemGroup, SelectItem } from 'primeng/api';
 })
 export class SettingsComponent implements OnInit {
   constructor(
-    private nodeApiService: ApiService,
+    private apiService: ApiService,
     private globalService: GlobalService,
     private themeService: ThemeService,
     private electronService: ElectronService,
     private addressType: AddressType,
+    public appState: ApplicationStateService,
   ) { }
 
   public groupedThemes: SelectItemGroup[];
   public addressTypeOptions: SelectItem[];
   public coldWalletTypeOptions: SelectItem[];
+  public modeTypeOptions: SelectItem[];
   public selectedAddressType: AddressTypes;
   public isColdHotWallet: boolean;
   public logoFileName: string;
   public selectedTheme: string;
+  public isDeveloper: boolean;
 
   ngOnInit() {
     this.groupedThemes = [
@@ -58,16 +62,21 @@ export class SettingsComponent implements OnInit {
 
     this.coldWalletTypeOptions = [
       { label: 'Cold (Default)', value: false, icon: 'fa fa-shield' },
-      { label: 'Hot', value: true, icon: 'fa fa-fire' }
+      { label: 'Hot (Delegated)', value: true, icon: 'fa fa-fire' }
+    ];
+
+    this.modeTypeOptions = [
+      { label: 'Open Developer Tools', value: true, icon: 'pi pi-user-plus' }
     ];
 
     this.selectedAddressType = this.addressType.Type;
 
-    this.nodeApiService
+    this.apiService
       .getColdHotState(this.globalService.getWalletName())
       .subscribe(
         isHot => {
           this.isColdHotWallet = isHot;
+          this.appState.delegated = isHot;
         }
       );
   }
@@ -81,13 +90,20 @@ export class SettingsComponent implements OnInit {
     this.setLogoPath();
   }
 
+  onModeChange(event) {
+    if (event.value) {
+      this.electronService.ipcRenderer.sendSync('open-dev-tools');
+    }
+  }
+
   setLogoPath() {
     this.logoFileName = this.themeService.getLogo();
   }
 
   onColdWalletTypeChange(event) {
+    this.appState.delegated = event.value;
     const requestData = new ColdHotStateRequest(this.globalService.getWalletName(), event.value);
-    this.nodeApiService
+    this.apiService
       .toggleColdHotState(requestData)
       .subscribe();
   }
@@ -101,6 +117,6 @@ export class SettingsComponent implements OnInit {
   }
 
   public openColdHotSetup() {
-    this.electronService.shell.openExternal('https://github.com/x42protocol/documentation/blob/master/xCore-ColdStakingHotSetup.md');
+    this.electronService.shell.openExternal('https://github.com/x42protocol/xCore/wiki/Remote-Delegated-Cold-Staking-Setup');
   }
 }

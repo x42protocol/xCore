@@ -3,7 +3,6 @@ import { FormGroup, Validators, FormBuilder } from '@angular/forms';
 import { Router } from '@angular/router';
 import { GlobalService } from '../shared/services/global.service';
 import { ApiService } from '../shared/services/api.service';
-import { ModalService } from '../shared/services/modal.service';
 import { ApplicationStateService } from '../shared/services/application-state.service';
 import { WalletLoad } from '../shared/models/wallet-load';
 import { ThemeService } from '../shared/services/theme.service';
@@ -18,7 +17,7 @@ import { ColdStakingService } from '../shared/services/coldstaking.service';
 export class LoginComponent implements OnInit {
   constructor(
     private globalService: GlobalService,
-    private FullNodeApiService: ApiService,
+    private apiService: ApiService,
     private router: Router,
     private fb: FormBuilder,
     public themeService: ThemeService,
@@ -98,7 +97,7 @@ export class LoginComponent implements OnInit {
   }
 
   private getWalletFiles() {
-    this.FullNodeApiService.getWalletFiles()
+    this.apiService.getWalletFiles()
       .subscribe(
         response => {
           this.globalService.setWalletPath(response.walletsPath);
@@ -143,7 +142,7 @@ export class LoginComponent implements OnInit {
   }
 
   private loadWallet(walletLoad: WalletLoad) {
-    this.FullNodeApiService.loadX42Wallet(walletLoad)
+    this.apiService.loadX42Wallet(walletLoad)
       .subscribe(
         response => {
           this.getKeyAddress(walletLoad.name, walletLoad.password);
@@ -167,7 +166,7 @@ export class LoginComponent implements OnInit {
   }
 
   private getCurrentNetwork() {
-    this.FullNodeApiService.getNodeStatus()
+    this.apiService.getNodeStatus()
       .subscribe(
         response => {
           const responseMessage = response;

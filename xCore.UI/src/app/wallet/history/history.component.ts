@@ -6,8 +6,9 @@ import { GlobalService } from '../../shared/services/global.service';
 import { ThemeService } from '../../shared/services/theme.service';
 import { WalletInfo } from '../../shared/models/wallet-info';
 import { TransactionInfo } from '../../shared/models/transaction-info';
-import { Subscription } from 'rxjs';
 import { TransactionDetailsComponent } from '../transaction-details/transaction-details.component';
+import { finalize } from 'rxjs/operators';
+import { TaskTimer } from 'tasktimer';
 
 @Component({
   selector: 'app-history-component',
@@ -31,15 +32,15 @@ export class HistoryComponent implements OnInit, OnDestroy {
   public hasTransaction = true;
   public isDarkTheme = false;
 
-  private walletHistorySubscription: Subscription;
+  private historyWorker = new TaskTimer(5000);
 
   ngOnInit() {
-    this.startSubscriptions();
+    this.historyWorker.add(() => this.updateWalletHistory()).start();
     this.coinUnit = this.globalService.getCoinUnit();
   }
 
   ngOnDestroy() {
-    this.cancelSubscriptions();
+    this.historyWorker.stop();
   }
 
   onDashboardClicked() {
@@ -55,32 +56,25 @@ export class HistoryComponent implements OnInit, OnDestroy {
     });
   }
 
-  // TODO: add history in seperate service to make it reusable
-  private getHistory() {
+  private updateWalletHistory() {
+    this.historyWorker.pause();
     const walletInfo = new WalletInfo(this.globalService.getWalletName());
     let historyResponse;
-    this.walletHistorySubscription = this.apiService.getWalletHistorySlim(walletInfo)
-      .subscribe(
+    this.apiService.getWalletHistoryOnce(walletInfo, 0, 10)
+      .pipe(finalize(() => {
+        this.historyWorker.resume();
+      }),
+      ).subscribe(
         response => {
-          if (response != null) {
-            // TODO - add account feature instead of using first entry in array
-            if (!!response.history && response.history[0].transactionsHistory.length > 0) {
-              historyResponse = response.history[0].transactionsHistory;
-              this.getTransactionInfo(historyResponse);
-            } else {
-              this.hasTransaction = false;
-            }
+          if (!!response.history && response.history[0].transactionsHistory.length > 0) {
+            historyResponse = response.history[0].transactionsHistory;
+            this.getTransactionInfo(historyResponse);
+          } else {
+            this.hasTransaction = false;
           }
         },
         error => {
-          if (error.status === 0) {
-            this.cancelSubscriptions();
-          } else if (error.status >= 400) {
-            if (!error.error.errors[0].message) {
-              this.cancelSubscriptions();
-              this.startSubscriptions();
-            }
-          }
+          this.apiService.handleException(error);
         }
       );
   }
@@ -115,13 +109,4 @@ export class HistoryComponent implements OnInit, OnDestroy {
     }
   }
 
-  private cancelSubscriptions() {
-    if (this.walletHistorySubscription) {
-      this.walletHistorySubscription.unsubscribe();
-    }
-  }
-
-  private startSubscriptions() {
-    this.getHistory();
-  }
 }

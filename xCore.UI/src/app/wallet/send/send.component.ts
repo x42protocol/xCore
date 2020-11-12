@@ -1,24 +1,23 @@
-import { Component, OnInit, OnDestroy, Input } from '@angular/core';
-import { FormGroup, FormControl, Validators, FormBuilder, AbstractControl } from '@angular/forms';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { FormGroup, Validators, FormBuilder, AbstractControl } from '@angular/forms';
 
 import { ApiService } from '../../shared/services/api.service';
 import { GlobalService } from '../../shared/services/global.service';
+import { Logger } from '../../shared/services/logger.service';
 import { CoinNotationPipe } from '../../shared/pipes/coin-notation.pipe';
 
 import { FeeEstimation } from '../../shared/models/fee-estimation';
 import { SidechainFeeEstimation } from '../../shared/models/sidechain-fee-estimation';
 import { TransactionBuilding } from '../../shared/models/transaction-building';
 import { TransactionSending } from '../../shared/models/transaction-sending';
-import { WalletInfo } from '../../shared/models/wallet-info';
 import { ThemeService } from '../../shared/services/theme.service';
-
-import { Subscription } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, finalize } from 'rxjs/operators';
 
 import { DynamicDialogRef, DynamicDialogConfig, DialogService } from 'primeng/dynamicdialog';
 import { PriceLockUtil } from '../../shared/models/pricelockutil';
 import { SubmitPaymentRequest } from '../../shared/models/xserver-submit-payment-request';
 import { SignMessageRequest } from '../../shared/models/wallet-signmessagerequest';
+import { TaskTimer } from 'tasktimer';
 
 interface TxDetails {
   transactionFee?: number;
@@ -43,6 +42,7 @@ export class SendComponent implements OnInit, OnDestroy {
     public ref: DynamicDialogRef,
     public config: DynamicDialogConfig,
     public themeService: ThemeService,
+    private log: Logger,
   ) {
     this.buildSendForm();
     this.buildPaymentForm();
@@ -50,6 +50,7 @@ export class SendComponent implements OnInit, OnDestroy {
     this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
   }
 
+  public balanceLoaded: boolean;
   public sendForm: FormGroup;
   public paymentForm: FormGroup;
   public sendToSidechainForm: FormGroup;
@@ -95,8 +96,8 @@ export class SendComponent implements OnInit, OnDestroy {
 
   private paymentPairId: number;
   private transactionHex: string;
-  private walletBalanceSubscription: Subscription;
 
+  private walletAccountBalanceWorker = new TaskTimer(5000);
 
   paymentFormErrors = {
     paymentPassword: ''
@@ -166,6 +167,9 @@ export class SendComponent implements OnInit, OnDestroy {
   };
 
   ngOnInit() {
+
+    this.walletAccountBalanceWorker.add(() => this.updateAccountBalanceDetails()).start();
+
     this.sidechainEnabled = false;
     if (this.sidechainEnabled) {
       this.firstTitle = 'Sidechain';
@@ -174,7 +178,6 @@ export class SendComponent implements OnInit, OnDestroy {
       this.firstTitle = 'Mainchain';
       this.secondTitle = 'Sidechain';
     }
-    this.startSubscriptions();
     this.coinUnit = this.globalService.getCoinUnit();
     if (this.config.data !== undefined) {
       this.address = this.config.data.address;
@@ -183,7 +186,7 @@ export class SendComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.cancelSubscriptions();
+    this.walletAccountBalanceWorker.stop();
   }
 
   private buildSendForm(): void {
@@ -510,26 +513,7 @@ export class SendComponent implements OnInit, OnDestroy {
   }
 
   public getMaxBalance() {
-    const data = {
-      walletName: this.globalService.getWalletName(),
-      feeType: this.sendForm.get('fee').value
-    };
-
-    let balanceResponse;
-
-    this.apiService.getMaximumBalance(data)
-      .subscribe(
-        response => {
-          balanceResponse = response;
-        },
-        error => {
-          this.apiError = error.error.errors[0].message;
-        },
-        () => {
-          this.sendForm.patchValue({ amount: +new CoinNotationPipe(this.globalService).transform(balanceResponse.maxSpendableAmount) });
-          this.estimatedFee = balanceResponse.fee;
-        }
-      );
+    this.sendForm.patchValue({ amount: +new CoinNotationPipe(this.globalService).transform(this.totalBalance) });
   }
 
   public estimateFee() {
@@ -674,41 +658,30 @@ export class SendComponent implements OnInit, OnDestroy {
       );
   }
 
-  private getWalletBalance() {
-    const walletInfo = new WalletInfo(this.globalService.getWalletName());
-    this.walletBalanceSubscription = this.apiService.getWalletBalance(walletInfo)
-      .subscribe(
+  private updateAccountBalanceDetails() {
+    this.walletAccountBalanceWorker.pause();
+    const maxBalanceRequest = {
+      walletName: this.globalService.getWalletName(),
+      feeType: this.sendForm.get('fee').value
+    };
+    this.apiService.getMaximumBalance(maxBalanceRequest)
+      .pipe(finalize(() => {
+        this.walletAccountBalanceWorker.resume();
+      }),
+      ).subscribe(
         response => {
-          if (response != null) {
-            const balanceResponse = response;
-            // TO DO - add account feature instead of using first entry in array
-            this.totalBalance = balanceResponse.balances[0].amountConfirmed + balanceResponse.balances[0].amountUnconfirmed;
-          }
+          this.log.info('Get max balance result:', response);
+          this.estimatedFee = response.fee;
+          this.totalBalance = response.maxSpendableAmount;
+          this.balanceLoaded = true;
         },
         error => {
-          if (error.status === 0) {
-            this.cancelSubscriptions();
-          } else if (error.status >= 400) {
-            if (!error.error.errors[0].message) {
-              this.cancelSubscriptions();
-              this.startSubscriptions();
-            }
-          }
+          this.apiService.handleException(error);
         }
       );
   }
 
   public goBack() {
     this.isPayment = false;
-  }
-
-  private cancelSubscriptions() {
-    if (this.walletBalanceSubscription) {
-      this.walletBalanceSubscription.unsubscribe();
-    }
-  }
-
-  private startSubscriptions() {
-    this.getWalletBalance();
   }
 }

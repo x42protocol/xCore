@@ -6,7 +6,7 @@
         <button pButton type="button" icon="pi pi-arrow-left" label="Back" class="ui-button-rounded" (click)="showOneAddress()"></button>
       </div>
       <div class="text-right col-6">
-        <i class="pi pi-question-circle" style="font-size: 1.5em" (click)="showAboutPriceLocks()"></i>
+        <i class="pi pi-question-circle" style="font-size: 1.5em; cursor: pointer;" (click)="showAboutPriceLocks()"></i>
       </div>
     </div>
     <span *ngIf="showAbout" class="ui-message ui-widget ui-corner-all ng-star-inserted">
@@ -99,7 +99,7 @@
     {{ errorMessage }}
   </div>
   <div *ngIf="!isPriceLock">
-    <div class="text-right">
+    <div class="text-left">
       <button *ngIf="!showAll" pButton type="button" icon="pi pi-chevron-circle-right" iconPos="right" label="Create Payment" class="ui-button-rounded" (click)="showPriceLock()"></button>
     </div>
     <form *ngIf="!showAll">

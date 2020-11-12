@@ -3,6 +3,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { Message } from 'primeng/api';
 import { DialogService } from 'primeng/dynamicdialog';
 import { GlobalService } from '../../shared/services/global.service';
+import { Logger } from '../../shared/services/logger.service';
 import { ThemeService } from '../../shared/services/theme.service';
 import { ApiService } from '../../shared/services/api.service';
 import { ColdStakingService } from '../../shared/services/coldstaking.service';
@@ -15,6 +16,7 @@ import { TransactionInfo } from '../../shared/models/transaction-info';
 import { WalletInfo } from '../../shared/models/wallet-info';
 import { Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
+import { TaskTimer } from 'tasktimer';
 
 @Component({
   selector: 'app-staking-scene',
@@ -29,6 +31,7 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
     public dialogService: DialogService,
     private fb: FormBuilder,
     public themeService: ThemeService,
+    private log: Logger,
   ) {
     this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
   }
@@ -49,7 +52,7 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
   public hotMessage: Message[] = [];
   public isColdHotWallet: boolean;
   public coinUnit: string;
-
+  public balanceLoaded: boolean;
   public confirmedColdBalance = 0;
   public confirmedHotBalance = 0;
 
@@ -62,11 +65,11 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
   public hasColdBalance = false;
   public hasHotBalance = false;
 
-  private walletColdHistorySubscription: Subscription;
-  private walletHotHistorySubscription: Subscription;
-  private walletColdBalanceSubscription: Subscription;
-  private walletHotBalanceSubscription: Subscription;
   private walletColdWalletExistsSubscription: Subscription;
+  private walletColdBalanceWorker = new TaskTimer(5000);
+  private walletHotBalanceWorker = new TaskTimer(5000);
+  private walletColdHistoryWorker = new TaskTimer(5000);
+  private walletHotHistoryWorker = new TaskTimer(5000);
 
   public setupForm: FormGroup;
 
@@ -86,9 +89,19 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
           this.isColdHotWallet = isHot;
         }
       );
+
+    this.walletColdBalanceWorker.add(() => this.updateColdBalanceDetails()).start();
+    this.walletHotBalanceWorker.add(() => this.updateHotBalanceDetails()).start();
+    this.walletColdHistoryWorker.add(() => this.updateColdHistory());
+    this.walletHotHistoryWorker.add(() => this.updateHotHistory());
   }
 
   ngOnDestroy() {
+    this.walletColdBalanceWorker.stop();
+    this.walletHotBalanceWorker.stop();
+    this.walletColdHistoryWorker.stop();
+    this.walletHotHistoryWorker.stop();
+
     this.cancelSubscriptions();
   }
 
@@ -151,47 +164,55 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
     });
   }
 
-  private getHistory(isCold: boolean) {
+  private updateColdHistory() {
+    this.walletColdHistoryWorker.pause();
     const walletInfo = new WalletInfo(this.globalService.getWalletName());
-    if (isCold) {
-      let coldHistoryResponse;
-      walletInfo.accountName = this.coldStakingAccount;
-      this.walletColdHistorySubscription = this.apiService.getWalletHistorySlim(walletInfo, 0, 100, true)
-        .subscribe(
-          response => {
-            if (response != null) {
-              if (!!response.history && response.history[0].transactionsHistory.length > 0) {
-                coldHistoryResponse = response.history[0].transactionsHistory;
-                this.getTransactionInfo(coldHistoryResponse, true);
-              }
-              else {
-                this.hasColdTransaction = false;
-              }
-            }
+    walletInfo.accountName = this.coldStakingAccount;
+    this.apiService.getWalletHistoryOnce(walletInfo, 0, 100, true)
+      .pipe(finalize(() => {
+        this.isLoading = false;
+        this.walletColdHistoryWorker.resume();
+      }),
+      ).subscribe(
+        response => {
+          if (!!response.history && response.history[0].transactionsHistory.length > 0) {
+            const coldHistoryResponse = response.history[0].transactionsHistory;
+            this.getTransactionInfo(coldHistoryResponse, true);
           }
-        );
-    } else {
-      let coldHistoryResponse;
-      walletInfo.accountName = this.hotStakingAccount;
-      this.walletHotHistorySubscription = this.apiService.getWalletHistory(walletInfo, 0, 100, true)
-        .pipe(
-          finalize(() => this.isLoading = false)
-        )
-        .subscribe(
-          response => {
-            if (response != null) {
-              if (!!response.history && response.history[0].transactionsHistory.length > 0) {
-                coldHistoryResponse = response.history[0].transactionsHistory;
-                this.getTransactionInfo(coldHistoryResponse, false);
-              }
-              else {
-                this.hasHotTransaction = false;
-              }
-              this.isLoading = false;
-            }
+          else {
+            this.hasColdTransaction = false;
           }
-        );
-    }
+        },
+        error => {
+          this.apiService.handleException(error);
+        }
+      );
+  }
+
+  private updateHotHistory() {
+    this.walletHotHistoryWorker.pause();
+    const walletInfo = new WalletInfo(this.globalService.getWalletName());
+    walletInfo.accountName = this.hotStakingAccount;
+    this.apiService.getWalletHistoryOnce(walletInfo, 0, 100, true)
+      .pipe(finalize(() => {
+        this.isLoading = false;
+        this.walletHotHistoryWorker.resume();
+      }),
+      ).subscribe(
+        response => {
+          if (!!response.history && response.history[0].transactionsHistory.length > 0) {
+            const hotHistoryResponse = response.history[0].transactionsHistory;
+            this.getTransactionInfo(hotHistoryResponse, false);
+          }
+          else {
+            this.hasHotTransaction = false;
+          }
+          this.isLoading = false;
+        },
+        error => {
+          this.apiService.handleException(error);
+        }
+      );
   }
 
   private getTransactionInfo(transactions: any, isCold: boolean) {
@@ -238,38 +259,72 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
     }
   }
 
-  private getWalletBalance() {
+  private updateColdBalanceDetails() {
+    this.walletColdBalanceWorker.pause();
     const walletInfo = new WalletInfo(this.globalService.getWalletName());
-    walletInfo.accountName = this.coldStakingAccount;
-
-    this.walletColdBalanceSubscription = this.apiService.getWalletBalance(walletInfo, true)
-      .subscribe(
-        coldBalanceResponse => {
-          if (coldBalanceResponse != null) {
-            if (coldBalanceResponse.balances[0].amountConfirmed > 0 || coldBalanceResponse.balances[0].amountUnconfirmed > 0) {
-              this.hasColdBalance = true;
-            }
-            this.confirmedColdBalance = coldBalanceResponse.balances[0].amountConfirmed;
-            this.unconfirmedColdBalance = coldBalanceResponse.balances[0].amountUnconfirmed;
-            this.spendableColdBalance = coldBalanceResponse.balances[0].spendableAmount;
+    this.apiService.getWalletBalanceOnce(walletInfo)
+      .pipe(finalize(() => {
+        this.walletColdBalanceWorker.resume();
+      }),
+      ).subscribe(
+        response => {
+          this.log.info('Get cold balance result:', response);
+          const balanceResponse = response;
+          this.confirmedColdBalance = balanceResponse.balances[0].amountConfirmed;
+          this.unconfirmedColdBalance = balanceResponse.balances[0].amountUnconfirmed;
+          this.spendableColdBalance = balanceResponse.balances[0].spendableAmount;
+          if ((this.confirmedColdBalance + this.unconfirmedColdBalance) > 0) {
+            this.hasColdBalance = true;
+          } else {
+            this.hasColdBalance = false;
           }
+          this.balanceLoaded = true;
+          this.startColdHistoryWorker();
+        },
+        error => {
+          this.apiService.handleException(error);
         }
       );
+  }
 
+  startColdHistoryWorker() {
+    if (this.walletColdHistoryWorker.state === TaskTimer.State.IDLE) {
+      this.log.info('Cold history is not running, starting...');
+      this.hasColdTransaction = true;
+      this.walletColdHistoryWorker.start();
+    }
+  }
+
+  private updateHotBalanceDetails() {
+    this.walletHotBalanceWorker.pause();
+    const walletInfo = new WalletInfo(this.globalService.getWalletName());
     walletInfo.accountName = this.hotStakingAccount;
-    this.walletHotBalanceSubscription = this.apiService.getWalletBalance(walletInfo, true)
-      .subscribe(
+    this.apiService.getWalletBalanceOnce(walletInfo)
+      .pipe(finalize(() => {
+        this.walletHotBalanceWorker.resume();
+      }),
+      ).subscribe(
         hotBalanceResponse => {
-          if (hotBalanceResponse != null) {
-            if (hotBalanceResponse.balances[0].amountConfirmed > 0 || hotBalanceResponse.balances[0].amountUnconfirmed > 0) {
-              this.hasHotBalance = true;
-            }
-            this.confirmedHotBalance = hotBalanceResponse.balances[0].amountConfirmed;
-            this.unconfirmedHotBalance = hotBalanceResponse.balances[0].amountUnconfirmed;
-            this.spendableHotBalance = hotBalanceResponse.balances[0].spendableAmount;
+          this.log.info('Get hot balance result:', hotBalanceResponse);
+          if (hotBalanceResponse.balances[0].amountConfirmed > 0 || hotBalanceResponse.balances[0].amountUnconfirmed > 0) {
+            this.hasHotBalance = true;
           }
+          this.confirmedHotBalance = hotBalanceResponse.balances[0].amountConfirmed;
+          this.unconfirmedHotBalance = hotBalanceResponse.balances[0].amountUnconfirmed;
+          this.spendableHotBalance = hotBalanceResponse.balances[0].spendableAmount;
+        },
+        error => {
+          this.apiService.handleException(error);
         }
       );
+  }
+
+  startHotHistoryWorker() {
+    if (this.walletHotHistoryWorker.state === TaskTimer.State.IDLE) {
+      this.log.info('Hot history is not running, starting...');
+      this.hasHotTransaction = true;
+      this.walletHotHistoryWorker.start();
+    }
   }
 
   public openTransactionDetailDialog(transaction: TransactionInfo) {
@@ -282,22 +337,7 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
   }
 
   private cancelSubscriptions() {
-    if (this.walletColdHistorySubscription) {
-      this.walletColdHistorySubscription.unsubscribe();
-    }
-    if (this.walletHotHistorySubscription) {
-      this.walletHotHistorySubscription.unsubscribe();
-    }
-    if (this.walletColdBalanceSubscription) {
-      this.walletColdBalanceSubscription.unsubscribe();
-    }
-    if (this.walletHotBalanceSubscription) {
-      this.walletHotBalanceSubscription.unsubscribe();
-    }
     if (this.walletColdWalletExistsSubscription) {
-      this.walletColdWalletExistsSubscription.unsubscribe();
-    }
-    if (this.hotWalletAccountExists) {
       this.walletColdWalletExistsSubscription.unsubscribe();
     }
   }
@@ -312,9 +352,5 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
       this.hasHotBalance = false;
       return;
     }
-
-    this.getWalletBalance();
-    this.getHistory(true);
-    this.getHistory(false);
   }
 }

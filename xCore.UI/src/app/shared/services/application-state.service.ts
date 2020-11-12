@@ -61,6 +61,7 @@ export class ApplicationStateService {
     return ApplicationStateService.singletonInstance;
   }
 
+  delegated = false;
 
   networkDefinition: any;
 

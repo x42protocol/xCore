@@ -15,6 +15,7 @@ import { ApplicationStateService } from '../../../shared/services/application-st
 import { UpdateService } from '../../../shared/services/update.service';
 import { Logger } from '../../../shared/services/logger.service';
 import { ApiService } from '../../services/api.service';
+import { TaskTimer } from 'tasktimer';
 
 @Component({
   selector: 'app-main-menu',
@@ -42,6 +43,9 @@ export class MainMenuComponent implements OnInit {
 
   toolTip = '';
   connectedNodesTooltip = '';
+
+  private coldTypeWorker = new TaskTimer(1000);
+  private isDelegated = false;
 
   constructor(
     private log: Logger,
@@ -164,6 +168,26 @@ export class MainMenuComponent implements OnInit {
     setTimeout(() => {
       this.checkForUpdates();
     }, 12000);
+
+    const walletName = this.globalService.getWalletName();
+    if (walletName !== '') {
+      this.apiService
+        .getColdHotState(walletName)
+        .subscribe(
+          isHot => {
+            this.appState.delegated = isHot;
+          }
+        );
+    }
+
+    this.coldTypeWorker.add(() => this.checkForColdTypeChange()).start();
+  }
+
+  checkForColdTypeChange() {
+    if (this.isDelegated !== this.appState.delegated) {
+      this.isDelegated = this.appState.delegated;
+      this.setUnlockedMenuItems();
+    }
   }
 
   changeMode() {
@@ -195,6 +219,10 @@ export class MainMenuComponent implements OnInit {
   }
 
   setUnlockedMenuItems() {
+    let coldStakeType = 'Cold';
+    if (this.isDelegated) {
+      coldStakeType = 'Delegated';
+    }
     this.menuItems = [
       {
         label: 'Client',
@@ -239,7 +267,7 @@ export class MainMenuComponent implements OnInit {
           },
           { separator: true },
           {
-            label: 'Cold Staking',
+            label: `${coldStakeType} Staking`,
             icon: 'pi pi-fw pi-ticket',
             command: (event: Event) => {
               this.openColdStaking();
