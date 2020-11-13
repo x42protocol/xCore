@@ -116,7 +116,6 @@
             <section>
               <div *ngIf="hasHotBalance">
                 <ul class="list-unstyled mb-3">
-                  <li *ngIf="isStarting">Waiting for staking to start...</li>
                   <div *ngIf="!isStarting">
                     <li>Remote Balance: <strong>{{ (confirmedHotBalance | coinNotation) || (0 | coinNotation) }}</strong><small> {{ coinUnit }}</small></li>
                   </div>

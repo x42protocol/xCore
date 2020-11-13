@@ -78,7 +78,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       { name: 'Search For Apps', image: 'https://cdn1.iconfinder.com/data/icons/hawcons/32/698628-icon-112-search-plus-512.png' }
     ];
 
-    this.stakingInfoWorker.add(() => this.updateStakingInfoDetails());
+    this.stakingInfoWorker.add(() => this.updateStakingInfoDetails()).start();
     this.walletAccountBalanceWorker.add(() => this.updateAccountBalanceDetails()).start();
     this.walletHotBalanceWorker.add(() => this.updateHotBalanceDetails()).start();
     this.historyWorker.add(() => this.updateWalletHistory());
@@ -321,7 +321,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
           this.makeLatestTxListSmall();
           this.stakingEnabled = true;
           this.stakingForm.patchValue({ walletPassword: '' });
-          this.stakingInfoWorker.start();
         },
         error => {
           this.isStarting = false;
