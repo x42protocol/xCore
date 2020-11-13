@@ -225,19 +225,18 @@ export class ColdStakingWithdrawComponent implements OnInit, OnDestroy {
 
   private updateAccountBalanceDetails() {
     this.walletAccountBalanceWorker.pause();
-    const maxBalanceRequest = {
-      walletName: this.globalService.getWalletName(),
-      feeType: this.sendForm.get('fee').value
-    };
-    this.apiService.getMaximumBalance(maxBalanceRequest)
+    const walletInfo = new WalletInfo(this.globalService.getWalletName());
+    walletInfo.accountName = this.getAccount();
+    this.apiService.getWalletBalanceOnce(walletInfo)
       .pipe(finalize(() => {
         this.walletAccountBalanceWorker.resume();
       }),
       ).subscribe(
         response => {
-          this.log.info('Get max balance result:', response);
-          this.estimatedFee = response.fee;
-          this.totalBalance = response.maxSpendableAmount;
+          this.log.info('Get account balance result:', response);
+          const balanceResponse = response;
+          this.totalBalance = balanceResponse.balances[0].amountConfirmed + balanceResponse.balances[0].amountUnconfirmed;
+          this.spendableBalance = balanceResponse.balances[0].spendableAmount;
           this.balanceLoaded = true;
         },
         error => {
