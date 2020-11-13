@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, Validators, FormBuilder } from '@angular/forms';
 import { Router } from '@angular/router';
+import { ModalService } from '../shared/services/modal.service';
 import { GlobalService } from '../shared/services/global.service';
 import { ApiService } from '../shared/services/api.service';
 import { ApplicationStateService } from '../shared/services/application-state.service';
@@ -23,6 +24,7 @@ export class LoginComponent implements OnInit {
     public themeService: ThemeService,
     private stakingService: ColdStakingService,
     public appState: ApplicationStateService,
+    public modalService: ModalService,
   ) {
     this.buildDecryptForm();
     this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
@@ -148,6 +150,7 @@ export class LoginComponent implements OnInit {
           this.getKeyAddress(walletLoad.name, walletLoad.password);
         },
         error => {
+          this.modalService.openModal("Login", error.error.errors[0].message);
           this.isDecrypting = false;
         }
       );

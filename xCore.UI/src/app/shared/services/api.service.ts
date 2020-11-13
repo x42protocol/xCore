@@ -662,9 +662,5 @@ export class ApiService {
       message: errorMessage,
       icon: 'warning'
     });
-
-    // if (errorMessage.indexOf('Http failure response for') === -1) {
-    // this.snackBar.open(errorMessage, null, { duration: 5000, panelClass: 'error-snackbar' });
-    // }
   }
 }
