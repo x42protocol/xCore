@@ -39,9 +39,9 @@
     <div class="col-12" *ngIf="isColdHotWallet">
       <p-panel #hotbalancepnl>
         <p-header>
-          <span class="ui-panel-title" style="font-size:16px;display:inline-block;margin-top:2px;">Hot Balance</span>
+          <span class="ui-panel-title" style="font-size:16px;display:inline-block;margin-top:2px;">Delegated Balance</span>
           <p style="float: right;" *ngIf="hotWalletAccountExists">
-            <button type="button" pButton (click)="onWalletGetFirstUnusedAddress(false)" label="Get Hot Address" class="ui-button-success" icon="pi pi-directions" style="margin-right: 10px;"></button>
+            <button type="button" pButton (click)="onWalletGetFirstUnusedAddress(false)" label="Get Address to Delegate" class="ui-button-success" icon="pi pi-directions" style="margin-right: 10px;"></button>
           </p>
         </p-header>
         <div class="col-9 text-left" *ngIf="hasHotBalance">
@@ -112,7 +112,7 @@
       <!-- HOT TRANSACTIONS -->
       <p-table [responsive]="true" [value]="hotTransactions" [style]="{'margin-top':'20px'}" *ngIf="isColdHotWallet" [paginator]="true" [rows]="10">
         <ng-template pTemplate="caption">
-          Hot Transaction History
+          Delegated Balance Transaction History
         </ng-template>
         <ng-template pTemplate="header">
           <tr>
