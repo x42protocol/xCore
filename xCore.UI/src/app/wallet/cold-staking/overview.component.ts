@@ -313,6 +313,13 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
           this.confirmedHotBalance = hotBalanceResponse.balances[0].amountConfirmed;
           this.unconfirmedHotBalance = hotBalanceResponse.balances[0].amountUnconfirmed;
           this.spendableHotBalance = hotBalanceResponse.balances[0].spendableAmount;
+          if ((this.confirmedHotBalance + this.unconfirmedHotBalance) > 0) {
+            this.hasHotBalance = true;
+          } else {
+            this.hasHotBalance = false;
+          }
+          this.balanceLoaded = true;
+          this.startHotHistoryWorker();
         },
         error => {
           this.apiService.handleException(error);
