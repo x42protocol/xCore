@@ -64,9 +64,7 @@
         <div><strong>Version: {{updateService.info.version}} ({{releaseDateFormatted()}})</strong></div>
       </div>
       <div>
-        <p>
-          {{updateService.info.releaseNotes}}
-        </p>
+        <p [innerHTML]="updateService.info.releaseNotes"></p>
         <p class="mt-2" *ngIf="updateService.progress && updateService.progress.percent !== 100">
           <p-progressBar [value]="updateService.progress.percent | number:'1.2-2'"></p-progressBar>
           <br>({{updateService.progress.transferred | sizeUnit}}/{{updateService.progress.total | sizeUnit}})
