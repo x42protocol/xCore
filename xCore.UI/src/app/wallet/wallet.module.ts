@@ -30,7 +30,6 @@ import { CreateProfileComponent } from './profile/create/create-profile.componen
 // Cold Staking
 import { ColdStakingOverviewComponent } from './cold-staking/overview.component';
 import { ColdStakingCreateComponent } from './cold-staking/create/create.component';
-import { ColdStakingCreateSuccessComponent } from './cold-staking/create-success/create-success.component';
 import { ColdStakingCreateAddressComponent } from './cold-staking/create-address/create-address.component';
 import { ColdStakingWithdrawComponent } from './cold-staking/withdraw/withdraw.component';
 import { ColdStakingCreateHotComponent } from './cold-staking/create-hot/create-hot.component';
@@ -127,7 +126,6 @@ import { NgCircleProgressModule } from 'ng-circle-progress';
     ResyncComponent,
     ColdStakingOverviewComponent,
     ColdStakingCreateComponent,
-    ColdStakingCreateSuccessComponent,
     ColdStakingCreateAddressComponent,
     ColdStakingWithdrawComponent,
     ColdStakingCreateHotComponent,
@@ -146,7 +144,6 @@ import { NgCircleProgressModule } from 'ng-circle-progress';
     SignatureComponent,
     VerifyComponent,
     ColdStakingCreateComponent,
-    ColdStakingCreateSuccessComponent,
     ColdStakingCreateAddressComponent,
     ColdStakingWithdrawComponent,
     ColdStakingCreateHotComponent,

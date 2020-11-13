@@ -10,7 +10,6 @@ import { FeeEstimation } from '../../../shared/models/fee-estimation';
 import { ColdStakingService } from '../../../shared/services/coldstaking.service';
 import { TransactionSending } from '../../../shared/models/transaction-sending';
 import { ColdStakingSetup } from '../../../shared/models/coldstakingsetup';
-import { ColdStakingCreateSuccessComponent } from '../create-success/create-success.component';
 import { WalletInfo } from '../../../shared/models/wallet-info';
 import { debounceTime, finalize } from 'rxjs/operators';
 import { TaskTimer } from 'tasktimer';
@@ -44,12 +43,12 @@ export class ColdStakingCreateComponent implements OnInit, OnDestroy {
   public balanceLoaded: boolean;
   public sendForm: FormGroup;
   public coinUnit: string;
-  public spendableBalance = 0;
   public apiError: string;
   public totalBalance = 0;
   public isSending = false;
   public estimatedFee = 0;
   public isDarkTheme = false;
+  public sendSuccess: boolean;
 
   public mainAccount = 'account 0';
   public coldStakingAccount = 'coldStakingColdAddresses';
@@ -94,7 +93,7 @@ export class ColdStakingCreateComponent implements OnInit, OnDestroy {
   private buildSendForm(): void {
     this.sendForm = this.fb.group({
       hotWalletAddress: ['', Validators.compose([Validators.required, Validators.minLength(26)])],
-      amount: ['', Validators.compose([Validators.required, Validators.pattern(/^([0-9]+)?(\.[0-9]{0,8})?$/), Validators.min(0.00001), (control: AbstractControl) => Validators.max((this.spendableBalance - this.estimatedFee) / 100000000)(control)])],
+      amount: ['', Validators.compose([Validators.required, Validators.pattern(/^([0-9]+)?(\.[0-9]{0,8})?$/), Validators.min(0.00001), (control: AbstractControl) => Validators.max((this.totalBalance - this.estimatedFee) / 100000000)(control)])],
       password: ['', Validators.required],
       fee: ['medium', Validators.required]
     });
@@ -128,46 +127,29 @@ export class ColdStakingCreateComponent implements OnInit, OnDestroy {
     }
   }
 
+  public getMaxBalance() {
+    this.sendForm.patchValue({ amount: +new CoinNotationPipe(this.globalService).transform(this.totalBalance) });
+  }
+
   private updateAccountBalanceDetails() {
     this.walletAccountBalanceWorker.pause();
-    const walletInfo = new WalletInfo(this.globalService.getWalletName());
-    this.apiService.getWalletBalanceOnce(walletInfo)
+    const maxBalanceRequest = {
+      walletName: this.globalService.getWalletName(),
+      feeType: this.sendForm.get('fee').value
+    };
+    this.apiService.getMaximumBalance(maxBalanceRequest)
       .pipe(finalize(() => {
         this.walletAccountBalanceWorker.resume();
       }),
       ).subscribe(
         response => {
-          this.log.info('Get account balance result:', response);
-          const balanceResponse = response;
-          this.totalBalance = balanceResponse.balances[0].amountConfirmed + balanceResponse.balances[0].amountUnconfirmed;
-          this.spendableBalance = balanceResponse.balances[0].spendableAmount;
+          this.log.info('Get max balance result:', response);
+          this.estimatedFee = response.fee;
+          this.totalBalance = response.maxSpendableAmount;
           this.balanceLoaded = true;
         },
         error => {
           this.apiService.handleException(error);
-        }
-      );
-  }
-
-  public getMaxBalance() {
-    const data = {
-      walletName: this.globalService.getWalletName(),
-      feeType: this.sendForm.get('fee').value
-    };
-
-    let balanceResponse;
-
-    this.apiService.getMaximumBalance(data)
-      .subscribe(
-        response => {
-          balanceResponse = response;
-        },
-        error => {
-          this.apiError = error.error.errors[0].message;
-        },
-        () => {
-          this.sendForm.patchValue({ amount: +new CoinNotationPipe(this.globalService).transform(balanceResponse.maxSpendableAmount) });
-          this.estimatedFee = balanceResponse.fee;
         }
       );
   }
@@ -199,11 +181,7 @@ export class ColdStakingCreateComponent implements OnInit, OnDestroy {
   }
 
   public deligatedTransactionSent(transactionId: string) {
-    this.activeModal.close('Transaction Sent');
-    this.dialogService.open(ColdStakingCreateSuccessComponent, {
-      header: 'Success',
-      width: '540px'
-    });
+    this.sendSuccess = true;
   }
 
   public buildTransaction(): void {
