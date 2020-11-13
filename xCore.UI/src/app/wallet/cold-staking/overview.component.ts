@@ -262,6 +262,7 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
   private updateColdBalanceDetails() {
     this.walletColdBalanceWorker.pause();
     const walletInfo = new WalletInfo(this.globalService.getWalletName());
+    walletInfo.accountName = this.coldStakingAccount;
     this.apiService.getWalletBalanceOnce(walletInfo)
       .pipe(finalize(() => {
         this.walletColdBalanceWorker.resume();
