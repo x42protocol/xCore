@@ -11,7 +11,7 @@
           <div class="ui-helper-clearfix">
             <div class="col text-right" style="white-space: nowrap; width: 100px; display: inline;">
               <span class="ui-panel-title" style="font-size:16px;display:inline-block;margin-top:2px;" *ngIf="coldWalletAccountExists">Delegated Balance</span>
-              <span class="ui-panel-title" style="font-size:16px;display:inline-block;margin-top:2px;" *ngIf="!coldWalletAccountExists">Please click the start now button to deligate cold funds to stake</span>
+              <span class="ui-panel-title" style="font-size:16px;display:inline-block;margin-top:2px;" *ngIf="!coldWalletAccountExists">Please click the start now button to delegate cold funds to stake</span>
               <p style="float: right;" *ngIf="coldWalletAccountExists">
                 <button type="button" pButton (click)="onWalletWithdraw(true)" label="Withdraw" class="ui-button-info" icon="pi pi-arrow-circle-down" style="width: 100px; margin-right: 10px;" [disabled]="confirmedColdBalance == 0"></button>
                 <button type="button" pButton (click)="onColdSetup()" label="Delegate" class="ui-button-warning" icon="pi pi-arrow-circle-up" style="width: 100px;"></button>
