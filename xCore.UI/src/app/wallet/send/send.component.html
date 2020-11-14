@@ -107,6 +107,7 @@
           </div>
           <p-message *ngIf="apiError" severity="error" text="{{ apiError }}"></p-message>
           <button *ngIf="!paymentSuccess && !isSending" type="button" [disabled]="!paymentForm.valid || isSending || paymentExpired" class="btn-block mt-5" (click)="makePayment()" label="Make Payment" pButton></button>
+          <button *ngIf="paymentSuccess && !isSending" type="button" class="btn-block mt-5" (click)="ref.close('Close click')" label="Close" pButton></button>
           <!-- SVG -->
           <div *ngIf="isSending" [className]="isDarkTheme ? 'LoadingWhite' : 'Loading'" class="LoadingSend col-2 mx-auto" style="padding: 30px;">
             <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="30px" height="30px" viewBox="0 0 300 300" enable-background="new 0 0 300 300" xml:space="preserve">
