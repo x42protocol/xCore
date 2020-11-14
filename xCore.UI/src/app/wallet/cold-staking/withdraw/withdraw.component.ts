@@ -227,6 +227,16 @@ export class ColdStakingWithdrawComponent implements OnInit, OnDestroy {
       );
   }
 
+  public getUnusedReceiveAddresses() {
+    const walletInfo = new WalletInfo(this.globalService.getWalletName());
+    this.apiService.getUnusedReceiveAddress(walletInfo)
+      .subscribe(
+        response => {
+          this.sendForm.patchValue({ address: response });
+        }
+      );
+  }
+
   private updateAccountBalanceDetails() {
     this.walletAccountBalanceWorker.pause();
     const walletInfo = new WalletInfo(this.globalService.getWalletName());

@@ -28,7 +28,10 @@
     </div>
     <!--<div class="form-group has-success">-->
     <div class="form-group clearfix">
-      <label for="destinationAddress">Destination address</label>
+      <label class="float-left" for="destinationAddress">Destination address</label>
+      <label class="float-right p-text-bold" for="totalAmount" (click)="getUnusedReceiveAddresses()" style="cursor:pointer;">
+        Use address from wallet <i class="ml-1 pi pi-clone" style="font-size: 0.8rem"></i>
+      </label>
       <input type="text" class="form-control" [class.is-invalid]="sendFormErrors.address" [class.is-valid]="!sendFormErrors.address && sendForm.get('address').valid" formControlName="address" id="destinationAddress" placeholder="Please enter the destination address here." pInputText>
       <div *ngIf="sendFormErrors.address" class="invalid-feedback">{{ sendFormErrors.address }}</div>
     </div>
