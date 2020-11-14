@@ -12,6 +12,7 @@ import { ReceiveComponent } from '../../../wallet/receive/receive.component';
 import { CreateComponent } from '../../../setup/create/create.component';
 import { RecoverComponent } from '../../../setup/recover/recover.component';
 import { ApplicationStateService } from '../../../shared/services/application-state.service';
+import { ModalService } from '../../../shared/services/modal.service';
 import { UpdateService } from '../../../shared/services/update.service';
 import { Logger } from '../../../shared/services/logger.service';
 import { ApiService } from '../../services/api.service';
@@ -44,7 +45,7 @@ export class MainMenuComponent implements OnInit {
   toolTip = '';
   connectedNodesTooltip = '';
 
-  private updateCheckWorker = new TaskTimer(600000); // Check every 10 minutes
+  private updateCheckWorker = new TaskTimer(86400000); // Check every 24 hours
   private coldTypeWorker = new TaskTimer(1000);
   private isDelegated = false;
 
@@ -60,6 +61,7 @@ export class MainMenuComponent implements OnInit {
     public apiService: ApiService,
     private zone: NgZone,
     private fb: FormBuilder,
+    public modalService: ModalService,
   ) {
 
     this.groupedThemes = [
@@ -124,20 +126,9 @@ export class MainMenuComponent implements OnInit {
       });
 
       this.ipc.on('daemon-error', (event, error) => {
-
         this.log.error(error);
-        /* TODO Open dialog to show that we couldn't start the process.
-        const dialogRef = this.dialog.open(, {
-          data: {
-            title: 'Failed to start x42.Node process',
-            error,
-            lines: this.log.lastEntries()
-          }
-        });
-        dialogRef.afterClosed().subscribe(result => {
-          this.log.info(`Dialog result: ${result}`);
-        });
-        */
+        // this.modalService.openModal('Failed to start x42.Node process', error);
+        // TODO: Add to a log for the user: this.log.lastEntries()
       });
 
       this.ipc.on('log-debug', (event, msg: any) => {
