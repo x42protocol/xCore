@@ -150,7 +150,7 @@ export class LoginComponent implements OnInit {
           this.getKeyAddress(walletLoad.name, walletLoad.password);
         },
         error => {
-          this.modalService.openModal("Login", error.error.errors[0].message);
+          this.modalService.openModal('Login', error.error.errors[0].message);
           this.isDecrypting = false;
         }
       );
