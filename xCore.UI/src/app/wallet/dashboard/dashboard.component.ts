@@ -78,6 +78,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
       { name: 'Search For Apps', image: 'https://cdn1.iconfinder.com/data/icons/hawcons/32/698628-icon-112-search-plus-512.png' }
     ];
 
+    this.startMethods();
+  }
+
+  startMethods() {
+    this.updateAccountBalanceDetails();
+    this.updateHotBalanceDetails();
+    this.updateStakingInfoDetails();
+    this.updateWalletHistory();
+
     this.stakingInfoWorker.add(() => this.updateStakingInfoDetails()).start();
     this.walletAccountBalanceWorker.add(() => this.updateAccountBalanceDetails()).start();
     this.walletHotBalanceWorker.add(() => this.updateHotBalanceDetails()).start();
@@ -246,7 +255,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.historyWorker.pause();
     const walletInfo = new WalletInfo(this.globalService.getWalletName());
     let historyResponse;
-    this.apiService.getWalletHistoryOnce(walletInfo, 0, 10)
+    this.apiService.getWalletHistory(walletInfo, 0, 10)
       .pipe(finalize(() => {
         this.historyWorker.resume();
       }),

@@ -80,6 +80,7 @@ export class ColdStakingCreateComponent implements OnInit, OnDestroy {
 
   public ngOnInit() {
     this.walletAccountBalanceWorker.add(() => this.updateAccountBalanceDetails()).start();
+    this.updateAccountBalanceDetails();
   }
 
   public ngOnDestroy() {

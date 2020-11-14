@@ -1,4 +1,4 @@
-<section *ngIf="!balanceLoaded" class="text-center" style="height:100px; margin-top: 50px;">
+<section *ngIf="!balanceLoaded && !priceLockId" class="text-center" style="height:100px; margin-top: 50px;">
   <span [className]="isDarkTheme ? 'LoadingWhite' : 'Loading'" class="LoadingSend col-2 mx-auto" style="vertical-align: middle;">
     <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="30px" height="30px" viewBox="0 0 300 300" enable-background="new 0 0 300 300" xml:space="preserve">
       <g>
@@ -10,10 +10,10 @@
   </span>
   Loading Balance, please wait...
 </section>
-<section *ngIf="balanceLoaded && totalBalance == 0" class="text-center" style="height:100px; margin-top: 50px;">
+<section *ngIf="balanceLoaded && totalBalance == 0 && !priceLockId" class="text-center" style="height:100px; margin-top: 50px;">
   Please add x42 to your balance to create a profile.
 </section>
-<section *ngIf="balanceLoaded && totalBalance > 0">
+<section *ngIf="balanceLoaded && totalBalance > 0 && priceLockId != ''">
   <!-- MODAL SEND -->
   <div class="modal-body ModalSend pt-0">
     <div class="text-left col-6">

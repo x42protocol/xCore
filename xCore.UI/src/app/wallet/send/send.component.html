@@ -168,7 +168,7 @@
             <!-- <span class="float-right btn-link" (click)="getMaxBalance()">max</span> -->
           </div>
           <div class="ui-inputgroup">
-            <input type="text" class="form-control ui-inputtext" [class.is-invalid]="sendFormErrors.amount" [class.is-valid]="!sendFormErrors.amount && sendForm.get('amount').valid" formControlName="amount" placeholder="0.00" pInputText>
+            <input type="text" class="form-control ui-inputtext" [class.is-invalid]="sendFormErrors.amount" [class.is-valid]="!sendFormErrors.amount && sendForm.get('amount').valid" formControlName="amount" placeholder="0.00" [disabled]="!balanceLoaded" pInputText>
             <span class="ui-inputgroup-addon">{{ coinUnit }}</span>
           </div>
           <p-message *ngIf="sendFormErrors.amount" severity="error" text="{{ sendFormErrors.amount }}"></p-message>

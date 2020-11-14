@@ -5,7 +5,7 @@
 </section>
 <section id="content pb-4" class="col-11 mx-auto" *ngIf="!isLoading">
   <div class="row mb-2 mt-2">
-    <div class="col-12" *ngIf="!isColdHotWallet">
+    <div class="col-12" *ngIf="!isColdWalletHot">
       <p-panel #coldbalancepnl>
         <p-header>
           <div class="ui-helper-clearfix">
@@ -36,7 +36,7 @@
         </div>
       </p-panel>
     </div>
-    <div class="col-12" *ngIf="isColdHotWallet">
+    <div class="col-12" *ngIf="isColdWalletHot">
       <p-panel #hotbalancepnl>
         <p-header>
           <span class="ui-panel-title" style="font-size:16px;display:inline-block;margin-top:2px;">Delegated Balance</span>
@@ -65,7 +65,7 @@
   <section class="col-12" *ngIf="coldWalletAccountExists || hotWalletAccountExists">
     <div class="row" *ngIf="hasColdTransaction || hasHotTransaction">
       <!-- COLD TRANSACTIONS -->
-      <p-table [responsive]="true" [value]="coldTransactions" [style]="{'margin-top':'20px'}" *ngIf="!isColdHotWallet" [paginator]="true" [rows]="10">
+      <p-table [responsive]="true" [value]="coldTransactions" [style]="{'margin-top':'20px'}" *ngIf="!isColdWalletHot" [paginator]="true" [rows]="10">
         <ng-template pTemplate="caption">
           Cold Transaction History
         </ng-template>
@@ -110,7 +110,7 @@
       </p-table>
 
       <!-- HOT TRANSACTIONS -->
-      <p-table [responsive]="true" [value]="hotTransactions" [style]="{'margin-top':'20px'}" *ngIf="isColdHotWallet" [paginator]="true" [rows]="10">
+      <p-table [responsive]="true" [value]="hotTransactions" [style]="{'margin-top':'20px'}" *ngIf="isColdWalletHot" [paginator]="true" [rows]="10">
         <ng-template pTemplate="caption">
           Delegated Balance Transaction History
         </ng-template>

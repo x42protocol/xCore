@@ -395,7 +395,7 @@ export class ApiService {
   /**
    * Get a wallets transaction history info from the API.
    */
-  getWalletHistoryOnce(data: WalletInfo, skip: number = -1, take: number = -1, silent?: boolean): Observable<any> {
+  getWalletHistory(data: WalletInfo, skip: number = -1, take: number = -1, silent?: boolean): Observable<any> {
     let params = new HttpParams()
       .set('walletName', data.walletName)
       .set('accountName', data.accountName);

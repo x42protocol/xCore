@@ -167,9 +167,6 @@ export class SendComponent implements OnInit, OnDestroy {
   };
 
   ngOnInit() {
-
-    this.walletAccountBalanceWorker.add(() => this.updateAccountBalanceDetails()).start();
-
     this.sidechainEnabled = false;
     if (this.sidechainEnabled) {
       this.firstTitle = 'Sidechain';
@@ -183,6 +180,13 @@ export class SendComponent implements OnInit, OnDestroy {
       this.address = this.config.data.address;
       this.sendForm.patchValue({ address: this.address });
     }
+
+    this.startMethods();
+  }
+
+  startMethods() {
+    this.walletAccountBalanceWorker.add(() => this.updateAccountBalanceDetails()).start();
+    this.updateAccountBalanceDetails();
   }
 
   ngOnDestroy() {

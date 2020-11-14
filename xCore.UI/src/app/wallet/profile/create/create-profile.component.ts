@@ -108,9 +108,14 @@ export class CreateProfileComponent implements OnInit, OnDestroy {
       console.log(this.config.data);
       this.priceLockId = this.config.data.priceLockId;
       this.getPriceLock(this.priceLockId);
+    } else {
+      this.startMethods();
     }
+  }
 
+  startMethods() {
     this.walletAccountBalanceWorker.add(() => this.updateAccountBalanceDetails()).start();
+    this.updateAccountBalanceDetails();
   }
 
   ngOnDestroy() {

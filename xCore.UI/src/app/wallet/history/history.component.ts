@@ -36,6 +36,7 @@ export class HistoryComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.historyWorker.add(() => this.updateWalletHistory()).start();
+    this.updateWalletHistory();
     this.coinUnit = this.globalService.getCoinUnit();
   }
 
@@ -60,7 +61,7 @@ export class HistoryComponent implements OnInit, OnDestroy {
     this.historyWorker.pause();
     const walletInfo = new WalletInfo(this.globalService.getWalletName());
     let historyResponse;
-    this.apiService.getWalletHistoryOnce(walletInfo, 0, 10)
+    this.apiService.getWalletHistory(walletInfo, 0, 10)
       .pipe(finalize(() => {
         this.historyWorker.resume();
       }),

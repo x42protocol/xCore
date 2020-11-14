@@ -95,8 +95,12 @@ export class ColdStakingWithdrawComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.isColdStaking = this.config.data.isColdStaking;
+    this.startMethods();
+  }
 
+  startMethods() {
     this.walletAccountBalanceWorker.add(() => this.updateAccountBalanceDetails()).start();
+    this.updateAccountBalanceDetails();
   }
 
   ngOnDestroy() {
