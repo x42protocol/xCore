@@ -220,7 +220,7 @@ function createWindow() {
         width: 1150,
         height: 800,
         frame: true,
-        minWidth: 260,
+        minWidth: 1080,
         minHeight: 400,
         title: 'xCore',
         webPreferences: { webSecurity: false, nodeIntegration: true, enableRemoteModule: true }
