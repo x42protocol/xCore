@@ -536,7 +536,7 @@ export class SendComponent implements OnInit, OnDestroy {
           this.estimatedFee = response;
         },
         error => {
-          this.apiError = error.error.errors[0].message;
+          this.apiError = 'Invalid Address';
         }
       );
   }
@@ -591,7 +591,7 @@ export class SendComponent implements OnInit, OnDestroy {
         },
         error => {
           this.isSending = false;
-          this.apiError = error.error.errors[0].message;
+          this.apiError = 'Invalid Password';
         }
       );
   }

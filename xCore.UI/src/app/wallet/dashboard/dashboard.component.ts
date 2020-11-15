@@ -112,7 +112,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   public openSendDialog() {
     this.dialogService.open(SendComponent, {
-      header: 'Send to',
+      header: 'Send',
       width: '700px'
     });
   }
