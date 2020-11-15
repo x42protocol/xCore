@@ -26,12 +26,10 @@ export class SettingsComponent implements OnInit {
   public groupedThemes: SelectItemGroup[];
   public addressTypeOptions: SelectItem[];
   public coldWalletTypeOptions: SelectItem[];
-  public modeTypeOptions: SelectItem[];
   public selectedAddressType: AddressTypes;
   public isColdHotWallet: boolean;
   public logoFileName: string;
   public selectedTheme: string;
-  public isDeveloper: boolean;
 
   ngOnInit() {
     this.groupedThemes = [
@@ -65,10 +63,6 @@ export class SettingsComponent implements OnInit {
       { label: 'Hot (Delegated)', value: true, icon: 'fa fa-fire' }
     ];
 
-    this.modeTypeOptions = [
-      { label: 'Open Developer Tools', value: true, icon: 'pi pi-user-plus' }
-    ];
-
     this.selectedAddressType = this.addressType.Type;
 
     this.apiService
@@ -90,10 +84,8 @@ export class SettingsComponent implements OnInit {
     this.setLogoPath();
   }
 
-  onModeChange(event) {
-    if (event.value) {
-      this.electronService.ipcRenderer.sendSync('open-dev-tools');
-    }
+  openDevTools() {
+    this.electronService.ipcRenderer.sendSync('open-dev-tools');
   }
 
   setLogoPath() {
