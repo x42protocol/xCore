@@ -141,16 +141,14 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
   onColdSetup() {
     this.dialogService.open(ColdStakingCreateComponent, {
       header: 'Delegated Cold Staking',
-      width: '540px',
-      dismissableMask: true
+      width: '540px'
     });
   }
 
   onHotSetup() {
     this.dialogService.open(ColdStakingCreateHotComponent, {
       header: 'Hot Cold Staking Setup',
-      width: '540px',
-      dismissableMask: true
+      width: '540px'
     });
   }
 
