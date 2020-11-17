@@ -7,7 +7,6 @@ import { Logger } from '../../shared/services/logger.service';
 import { CoinNotationPipe } from '../../shared/pipes/coin-notation.pipe';
 
 import { FeeEstimation } from '../../shared/models/fee-estimation';
-import { SidechainFeeEstimation } from '../../shared/models/sidechain-fee-estimation';
 import { TransactionBuilding } from '../../shared/models/transaction-building';
 import { TransactionSending } from '../../shared/models/transaction-sending';
 import { ThemeService } from '../../shared/services/theme.service';
@@ -46,7 +45,6 @@ export class SendComponent implements OnInit, OnDestroy {
   ) {
     this.buildSendForm();
     this.buildPaymentForm();
-    this.buildSendToSidechainForm();
     this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
   }
 
@@ -212,19 +210,6 @@ export class SendComponent implements OnInit, OnDestroy {
 
     this.paymentForm.valueChanges.pipe(debounceTime(300))
       .subscribe(data => this.onPaymentValueChanged(data));
-  }
-
-  private buildSendToSidechainForm(): void {
-    this.sendToSidechainForm = this.fb.group({
-      federationAddress: ['', Validators.compose([Validators.required, Validators.minLength(26)])],
-      destinationAddress: ['', Validators.compose([Validators.required, Validators.minLength(26)])],
-      amount: ['', Validators.compose([Validators.required, Validators.pattern(/^([0-9]+)?(\.[0-9]{0,8})?$/), Validators.min(0.00001), (control: AbstractControl) => Validators.max((this.totalBalance - this.estimatedFee) / 100000000)(control)])],
-      fee: ['medium', Validators.required],
-      password: ['', Validators.required]
-    });
-
-    this.sendToSidechainForm.valueChanges.pipe(debounceTime(300))
-      .subscribe(data => this.onSendToSidechainValueChanged(data));
   }
 
   onPaymentValueChanged(data?: any) {
@@ -437,7 +422,7 @@ export class SendComponent implements OnInit, OnDestroy {
     this.transaction.AddRecipient(this.payFeeToAddress, this.paymentFee.toString());
 
     this.apiService
-      .buildTransaction(this.transaction, true)
+      .buildTransaction(this.transaction)
       .subscribe(
         response => {
           console.log(response);
@@ -491,31 +476,6 @@ export class SendComponent implements OnInit, OnDestroy {
       );
   }
 
-  onSendToSidechainValueChanged(data?: any) {
-    if (!this.sendToSidechainForm) { return; }
-    const form = this.sendToSidechainForm;
-
-    // tslint:disable-next-line:forin
-    for (const field in this.sendToSidechainFormErrors) {
-      this.sendToSidechainFormErrors[field] = '';
-      const control = form.get(field);
-      if (control && control.dirty && !control.valid) {
-        const messages = this.sendToSidechainValidationMessages[field];
-
-        // tslint:disable-next-line:forin
-        for (const key in control.errors) {
-          this.sendToSidechainFormErrors[field] += messages[key] + ' ';
-        }
-      }
-    }
-
-    this.apiError = '';
-
-    if (this.sendToSidechainForm.get('destinationAddress').valid && this.sendToSidechainForm.get('federationAddress').valid && this.sendToSidechainForm.get('amount').valid) {
-      this.estimateSidechainFee();
-    }
-  }
-
   public getMaxBalance() {
     this.sendForm.patchValue({ amount: +new CoinNotationPipe(this.globalService).transform(this.totalBalance) });
   }
@@ -530,35 +490,13 @@ export class SendComponent implements OnInit, OnDestroy {
       true
     );
 
-    this.apiService.estimateFee(transaction, true)
+    this.apiService.estimateFee(transaction)
       .subscribe(
         response => {
           this.estimatedFee = response;
         },
         error => {
           this.apiError = 'Invalid Address';
-        }
-      );
-  }
-
-  public estimateSidechainFee() {
-    const sidechainTransaction = new SidechainFeeEstimation(
-      this.globalService.getWalletName(),
-      'account 0',
-      this.sendToSidechainForm.get('federationAddress').value.trim(),
-      this.sendToSidechainForm.get('destinationAddress').value.trim(),
-      this.sendToSidechainForm.get('amount').value,
-      this.sendToSidechainForm.get('fee').value,
-      true
-    );
-
-    this.apiService.estimateSidechainFee(sidechainTransaction)
-      .subscribe(
-        response => {
-          this.estimatedSidechainFee = response;
-        },
-        error => {
-          this.apiError = error.error.errors[0].message;
         }
       );
   }
@@ -578,7 +516,7 @@ export class SendComponent implements OnInit, OnDestroy {
     );
 
     this.apiService
-      .buildTransaction(this.transaction, true)
+      .buildTransaction(this.transaction)
       .subscribe(
         response => {
           console.log(response);
@@ -671,8 +609,8 @@ export class SendComponent implements OnInit, OnDestroy {
     this.apiService.getMaximumBalance(maxBalanceRequest)
       .pipe(finalize(() => {
         this.walletAccountBalanceWorker.resume();
-      }),
-      ).subscribe(
+      }))
+      .subscribe(
         response => {
           this.log.info('Get max balance result:', response);
           this.estimatedFee = response.fee;

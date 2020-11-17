@@ -178,8 +178,8 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
     this.apiService.getWalletHistory(walletInfo, 0, 100, true)
       .pipe(finalize(() => {
         this.walletColdHistoryWorker.resume();
-      }),
-      ).subscribe(
+      }))
+      .subscribe(
         response => {
           if (!!response.history && response.history[0].transactionsHistory.length > 0) {
             const coldHistoryResponse = response.history[0].transactionsHistory;
@@ -202,8 +202,8 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
     this.apiService.getWalletHistory(walletInfo, 0, 100, true)
       .pipe(finalize(() => {
         this.walletHotHistoryWorker.resume();
-      }),
-      ).subscribe(
+      }))
+      .subscribe(
         response => {
           if (!!response.history && response.history[0].transactionsHistory.length > 0) {
             const hotHistoryResponse = response.history[0].transactionsHistory;
@@ -270,8 +270,8 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
     this.apiService.getWalletBalanceOnce(walletInfo)
       .pipe(finalize(() => {
         this.walletColdBalanceWorker.resume();
-      }),
-      ).subscribe(
+      }))
+      .subscribe(
         response => {
           this.log.info('Get cold balance result:', response);
           const balanceResponse = response;
@@ -308,8 +308,8 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
     this.apiService.getWalletBalanceOnce(walletInfo)
       .pipe(finalize(() => {
         this.walletHotBalanceWorker.resume();
-      }),
-      ).subscribe(
+      }))
+      .subscribe(
         hotBalanceResponse => {
           this.log.info('Get hot balance result:', hotBalanceResponse);
           if (hotBalanceResponse.balances[0].amountConfirmed > 0 || hotBalanceResponse.balances[0].amountUnconfirmed > 0) {

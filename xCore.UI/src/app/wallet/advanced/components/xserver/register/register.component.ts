@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ApiService } from '../../../../../shared/services/api.service';
 import { GlobalService } from '../../../../../shared/services/global.service';
 import { ThemeService } from '../../../../../shared/services/theme.service';
@@ -7,12 +7,14 @@ import { ColdStakingSetup } from '../../../../../shared/models/coldstakingsetup'
 import { TransactionSending } from '../../../../../shared/models/transaction-sending';
 import { ServerIDResponse } from '../../../../../shared/models/serveridresponse';
 import { ColdStakingService } from '../../../../../shared/services/coldstaking.service';
+import { Logger } from '../../../../../shared/services/logger.service';
 import { TransactionInfo } from '../../../../../shared/models/transaction-info';
 import { SignMessageRequest } from '../../../../../shared/models/wallet-signmessagerequest';
 import { XServerRegistrationRequest } from '../../../../../shared/models/xserver-registration-request';
 import { XServerTestRequest } from '../../../../../shared/models/xserver-test-request';
 import { NodeStatus } from '../../../../../shared/models/node-status';
-import { Subscription } from 'rxjs';
+import { finalize } from 'rxjs/operators';
+import { TaskTimer } from 'tasktimer';
 
 @Component({
   selector: 'app-register-component',
@@ -20,7 +22,7 @@ import { Subscription } from 'rxjs';
   styleUrls: ['./register.component.css'],
 })
 
-export class RegisterComponent implements OnInit {
+export class RegisterComponent implements OnInit, OnDestroy {
   constructor(
     private apiService: ApiService,
     private stakingService: ColdStakingService,
@@ -28,6 +30,7 @@ export class RegisterComponent implements OnInit {
     public themeService: ThemeService,
     public activeModal: DynamicDialogRef,
     public config: DynamicDialogConfig,
+    private log: Logger,
   ) {
     this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
   }
@@ -51,8 +54,7 @@ export class RegisterComponent implements OnInit {
   public testStatus = 0;
 
   private server: ServerIDResponse = new ServerIDResponse();
-  private generalWalletInfoSubscription: Subscription;
-  private nodeStatusSubscription: Subscription;
+  private transactionConfirmationsWorker = new TaskTimer(5000);
 
   private signedMessage: string;
   private broadcastStarted = false;
@@ -72,11 +74,14 @@ export class RegisterComponent implements OnInit {
     this.keyAddress = this.config.data.keyAddress;
     this.feeAddress = this.config.data.feeAddress;
 
-    this.startSubscription();
+    this.startMethods();
   }
 
-  private startSubscription() {
-    this.nodeStatusSubscription = this.apiService.getNodeStatus()
+  startMethods() {
+    this.transactionConfirmationsWorker.add(() => this.updateTransactionConfirmations());
+    this.updateTransactionConfirmations();
+
+    this.apiService.getNodeStatus()
       .subscribe(
         (data: NodeStatus) => {
           const statusResponse = data;
@@ -84,10 +89,13 @@ export class RegisterComponent implements OnInit {
         }
       );
   }
+  ngOnDestroy() {
+    this.transactionConfirmationsWorker.stop();
+  }
 
   private testXServer(blockHeight: number) {
     const registrationRequest = new XServerTestRequest(this.selectedProtocol, this.networkAddress, Number(this.networkPort), blockHeight);
-    console.log(registrationRequest);
+    this.log.info('Registration request', registrationRequest);
     this.apiService.testxServer(registrationRequest)
       .subscribe(
         response => {
@@ -142,14 +150,14 @@ export class RegisterComponent implements OnInit {
         previousConfirmation = this.confirmations;
       } else {
         clearInterval(interval);
-        console.log(this.errorMessage);
+        this.log.info('Registration Error', this.errorMessage);
       }
     }, 1000);
   }
 
   private broadcastRegistrationRequest() {
     const registrationRequest = new XServerRegistrationRequest(this.profileName, this.selectedProtocol, this.networkAddress, Number(this.networkPort), this.signedMessage, this.keyAddress, this.server.getAddressFromServerId(), this.feeAddress, this.getTierNumber());
-    console.log(registrationRequest);
+    this.log.info('Broadcast Registration', registrationRequest);
     this.apiService.registerxServer(registrationRequest)
       .subscribe(
         response => {
@@ -188,27 +196,20 @@ export class RegisterComponent implements OnInit {
     this.collateralProgress = totalProgress;
   }
 
-  private updateConfirmations() {
-    this.generalWalletInfoSubscription = this.apiService.getTxOut(this.transactionInfo.transactionId, false, true)
+  private updateTransactionConfirmations() {
+    this.transactionConfirmationsWorker.pause();
+    this.apiService.getTxOut(this.transactionInfo.transactionId, false)
+      .pipe(finalize(() => {
+        this.transactionConfirmationsWorker.resume();
+      }))
       .subscribe(
-        response => {
-          if (response != null) {
-            const transactionOutput = response;
-            if (transactionOutput != null) {
-              this.confirmations = transactionOutput.confirmations;
-            }
+        transactionOutput => {
+          if (transactionOutput != null) {
+            this.confirmations = transactionOutput.confirmations;
           }
         },
         error => {
-          if (error.status === 0) {
-            this.cancelWalletSubscriptions();
-            this.stopWithErrorMessage('Could not get confirmation.');
-          } else if (error.status >= 400) {
-            if (!error.error.errors[0].message) {
-              this.cancelWalletSubscriptions();
-              this.stopWithErrorMessage('Could not get confirmation..');
-            }
-          }
+          this.apiService.handleException(error);
         }
       );
   }
@@ -216,7 +217,8 @@ export class RegisterComponent implements OnInit {
   public deligatedTransactionSent(transactionInfo: TransactionInfo) {
     this.transactionInfo = transactionInfo;
     this.incrementProgress(10);
-    this.updateConfirmations();
+    this.transactionConfirmationsWorker.start();
+    this.updateTransactionConfirmations();
   }
 
   public broadcastTransaction(): void {
@@ -229,8 +231,7 @@ export class RegisterComponent implements OnInit {
     if (hotWalletAddress === '') {
       this.stopWithErrorMessage('Invalid xServer ID');
     } else {
-      console.log(hotWalletAddress);
-
+      this.log.info('xServer Address', hotWalletAddress);
       this.stakingService.createColdstaking(new ColdStakingSetup(
         hotWalletAddress,
         this.keyAddress,
@@ -264,12 +265,6 @@ export class RegisterComponent implements OnInit {
   private stopWithErrorMessage(message: string) {
     this.errorMessage = message;
     this.currentStep = -2;
-  }
-
-  private cancelWalletSubscriptions() {
-    if (this.generalWalletInfoSubscription) {
-      this.generalWalletInfoSubscription.unsubscribe();
-    }
   }
 
   public Close() {

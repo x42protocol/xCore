@@ -408,7 +408,7 @@ export class CreateProfileComponent implements OnInit, OnDestroy {
     this.transaction.AddRecipient(this.payFeeToAddress, this.paymentFee.toString());
 
     this.apiService
-      .buildTransaction(this.transaction, true)
+      .buildTransaction(this.transaction)
       .subscribe(
         response => {
           console.log(response);
@@ -466,8 +466,8 @@ export class CreateProfileComponent implements OnInit, OnDestroy {
     this.apiService.getWalletBalanceOnce(walletInfo)
       .pipe(finalize(() => {
         this.walletAccountBalanceWorker.resume();
-      }),
-      ).subscribe(
+      }))
+      .subscribe(
         balanceResponse => {
           this.log.info('Get account balance result:', balanceResponse);
           this.totalBalance = balanceResponse.balances[0].amountConfirmed + balanceResponse.balances[0].amountUnconfirmed;

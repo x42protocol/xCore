@@ -68,6 +68,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private walletAccountBalanceWorker = new TaskTimer(5000);
   private walletHotBalanceWorker = new TaskTimer(5000);
   private historyWorker = new TaskTimer(5000);
+  private isColdWalletHot = false;
 
   ngOnInit() {
     this.walletName = this.globalService.getWalletName();
@@ -78,6 +79,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       { name: 'Search For Apps', image: 'https://cdn1.iconfinder.com/data/icons/hawcons/32/698628-icon-112-search-plus-512.png' }
     ];
 
+    this.checkWalletHotColdState();
     this.startMethods();
   }
 
@@ -104,6 +106,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.stakingForm = this.fb.group({
       walletPassword: ['', Validators.required]
     });
+  }
+
+  private checkWalletHotColdState() {
+    this.apiService
+      .getColdHotState(this.globalService.getWalletName())
+      .subscribe(
+        isHot => {
+          this.isColdWalletHot = isHot;
+        }
+      );
   }
 
   public goToHistory() {
@@ -195,8 +207,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.apiService.getWalletBalanceOnce(walletInfo)
       .pipe(finalize(() => {
         this.walletAccountBalanceWorker.resume();
-      }),
-      ).subscribe(
+      }))
+      .subscribe(
         response => {
           this.log.info('Get account balance result:', response);
           const balanceResponse = response;
@@ -219,27 +231,29 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private updateHotBalanceDetails() {
-    this.walletHotBalanceWorker.pause();
-    const walletInfo = new WalletInfo(this.globalService.getWalletName());
-    walletInfo.accountName = this.hotStakingAccount;
-    this.apiService.getWalletBalanceOnce(walletInfo, true)
-      .pipe(finalize(() => {
-        this.walletHotBalanceWorker.resume();
-      }),
-      ).subscribe(
-        hotBalanceResponse => {
-          this.log.info('Get hot balance result:', hotBalanceResponse);
-          if (hotBalanceResponse.balances[0].amountConfirmed > 0 || hotBalanceResponse.balances[0].amountUnconfirmed > 0) {
-            this.hasHotBalance = true;
+    if (this.isColdWalletHot) {
+      this.walletHotBalanceWorker.pause();
+      const walletInfo = new WalletInfo(this.globalService.getWalletName());
+      walletInfo.accountName = this.hotStakingAccount;
+      this.apiService.getWalletBalanceOnce(walletInfo)
+        .pipe(finalize(() => {
+          this.walletHotBalanceWorker.resume();
+        }))
+        .subscribe(
+          hotBalanceResponse => {
+            this.log.info('Get hot balance result:', hotBalanceResponse);
+            if (hotBalanceResponse.balances[0].amountConfirmed > 0 || hotBalanceResponse.balances[0].amountUnconfirmed > 0) {
+              this.hasHotBalance = true;
+            }
+            this.confirmedHotBalance = hotBalanceResponse.balances[0].amountConfirmed;
+            this.unconfirmedHotBalance = hotBalanceResponse.balances[0].amountUnconfirmed;
+            this.spendableHotBalance = hotBalanceResponse.balances[0].spendableAmount;
+          },
+          error => {
+            this.apiService.handleException(error);
           }
-          this.confirmedHotBalance = hotBalanceResponse.balances[0].amountConfirmed;
-          this.unconfirmedHotBalance = hotBalanceResponse.balances[0].amountUnconfirmed;
-          this.spendableHotBalance = hotBalanceResponse.balances[0].spendableAmount;
-        },
-        error => {
-          this.apiService.handleException(error);
-        }
-      );
+        );
+    }
   }
 
   startHistoryWorker() {
@@ -258,8 +272,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.apiService.getWalletHistory(walletInfo, 0, 10)
       .pipe(finalize(() => {
         this.historyWorker.resume();
-      }),
-      ).subscribe(
+      }))
+      .subscribe(
         response => {
           // TODO - add account feature instead of using first entry in array
           if (!!response.history && response.history[0].transactionsHistory.length > 0) {
@@ -355,8 +369,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.apiService.getStakingInfo()
       .pipe(finalize(() => {
         this.stakingInfoWorker.resume();
-      }),
-      ).subscribe(
+      }))
+      .subscribe(
         response => {
           this.log.info('Get staking info result:', response);
           const stakingResponse = response;

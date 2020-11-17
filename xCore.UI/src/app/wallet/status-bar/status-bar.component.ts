@@ -1,5 +1,4 @@
 import { Component, OnInit, OnDestroy, Input } from '@angular/core';
-import { Subscription } from 'rxjs';
 import { ApiService } from '../../shared/services/api.service';
 import { GlobalService } from '../../shared/services/global.service';
 import { NodeStatus } from '../../shared/models/node-status';
@@ -15,9 +14,9 @@ import { TaskTimer } from 'tasktimer';
 })
 export class StatusBarComponent implements OnInit, OnDestroy {
   private stakingInfoWorker = new TaskTimer(5000);
-  private generalWalletInfoSubscription: Subscription;
-  private nodeStatusSubscription: Subscription;
-  private xServerStatusSubscription: Subscription;
+  private xServerInfoWorker = new TaskTimer(5000);
+  private generalInfoWorker = new TaskTimer(5000);
+  private nodeStatusWorker = new TaskTimer(5000);
   private connectedNodesTooltip = '';
   private connectedXServerTooltip = '';
   private isChainSynced: boolean;
@@ -42,13 +41,24 @@ export class StatusBarComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.setDefaultConnectionToolTip();
-    this.startSubscriptions();
+    this.getGeneralWalletInfo();
+    this.startMethods();
+  }
+
+  startMethods() {
+    this.updateStakingInfoDetails();
+    this.getGeneralxServerInfo();
     this.stakingInfoWorker.add(() => this.updateStakingInfoDetails()).start();
+    this.xServerInfoWorker.add(() => this.getGeneralxServerInfo()).start();
+    this.generalInfoWorker.add(() => this.updateGeneralWalletInfo());
+    this.nodeStatusWorker.add(() => this.updateNodeStatus());
   }
 
   ngOnDestroy() {
     this.stakingInfoWorker.stop();
-    this.cancelSubscriptions();
+    this.xServerInfoWorker.stop();
+    this.generalInfoWorker.stop();
+    this.nodeStatusWorker.stop();
   }
 
   private updateConnectionToolTip() {
@@ -62,127 +72,131 @@ export class StatusBarComponent implements OnInit, OnDestroy {
   }
 
   private getGeneralxServerInfo() {
-    this.xServerStatusSubscription = this.apiService.getxServerStatusInterval()
+    this.xServerInfoWorker.pause();
+    this.apiService.getxServerStatus()
+      .pipe(finalize(() => {
+        this.xServerInfoWorker.resume();
+      }))
       .subscribe(
-        (data: XServerStatus) => {
-          if (data != null) {
-            const statusResponse = data;
-            this.connectedXServers = statusResponse.connected;
-            this.globalService.setxServerStatus(statusResponse);
+        (xServerInfoResponse: XServerStatus) => {
+          this.connectedXServers = xServerInfoResponse.connected;
+          this.globalService.setxServerStatus(xServerInfoResponse);
 
-            if (statusResponse.connected === 1) {
-              this.connectedXServerTooltip = '1 xServer';
-            } else if (statusResponse.connected >= 0) {
-              this.connectedXServerTooltip = `${statusResponse.connected} xServers`;
-            }
-            this.updateConnectionToolTip();
+          if (xServerInfoResponse.connected === 1) {
+            this.connectedXServerTooltip = '1 xServer';
+          } else if (xServerInfoResponse.connected >= 0) {
+            this.connectedXServerTooltip = `${xServerInfoResponse.connected} xServers`;
           }
-        },
-        error => {
-          this.cancelSubscriptions();
-          this.startSubscriptions();
+          this.updateConnectionToolTip();
+        }, error => {
+          this.apiService.handleException(error);
         }
       );
   }
 
   private getGeneralWalletInfo() {
     if (this.globalService.getWalletName() === '') {
-      this.nodeStatusSubscription = this.apiService.getNodeStatusInterval()
-        .subscribe(
-          (data: NodeStatus) => {
-            if (data != null) {
-              const statusResponse = data;
-              this.connectedNodes = statusResponse.inboundPeers.length + statusResponse.outboundPeers.length;
-              this.lastBlockSyncedHeight = statusResponse.blockStoreHeight;
-              this.chainTip = statusResponse.bestPeerHeight;
-
-              let processedText = `Processed ${this.lastBlockSyncedHeight} out of ${this.chainTip} blocks.`;
-              if (this.chainTip == null) {
-                processedText = `Waiting for peer connections to start.`;
-              }
-
-              this.toolTip = `Synchronizing.  ${processedText}`;
-
-              if (this.connectedNodes === 1) {
-                this.connectedNodesTooltip = '1 node';
-              } else if (this.connectedNodes >= 0) {
-                this.connectedNodesTooltip = `${this.connectedNodes} nodes`;
-              }
-              this.updateConnectionToolTip();
-
-              if (this.chainTip == null || this.lastBlockSyncedHeight > this.chainTip) {
-                this.percentSynced = 'syncing...';
-              } else {
-                this.percentSyncedNumber = ((this.lastBlockSyncedHeight / this.chainTip) * 100);
-                if (this.percentSyncedNumber.toFixed(0) === '100' && this.lastBlockSyncedHeight !== this.chainTip) {
-                  this.percentSyncedNumber = 99;
-                }
-
-                this.percentSynced = this.percentSyncedNumber.toFixed(0) + '%';
-
-                if (this.percentSynced === '100%') {
-                  this.toolTip = `Up to date.  ${processedText}`;
-                }
-              }
-            }
-          },
-          error => {
-            this.cancelSubscriptions();
-            this.startSubscriptions();
-          }
-        );
+      this.updateNodeStatus();
+      this.nodeStatusWorker.start();
     } else {
-      const walletInfo = new WalletInfo(this.globalService.getWalletName());
-      this.generalWalletInfoSubscription = this.apiService.getGeneralInfo(walletInfo)
-        .subscribe(
-          response => {
-            if (response != null) {
-              const generalWalletInfoResponse = response;
-              this.lastBlockSyncedHeight = generalWalletInfoResponse.lastBlockSyncedHeight;
-              this.chainTip = generalWalletInfoResponse.chainTip;
-              this.isChainSynced = generalWalletInfoResponse.isChainSynced;
-              this.connectedNodes = generalWalletInfoResponse.connectedNodes;
-              this.globalService.setBlockHeight(this.chainTip);
+      this.updateGeneralWalletInfo();
+      this.generalInfoWorker.start();
+    }
+  }
 
-              const processedText = `Processed ${this.lastBlockSyncedHeight} out of ${this.chainTip} blocks.`;
-              this.toolTip = `Synchronizing.  ${processedText}`;
+  private updateNodeStatus() {
+    this.nodeStatusWorker.pause();
+    this.apiService.getNodeStatus()
+      .pipe(finalize(() => {
+        this.nodeStatusWorker.resume();
+      }))
+      .subscribe(
+        (statusResponse: NodeStatus) => {
+          this.connectedNodes = statusResponse.inboundPeers.length + statusResponse.outboundPeers.length;
+          this.lastBlockSyncedHeight = statusResponse.blockStoreHeight;
+          this.chainTip = statusResponse.bestPeerHeight;
 
-              if (this.connectedNodes === 1) {
-                this.connectedNodesTooltip = '1 node';
-              } else if (this.connectedNodes >= 0) {
-                this.connectedNodesTooltip = `${this.connectedNodes} nodes`;
-              }
-              this.updateConnectionToolTip();
+          let processedText = `Processed ${this.lastBlockSyncedHeight} out of ${this.chainTip} blocks.`;
+          if (this.chainTip == null) {
+            processedText = `Waiting for peer connections to start.`;
+          }
 
-              if (this.chainTip == null || this.lastBlockSyncedHeight > this.chainTip) {
-                this.percentSynced = 'syncing...';
-              }
-              else {
-                this.percentSyncedNumber = ((this.lastBlockSyncedHeight / this.chainTip) * 100);
-                if (this.percentSyncedNumber.toFixed(0) === '100' && this.lastBlockSyncedHeight !== this.chainTip && !this.isChainSynced) {
-                  this.percentSyncedNumber = 99;
-                }
+          this.toolTip = `Synchronizing.  ${processedText}`;
 
-                this.percentSynced = this.percentSyncedNumber.toFixed(0) + '%';
+          if (this.connectedNodes === 1) {
+            this.connectedNodesTooltip = '1 node';
+          } else if (this.connectedNodes >= 0) {
+            this.connectedNodesTooltip = `${this.connectedNodes} nodes`;
+          }
+          this.updateConnectionToolTip();
 
-                if (this.percentSynced === '100%') {
-                  this.toolTip = `Up to date.  ${processedText}`;
-                }
-              }
+          if (this.chainTip == null || this.lastBlockSyncedHeight > this.chainTip) {
+            this.percentSynced = 'syncing...';
+          } else {
+            this.percentSyncedNumber = ((this.lastBlockSyncedHeight / this.chainTip) * 100);
+            if (this.percentSyncedNumber.toFixed(0) === '100' && this.lastBlockSyncedHeight !== this.chainTip) {
+              this.percentSyncedNumber = 99;
             }
-          },
-          error => {
-            if (error.status === 0) {
-              this.cancelSubscriptions();
-            } else if (error.status >= 400) {
-              if (!error.error.errors[0].message) {
-                this.cancelSubscriptions();
-                this.startSubscriptions();
-              }
+
+            this.percentSynced = this.percentSyncedNumber.toFixed(0) + '%';
+
+            if (this.percentSynced === '100%') {
+              this.toolTip = `Up to date.  ${processedText}`;
             }
           }
-        );
-    }
+        },
+        error => {
+          this.apiService.handleException(error);
+        }
+      );
+  }
+
+  private updateGeneralWalletInfo() {
+    this.generalInfoWorker.pause();
+    const walletInfo = new WalletInfo(this.globalService.getWalletName());
+    this.apiService.getGeneralInfo(walletInfo)
+      .pipe(finalize(() => {
+        this.generalInfoWorker.resume();
+      }))
+      .subscribe(
+        response => {
+          const generalWalletInfoResponse = response;
+          this.lastBlockSyncedHeight = generalWalletInfoResponse.lastBlockSyncedHeight;
+          this.chainTip = generalWalletInfoResponse.chainTip;
+          this.isChainSynced = generalWalletInfoResponse.isChainSynced;
+          this.connectedNodes = generalWalletInfoResponse.connectedNodes;
+          this.globalService.setBlockHeight(this.chainTip);
+
+          const processedText = `Processed ${this.lastBlockSyncedHeight} out of ${this.chainTip} blocks.`;
+          this.toolTip = `Synchronizing.  ${processedText}`;
+
+          if (this.connectedNodes === 1) {
+            this.connectedNodesTooltip = '1 node';
+          } else if (this.connectedNodes >= 0) {
+            this.connectedNodesTooltip = `${this.connectedNodes} nodes`;
+          }
+          this.updateConnectionToolTip();
+
+          if (this.chainTip == null || this.lastBlockSyncedHeight > this.chainTip) {
+            this.percentSynced = 'syncing...';
+          }
+          else {
+            this.percentSyncedNumber = ((this.lastBlockSyncedHeight / this.chainTip) * 100);
+            if (this.percentSyncedNumber.toFixed(0) === '100' && this.lastBlockSyncedHeight !== this.chainTip && !this.isChainSynced) {
+              this.percentSyncedNumber = 99;
+            }
+
+            this.percentSynced = this.percentSyncedNumber.toFixed(0) + '%';
+
+            if (this.percentSynced === '100%') {
+              this.toolTip = `Up to date.  ${processedText}`;
+            }
+          }
+        },
+        error => {
+          this.apiService.handleException(error);
+        }
+      );
   }
 
   private updateStakingInfoDetails() {
@@ -190,7 +204,7 @@ export class StatusBarComponent implements OnInit, OnDestroy {
     this.apiService.getStakingInfo()
       .pipe(finalize(() => {
         this.stakingInfoWorker.resume();
-      }),
+      })
       ).subscribe(
         stakingResponse => {
           this.stakingEnabled = stakingResponse.enabled;
@@ -198,24 +212,5 @@ export class StatusBarComponent implements OnInit, OnDestroy {
           this.apiService.handleException(error);
         }
       );
-  }
-
-  private cancelSubscriptions() {
-    if (this.generalWalletInfoSubscription) {
-      this.generalWalletInfoSubscription.unsubscribe();
-    }
-
-    if (this.nodeStatusSubscription) {
-      this.nodeStatusSubscription.unsubscribe();
-    }
-
-    if (this.xServerStatusSubscription) {
-      this.xServerStatusSubscription.unsubscribe();
-    }
-  }
-
-  private startSubscriptions() {
-    this.getGeneralWalletInfo();
-    this.getGeneralxServerInfo();
   }
 }

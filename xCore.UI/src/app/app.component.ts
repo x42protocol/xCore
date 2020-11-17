@@ -3,14 +3,14 @@ import { Router } from '@angular/router';
 import { ApplicationStateService } from '../app/shared/services/application-state.service';
 import { ApiService } from '../app/shared/services/api.service';
 import { Logger } from '../app/shared/services/logger.service';
-import { NodeStatus } from '../app/shared/models/node-status';
 import { ElectronService } from 'ngx-electron';
 import { ThemeService } from './shared/services/theme.service';
 import { TitleService } from './shared/services/title.service';
 import { MenuItem } from 'primeng/api';
-import { Subscription, Observable } from 'rxjs';
-import { delay, retryWhen, tap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { delay, retryWhen, tap, finalize } from 'rxjs/operators';
 import { environment } from '../environments/environment';
+import { TaskTimer } from 'tasktimer';
 import * as signalR from '@aspnet/signalr';
 import * as coininfo from 'x42-coininfo';
 
@@ -36,12 +36,10 @@ export class AppComponent implements OnInit, OnDestroy {
   remember: boolean;
   connection: signalR.HubConnection;
   delayed = false;
-  apiSubscription: any;
   nodeStarted = false;
   nodeFailed = false;
 
-  private subscription: Subscription;
-  private statusIntervalSubscription: Subscription;
+  private nodeStatusWorker = new TaskTimer(5000);
 
   private readonly TryDelayMilliseconds = 3000;
   private readonly MaxRetryCount = 50;
@@ -95,6 +93,12 @@ export class AppComponent implements OnInit, OnDestroy {
         icon: 'pi goat-icon'
       }
     ];
+
+    this.startMethods();
+  }
+
+  startMethods() {
+    this.nodeStatusWorker.add(() => this.updateNodeStatus());
   }
 
   get appTitle$(): Observable<string> {
@@ -188,7 +192,7 @@ export class AppComponent implements OnInit, OnDestroy {
   // Attempts to initialise the wallet by contacting the daemon.  Will try to do this MaxRetryCount times.
   private tryStart() {
     let retry = 0;
-    const stream$ = this.apiService.getNodeStatus().pipe(
+    this.apiService.getNodeStatus().pipe(
       retryWhen(errors =>
         errors.pipe(delay(this.TryDelayMilliseconds)).pipe(
           tap(errorStatus => {
@@ -201,30 +205,38 @@ export class AppComponent implements OnInit, OnDestroy {
       )
     );
 
-    this.subscription = stream$.subscribe(
-      (data: NodeStatus) => {
-        this.apiConnected = true;
-        this.statusIntervalSubscription = this.apiService.getNodeStatusInterval()
-          .subscribe(
-            response => {
-              const statusResponse = response.featuresData.filter(x => x.namespace === 'Blockcore.Base.BaseFeature');
-              if (statusResponse.length > 0 && statusResponse[0].state === 'Initialized') {
-                this.statusIntervalSubscription.unsubscribe();
-                this.start();
-              }
-            }
-          );
-      }, (error: any) => {
-        this.log.info('Failed to start wallet');
-        this.nodeFailedToLoad();
-      }
-    );
+    this.nodeStatusWorker.start();
+    this.updateNodeStatus();
   }
 
   nodeFailedToLoad() {
     this.nodeFailed = true;
     this.loading = false;
     this.loadingFailed = true;
+  }
+
+  private updateNodeStatus() {
+    this.nodeStatusWorker.pause();
+    this.apiService.getNodeStatus()
+      .pipe(finalize(() => {
+        this.nodeStatusWorker.resume();
+      }))
+      .subscribe(
+        response => {
+          const statusResponse = response.featuresData.filter(x => x.namespace === 'Blockcore.Base.BaseFeature');
+          if (statusResponse.length > 0 && statusResponse[0].state === 'Initialized') {
+            this.nodeStatusWorker.stop();
+            if (!this.appState.connected) {
+              this.start();
+            }
+          }
+        },
+        error => {
+          this.log.info('Failed to start wallet');
+          this.nodeFailedToLoad();
+          this.apiService.handleException(error);
+        }
+      );
   }
 
   start() {
@@ -238,18 +250,11 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.unsubscribe();
-  }
-
-  unsubscribe() {
-    if (this.apiSubscription) {
-      this.apiSubscription.unsubscribe();
-    }
+    this.nodeStatusWorker.stop();
   }
 
   cancel() {
-    this.unsubscribe();
-
+    this.nodeStatusWorker.stop();
     this.appState.connected = false;
     this.loading = false;
     this.delayed = false;

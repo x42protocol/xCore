@@ -28,7 +28,6 @@ export class UpdateService {
       if (!UpdateService.singletonInstance) {
 
         this.ipc.on('check-for-update', (event, info: UpdateInfo) => {
-          // notificationService.show({ title: 'Checking for update...', body: JSON.stringify(info) });
           console.log('check-for-update: ', info);
         });
 
@@ -43,7 +42,6 @@ export class UpdateService {
         });
 
         this.ipc.on('update-not-available', (event, info: UpdateInfo) => {
-          // notificationService.show({ title: 'Update not available', body: JSON.stringify(info) });
           console.log('update-not-available: ', info);
           this.info = info;
           this.available = false;
@@ -60,7 +58,6 @@ export class UpdateService {
         });
 
         this.ipc.on('update-error', (event, error) => {
-          // notificationService.show({ title: 'Update error', body: error.message });
           console.log('update-error: ', error);
         });
 

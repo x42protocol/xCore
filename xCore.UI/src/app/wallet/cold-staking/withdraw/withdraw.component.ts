@@ -244,8 +244,8 @@ export class ColdStakingWithdrawComponent implements OnInit, OnDestroy {
     this.apiService.getWalletBalanceOnce(walletInfo)
       .pipe(finalize(() => {
         this.walletAccountBalanceWorker.resume();
-      }),
-      ).subscribe(
+      }))
+      .subscribe(
         response => {
           this.log.info('Get account balance result:', response);
           const balanceResponse = response;

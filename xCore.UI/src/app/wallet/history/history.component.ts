@@ -64,8 +64,8 @@ export class HistoryComponent implements OnInit, OnDestroy {
     this.apiService.getWalletHistory(walletInfo, 0, 10)
       .pipe(finalize(() => {
         this.historyWorker.resume();
-      }),
-      ).subscribe(
+      }))
+      .subscribe(
         response => {
           if (!!response.history && response.history[0].transactionsHistory.length > 0) {
             historyResponse = response.history[0].transactionsHistory;

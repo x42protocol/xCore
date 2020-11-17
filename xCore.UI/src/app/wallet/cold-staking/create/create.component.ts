@@ -141,8 +141,8 @@ export class ColdStakingCreateComponent implements OnInit, OnDestroy {
     this.apiService.getMaximumBalance(maxBalanceRequest)
       .pipe(finalize(() => {
         this.walletAccountBalanceWorker.resume();
-      }),
-      ).subscribe(
+      }))
+      .subscribe(
         response => {
           this.log.info('Get max balance result:', response);
           this.estimatedFee = response.fee;

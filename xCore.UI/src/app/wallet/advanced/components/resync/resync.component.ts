@@ -5,7 +5,8 @@ import { ApiService } from '../../../../shared/services/api.service';
 import { GlobalService } from '../../../../shared/services/global.service';
 import { ModalService } from '../../../../shared/services/modal.service';
 import { WalletRescan } from '../../../../shared/models/wallet-rescan';
-import { Subscription } from 'rxjs';
+import { finalize } from 'rxjs/operators';
+import { TaskTimer } from 'tasktimer';
 
 @Component({
   selector: 'app-resync',
@@ -24,7 +25,7 @@ export class ResyncComponent implements OnInit, OnDestroy {
   private lastBlockSyncedHeight: number;
   private chainTip: number;
   private isChainSynced: boolean;
-  private generalWalletInfoSubscription: Subscription;
+  private generalInfoWorker = new TaskTimer(5000);
 
   public isSyncing = true;
   public minDate = new Date('2009-08-09');
@@ -43,12 +44,17 @@ export class ResyncComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.walletName = this.globalService.getWalletName();
-    this.startSubscriptions();
+    this.startMethods();
     this.buildRescanWalletForm();
   }
 
+  startMethods() {
+    this.generalInfoWorker.add(() => this.updateGeneralWalletInfo()).start();
+    this.updateGeneralWalletInfo();
+  }
+
   ngOnDestroy() {
-    this.cancelSubscriptions();
+    this.generalInfoWorker.stop();
   }
 
   private buildRescanWalletForm(): void {
@@ -100,40 +106,29 @@ export class ResyncComponent implements OnInit, OnDestroy {
       );
   }
 
-  private getGeneralWalletInfo() {
+  private updateGeneralWalletInfo() {
+    this.generalInfoWorker.pause();
     const walletInfo = new WalletInfo(this.walletName);
-    this.generalWalletInfoSubscription = this.apiService.getGeneralInfo(walletInfo)
+    this.apiService.getGeneralInfo(walletInfo)
+      .pipe(finalize(() => {
+        this.generalInfoWorker.resume();
+      }))
       .subscribe(
         response => {
-          if (response != null) {
-            const generalWalletInfoResponse = response;
-            this.lastBlockSyncedHeight = generalWalletInfoResponse.lastBlockSyncedHeight;
-            this.chainTip = generalWalletInfoResponse.chainTip;
-            this.isChainSynced = generalWalletInfoResponse.isChainSynced;
+          const generalWalletInfoResponse = response;
+          this.lastBlockSyncedHeight = generalWalletInfoResponse.lastBlockSyncedHeight;
+          this.chainTip = generalWalletInfoResponse.chainTip;
+          this.isChainSynced = generalWalletInfoResponse.isChainSynced;
 
-            if (this.isChainSynced && this.lastBlockSyncedHeight === this.chainTip) {
-              this.isSyncing = false;
-            } else {
-              this.isSyncing = true;
-            }
+          if (this.isChainSynced && this.lastBlockSyncedHeight === this.chainTip) {
+            this.isSyncing = false;
+          } else {
+            this.isSyncing = true;
           }
         },
         error => {
-          this.cancelSubscriptions();
-          this.startSubscriptions();
+          this.apiService.handleException(error);
         }
-      )
-      ;
+      );
   }
-
-  private cancelSubscriptions() {
-    if (this.generalWalletInfoSubscription) {
-      this.generalWalletInfoSubscription.unsubscribe();
-    }
-  }
-
-  private startSubscriptions() {
-    this.getGeneralWalletInfo();
-  }
-
 }

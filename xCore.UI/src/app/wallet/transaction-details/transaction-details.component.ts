@@ -1,11 +1,12 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { SelectItem } from 'primeng/api';
 import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
-import { Subscription } from 'rxjs';
 import { ApiService } from '../../shared/services/api.service';
 import { GlobalService } from '../../shared/services/global.service';
 import { WalletInfo } from '../../shared/models/wallet-info';
 import { TransactionInfo } from '../../shared/models/transaction-info';
+import { finalize } from 'rxjs/operators';
+import { TaskTimer } from 'tasktimer';
 
 @Component({
   selector: 'app-transaction-details',
@@ -26,7 +27,7 @@ export class TransactionDetailsComponent implements OnInit, OnDestroy {
   public confirmations: number;
   public copyType: SelectItem[];
 
-  private generalWalletInfoSubscription: Subscription;
+  private generalInfoWorker = new TaskTimer(5000);
   private lastBlockSyncedHeight: number;
 
   ngOnInit() {
@@ -35,38 +36,38 @@ export class TransactionDetailsComponent implements OnInit, OnDestroy {
     ];
 
     this.transaction = this.config.data.transaction;
-    this.startSubscriptions();
+    this.startMethods();
     this.coinUnit = this.globalService.getCoinUnit();
   }
 
+  startMethods() {
+    this.generalInfoWorker.add(() => this.updateGeneralWalletInfo()).start();
+    this.updateGeneralWalletInfo();
+  }
+
   ngOnDestroy() {
-    this.cancelSubscriptions();
+    this.generalInfoWorker.stop();
   }
 
   public onCopiedClick() {
     this.copied = true;
   }
 
-  private getGeneralWalletInfo() {
+  private updateGeneralWalletInfo() {
+    this.generalInfoWorker.pause();
     const walletInfo = new WalletInfo(this.globalService.getWalletName());
-    this.generalWalletInfoSubscription = this.apiService.getGeneralInfo(walletInfo)
+    this.apiService.getGeneralInfo(walletInfo)
+      .pipe(finalize(() => {
+        this.generalInfoWorker.resume();
+      }))
       .subscribe(
         response => {
-          if (response != null) {
-            const generalWalletInfoResponse = response;
-            this.lastBlockSyncedHeight = generalWalletInfoResponse.lastBlockSyncedHeight;
-            this.getConfirmations(this.transaction);
-          }
+          const generalWalletInfoResponse = response;
+          this.lastBlockSyncedHeight = generalWalletInfoResponse.lastBlockSyncedHeight;
+          this.getConfirmations(this.transaction);
         },
         error => {
-          if (error.status === 0) {
-            this.cancelSubscriptions();
-          } else if (error.status >= 400) {
-            if (!error.error.errors[0].message) {
-              this.cancelSubscriptions();
-              this.startSubscriptions();
-            }
-          }
+          this.apiService.handleException(error);
         }
       );
   }
@@ -79,13 +80,4 @@ export class TransactionDetailsComponent implements OnInit, OnDestroy {
     }
   }
 
-  private cancelSubscriptions() {
-    if (this.generalWalletInfoSubscription) {
-      this.generalWalletInfoSubscription.unsubscribe();
-    }
-  }
-
-  private startSubscriptions() {
-    this.getGeneralWalletInfo();
-  }
 }

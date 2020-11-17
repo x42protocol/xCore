@@ -6,7 +6,8 @@ import { ApiService } from '../../shared/services/api.service';
 import { SendComponent } from '../send/send.component';
 import { AddNewAddressComponent } from '../address-book/modals/add-new-address/add-new-address.component';
 import { AddressLabel } from '../../shared/models/address-label';
-import { Subscription } from 'rxjs';
+import { finalize } from 'rxjs/operators';
+import { TaskTimer } from 'tasktimer';
 
 @Component({
   selector: 'app-address-book',
@@ -21,32 +22,32 @@ export class AddressBookComponent implements OnInit, OnDestroy {
   ) { }
 
   public copyType: SelectItem[];
-  private addressBookSubcription: Subscription;
+  private addressBookWorker = new TaskTimer(5000);
   addresses: AddressLabel[];
 
   ngOnInit() {
-    this.startSubscriptions();
     this.copyType = [
       { label: 'Copy', value: 'Copy', icon: 'pi pi-copy' }
     ];
+
+    this.startMethods();
   }
 
-  ngOnDestroy() {
-    this.cancelSubscriptions();
-  }
-
-  private startSubscriptions() {
+  startMethods() {
+    this.addressBookWorker.add(() => this.getAddressBookAddresses()).start();
     this.getAddressBookAddresses();
   }
 
-  private cancelSubscriptions() {
-    if (this.addressBookSubcription) {
-      this.addressBookSubcription.unsubscribe();
-    }
+  ngOnDestroy() {
+    this.addressBookWorker.stop();
   }
 
   private getAddressBookAddresses() {
-    this.addressBookSubcription = this.apiService.getAddressBookAddresses()
+    this.addressBookWorker.pause();
+    this.apiService.getAddressBookAddresses()
+      .pipe(finalize(() => {
+        this.addressBookWorker.resume();
+      }))
       .subscribe(
         response => {
           if (response != null) {
@@ -59,19 +60,10 @@ export class AddressBookComponent implements OnInit, OnDestroy {
               }
             }
           }
-        },
-        error => {
-          if (error.status === 0) {
-            this.cancelSubscriptions();
-          } else if (error.status >= 400) {
-            if (!error.error.errors[0].message) {
-              this.cancelSubscriptions();
-              this.startSubscriptions();
-            }
-          }
+        }, error => {
+          this.apiService.handleException(error);
         }
-      )
-      ;
+      );
   }
 
   copyToClipboardClicked(address: AddressLabel) {
@@ -93,12 +85,9 @@ export class AddressBookComponent implements OnInit, OnDestroy {
 
   removeClicked(address: AddressLabel) {
     this.apiService.removeAddressBookAddress(address.label)
-      .subscribe(
-        response => {
-          this.cancelSubscriptions();
-          this.startSubscriptions();
-        }
-      );
+      .subscribe(() => {
+        this.getAddressBookAddresses();
+      });
   }
 
   addNewAddressClicked() {

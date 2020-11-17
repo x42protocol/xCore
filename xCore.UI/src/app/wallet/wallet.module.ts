@@ -148,7 +148,8 @@ import { NgCircleProgressModule } from 'ng-circle-progress';
     ColdStakingWithdrawComponent,
     ColdStakingCreateHotComponent,
     RegisterComponent,
-    CreateProfileComponent
+    CreateProfileComponent,
+    AddNewAddressComponent
   ]
 })
 
