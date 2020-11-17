@@ -192,27 +192,24 @@ export class AppComponent implements OnInit, OnDestroy {
   // Attempts to initialise the wallet by contacting the daemon.  Will try to do this MaxRetryCount times.
   private tryStart() {
     let retry = 0;
-    this.apiService.getNodeStatus().pipe(
-      retryWhen(errors =>
-        errors.pipe(delay(this.TryDelayMilliseconds)).pipe(
-          tap(errorStatus => {
-            if (retry++ === this.MaxRetryCount) {
-              throw errorStatus;
-            }
-            this.log.info(`Retrying ${retry}...`);
-          })
+    this.apiService.getNodeStatus()
+      .pipe(
+        retryWhen(errors =>
+          errors.pipe(delay(this.TryDelayMilliseconds)).pipe(
+            tap(errorStatus => {
+              if (retry++ === this.MaxRetryCount) {
+                this.nodeFailedToLoad();
+                throw errorStatus;
+              }
+              this.log.info(`Retrying ${retry}...`);
+            })
+          )
         )
-      )
-    );
-
-    this.nodeStatusWorker.start();
-    this.updateNodeStatus();
-  }
-
-  nodeFailedToLoad() {
-    this.nodeFailed = true;
-    this.loading = false;
-    this.loadingFailed = true;
+      ).subscribe(() => {
+        this.apiConnected = true;
+        this.nodeStatusWorker.start();
+        this.updateNodeStatus();
+      });
   }
 
   private updateNodeStatus() {
@@ -247,6 +244,12 @@ export class AppComponent implements OnInit, OnDestroy {
 
     this.appState.connected = true;
     this.startx42();
+  }
+
+  nodeFailedToLoad() {
+    this.nodeFailed = true;
+    this.loading = false;
+    this.loadingFailed = true;
   }
 
   ngOnDestroy() {
