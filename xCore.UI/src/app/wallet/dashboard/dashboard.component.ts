@@ -15,6 +15,7 @@ import { TransactionDetailsComponent } from '../transaction-details/transaction-
 import { CreateProfileComponent } from '../profile/create/create-profile.component';
 import { finalize } from 'rxjs/operators';
 import { WorkerType } from '../../shared/models/worker';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard-component',
@@ -67,6 +68,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public profile: any;
 
   private isColdWalletHot = false;
+  private workerSubscription: Subscription;
 
   ngOnInit() {
     this.walletName = this.globalService.getWalletName();
@@ -82,12 +84,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   startMethods() {
-    this.worker.timerStatusChanged.subscribe((status) => {
+    this.workerSubscription = this.worker.timerStatusChanged.subscribe((status) => {
       if (status.running) {
         if (status.worker === WorkerType.STAKING_INFO) { this.updateStakingInfoDetails(); }
         if (status.worker === WorkerType.ACCOUNT_BALANCE) { this.updateAccountBalanceDetails(); }
         if (status.worker === WorkerType.HOT_BALANCE) { this.updateHotBalanceDetails(); }
-        if (status.worker === WorkerType.HISTORY) { this.updateWalletHistory(); }
+        // if (status.worker === WorkerType.HISTORY) { this.updateWalletHistory(); }
       }
     });
 
@@ -102,6 +104,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.worker.Stop(WorkerType.ACCOUNT_BALANCE);
     this.worker.Stop(WorkerType.HOT_BALANCE);
     this.worker.Stop(WorkerType.HISTORY);
+    this.cancelSubscriptions();
+  }
+
+  private cancelSubscriptions() {
+    if (this.workerSubscription) {
+      this.workerSubscription.unsubscribe();
+    }
   }
 
   private buildStakingForm(): void {
@@ -212,8 +221,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
       }))
       .subscribe(
         response => {
-          this.log.info('Get account balance result:', response);
           const balanceResponse = response;
+          let balanceChanged = false;
+          if (this.confirmedBalance !== balanceResponse.balances[0].amountConfirmed) {
+            balanceChanged = true;
+          } else if (this.unconfirmedBalance !== balanceResponse.balances[0].amountUnconfirmed) {
+            balanceChanged = true;
+          }
           // TODO - add account feature instead of using first entry in array
           this.confirmedBalance = balanceResponse.balances[0].amountConfirmed;
           this.unconfirmedBalance = balanceResponse.balances[0].amountUnconfirmed;
@@ -224,7 +238,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
             this.hasBalance = false;
           }
           this.balanceLoaded = true;
-          this.worker.Start(WorkerType.HISTORY);
+          // this.worker.Start(WorkerType.HISTORY);
+          if (balanceChanged) {
+            this.log.info('Balance changed', response);
+            this.updateWalletHistory();
+          }
         },
         error => {
           this.apiService.handleException(error);
@@ -260,12 +278,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   // TODO: add history in seperate service to make it reusable
   private updateWalletHistory() {
-    this.worker.Stop(WorkerType.HISTORY);
+    // this.worker.Stop(WorkerType.HISTORY);
     const walletInfo = new WalletInfo(this.globalService.getWalletName());
     let historyResponse;
     this.apiService.getWalletHistory(walletInfo, 0, 10)
       .pipe(finalize(() => {
-        this.worker.Start(WorkerType.HISTORY, 10);
+        // this.worker.Start(WorkerType.HISTORY, 10);
       }))
       .subscribe(
         response => {

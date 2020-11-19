@@ -8,6 +8,7 @@ import { WorkerService } from '../../../../shared/services/worker.service';
 import { WorkerType } from '../../../../shared/models/worker';
 import { WalletRescan } from '../../../../shared/models/wallet-rescan';
 import { finalize } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-resync',
@@ -27,6 +28,7 @@ export class ResyncComponent implements OnInit, OnDestroy {
   private lastBlockSyncedHeight: number;
   private chainTip: number;
   private isChainSynced: boolean;
+  private workerSubscription: Subscription;
 
   public isSyncing = true;
   public minDate = new Date('2009-08-09');
@@ -50,7 +52,7 @@ export class ResyncComponent implements OnInit, OnDestroy {
   }
 
   startMethods() {
-    this.worker.timerStatusChanged.subscribe((status) => {
+    this.workerSubscription = this.worker.timerStatusChanged.subscribe((status) => {
       if (status.running) {
         if (status.worker === WorkerType.GENERAL_INFO) { this.updateGeneralWalletInfo(); }
       }
@@ -61,6 +63,13 @@ export class ResyncComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.worker.Stop(WorkerType.GENERAL_INFO);
+    this.cancelSubscriptions();
+  }
+
+  private cancelSubscriptions() {
+    if (this.workerSubscription) {
+      this.workerSubscription.unsubscribe();
+    }
   }
 
   private buildRescanWalletForm(): void {

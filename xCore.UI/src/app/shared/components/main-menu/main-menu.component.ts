@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, NgZone } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, NgZone } from '@angular/core';
 import { FormGroup, Validators, FormBuilder } from '@angular/forms';
 import { ThemeService } from '../../services/theme.service';
 import { SelectItemGroup, MenuItem, SelectItem } from 'primeng/api';
@@ -18,14 +18,16 @@ import { Logger } from '../../../shared/services/logger.service';
 import { ApiService } from '../../services/api.service';
 import { WorkerService } from '../../../shared/services/worker.service';
 import { WorkerType } from '../../../shared/models/worker';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-main-menu',
   templateUrl: './main-menu.component.html',
   styleUrls: ['./main-menu.component.css']
 })
-export class MainMenuComponent implements OnInit {
+export class MainMenuComponent implements OnInit, OnDestroy {
   private ipc: Electron.IpcRenderer;
+  private workerSubscription: Subscription;
 
   @Input() public isUnLocked = false;
 
@@ -172,7 +174,7 @@ export class MainMenuComponent implements OnInit {
         );
     }
 
-    this.worker.timerStatusChanged.subscribe((status) => {
+    this.workerSubscription = this.worker.timerStatusChanged.subscribe((status) => {
       if (status.running) {
         if (status.worker === WorkerType.UPDATE) { this.checkForUpdates(); }
         if (status.worker === WorkerType.COLD_TYPE) { this.checkForColdTypeChange(); }
@@ -181,6 +183,16 @@ export class MainMenuComponent implements OnInit {
 
     this.worker.Start(WorkerType.UPDATE, 43200000);
     this.worker.Start(WorkerType.COLD_TYPE, 1000);
+  }
+
+  ngOnDestroy() {
+    this.cancelSubscriptions();
+  }
+
+  private cancelSubscriptions() {
+    if (this.workerSubscription) {
+      this.workerSubscription.unsubscribe();
+    }
   }
 
   checkForColdTypeChange() {

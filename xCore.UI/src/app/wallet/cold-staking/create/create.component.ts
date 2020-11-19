@@ -13,6 +13,8 @@ import { ColdStakingService } from '../../../shared/services/coldstaking.service
 import { TransactionSending } from '../../../shared/models/transaction-sending';
 import { ColdStakingSetup } from '../../../shared/models/coldstakingsetup';
 import { debounceTime, finalize } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
+
 type FeeType = { id: number, display: string, value: number };
 
 @Component({
@@ -39,6 +41,8 @@ export class ColdStakingCreateComponent implements OnInit, OnDestroy {
     this.setCoinUnit();
     this.buildSendForm();
   }
+
+  private workerSubscription: Subscription;
 
   public balanceLoaded: boolean;
   public sendForm: FormGroup;
@@ -77,17 +81,26 @@ export class ColdStakingCreateComponent implements OnInit, OnDestroy {
   };
 
   public ngOnInit() {
-    this.worker.timerStatusChanged.subscribe((status) => {
+    this.workerSubscription = this.worker.timerStatusChanged.subscribe((status) => {
       if (status.running) {
         if (status.worker === WorkerType.ACCOUNT_BALANCE) { this.updateAccountBalanceDetails(); }
       }
     });
 
     this.worker.Start(WorkerType.ACCOUNT_BALANCE);
+
+    this.updateAccountBalanceDetails();
   }
 
   public ngOnDestroy() {
     this.worker.Stop(WorkerType.ACCOUNT_BALANCE);
+    this.cancelSubscriptions();
+  }
+
+  private cancelSubscriptions() {
+    if (this.workerSubscription) {
+      this.workerSubscription.unsubscribe();
+    }
   }
 
   private setCoinUnit(): void {

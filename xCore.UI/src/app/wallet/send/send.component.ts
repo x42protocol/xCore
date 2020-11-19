@@ -7,17 +7,16 @@ import { Logger } from '../../shared/services/logger.service';
 import { WorkerService } from '../../shared/services/worker.service';
 import { WorkerType } from '../../shared/models/worker';
 import { CoinNotationPipe } from '../../shared/pipes/coin-notation.pipe';
-
 import { FeeEstimation } from '../../shared/models/fee-estimation';
 import { TransactionBuilding } from '../../shared/models/transaction-building';
 import { TransactionSending } from '../../shared/models/transaction-sending';
 import { ThemeService } from '../../shared/services/theme.service';
 import { debounceTime, finalize } from 'rxjs/operators';
-
 import { DynamicDialogRef, DynamicDialogConfig, DialogService } from 'primeng/dynamicdialog';
 import { PriceLockUtil } from '../../shared/models/pricelockutil';
 import { SubmitPaymentRequest } from '../../shared/models/xserver-submit-payment-request';
 import { SignMessageRequest } from '../../shared/models/wallet-signmessagerequest';
+import { Subscription } from 'rxjs';
 
 interface TxDetails {
   transactionFee?: number;
@@ -49,6 +48,8 @@ export class SendComponent implements OnInit, OnDestroy {
     this.buildPaymentForm();
     this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
   }
+
+  private workerSubscription: Subscription;
 
   public balanceLoaded: boolean;
   public sendForm: FormGroup;
@@ -180,10 +181,11 @@ export class SendComponent implements OnInit, OnDestroy {
     }
 
     this.startMethods();
+    this.updateAccountBalanceDetails();
   }
 
   startMethods() {
-    this.worker.timerStatusChanged.subscribe((status) => {
+    this.workerSubscription = this.worker.timerStatusChanged.subscribe((status) => {
       if (status.running) {
         if (status.worker === WorkerType.ACCOUNT_BALANCE) { this.updateAccountBalanceDetails(); }
       }
@@ -192,7 +194,13 @@ export class SendComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.worker.Stop(WorkerType.ACCOUNT_BALANCE);
+    this.cancelSubscriptions();
+  }
+
+  private cancelSubscriptions() {
+    if (this.workerSubscription) {
+      this.workerSubscription.unsubscribe();
+    }
   }
 
   private buildSendForm(): void {
@@ -474,6 +482,7 @@ export class SendComponent implements OnInit, OnDestroy {
           if (paymentResponse.success) {
             this.paymentMessage = 'Payment sent!';
             this.paymentSeverity = 'success';
+            this.worker.Start(WorkerType.ACCOUNT_BALANCE);
           }
           this.isSending = false;
         }
@@ -538,46 +547,9 @@ export class SendComponent implements OnInit, OnDestroy {
       );
   }
 
-  public buildSidechainTransaction() {
-    this.transaction = new TransactionBuilding(
-      this.globalService.getWalletName(),
-      'account 0',
-      this.sendToSidechainForm.get('password').value,
-      this.sendToSidechainForm.get('federationAddress').value.trim(),
-      this.sendToSidechainForm.get('amount').value,
-      // this.sendToSidechainForm.get("fee").value,
-      // TO DO: use coin notation
-      this.estimatedSidechainFee / 100000000,
-      true,
-      false,
-      this.sendToSidechainForm.get('destinationAddress').value.trim(),
-      this.opReturnAmount / 100000000
-    );
-    this.apiService.buildTransaction(this.transaction)
-      .subscribe(
-        response => {
-          this.estimatedSidechainFee = response.fee;
-          this.transactionHex = response.hex;
-          if (this.isSending) {
-            this.hasOpReturn = true;
-            this.sendTransaction(this.transactionHex);
-          }
-        },
-        error => {
-          this.isSending = false;
-          this.apiError = error.error.errors[0].message;
-        }
-      );
-  }
-
   public send() {
     this.isSending = true;
     this.buildTransaction();
-  }
-
-  public sendToSidechain() {
-    this.isSending = true;
-    this.buildSidechainTransaction();
   }
 
   private sendTransaction(hex: string) {
@@ -594,6 +566,7 @@ export class SendComponent implements OnInit, OnDestroy {
               hasOpReturn: this.hasOpReturn,
               amount: this.sendForm.get('amount').value
             };
+            this.worker.Start(WorkerType.ACCOUNT_BALANCE);
             this.transactionComplete = true;
           }
         },

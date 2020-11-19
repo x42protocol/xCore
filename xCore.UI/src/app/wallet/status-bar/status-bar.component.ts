@@ -7,6 +7,7 @@ import { XServerStatus } from '../../shared/models/xserver-status';
 import { WalletInfo } from '../../shared/models/wallet-info';
 import { finalize } from 'rxjs/operators';
 import { WorkerType } from '../../shared/models/worker';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-status-bar',
@@ -18,6 +19,7 @@ export class StatusBarComponent implements OnInit, OnDestroy {
   private connectedXServerTooltip = '';
   private isChainSynced: boolean;
   private percentSyncedNumber = 0;
+  private workerSubscription: Subscription;
 
   public lastBlockSyncedHeight: number;
   public chainTip: number;
@@ -44,7 +46,7 @@ export class StatusBarComponent implements OnInit, OnDestroy {
   }
 
   startMethods() {
-    this.worker.timerStatusChanged.subscribe((status) => {
+    this.workerSubscription = this.worker.timerStatusChanged.subscribe((status) => {
       if (status.running) {
         if (status.worker === WorkerType.STAKING_INFO) { this.updateStakingInfoDetails(); }
         if (status.worker === WorkerType.XSERVER_INFO) { this.getGeneralxServerInfo(); }
@@ -62,6 +64,13 @@ export class StatusBarComponent implements OnInit, OnDestroy {
     this.worker.Stop(WorkerType.XSERVER_INFO);
     this.worker.Stop(WorkerType.NODE_STATUS);
     this.worker.Stop(WorkerType.GENERAL_INFO);
+    this.cancelSubscriptions();
+  }
+
+  private cancelSubscriptions() {
+    if (this.workerSubscription) {
+      this.workerSubscription.unsubscribe();
+    }
   }
 
   private updateConnectionToolTip() {

@@ -8,7 +8,7 @@ import { ThemeService } from './shared/services/theme.service';
 import { TitleService } from './shared/services/title.service';
 import { WorkerService } from './shared/services/worker.service';
 import { MenuItem } from 'primeng/api';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { delay, retryWhen, tap, finalize } from 'rxjs/operators';
 import { environment } from '../environments/environment';
 import * as signalR from '@aspnet/signalr';
@@ -42,9 +42,12 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private readonly TryDelayMilliseconds = 3000;
   private readonly MaxRetryCount = 50;
-  loadingFailed = false;
+  private failedAttempts = 0;
+
+  public loadingFailed = false;
   public apiConnected = false;
   public contextMenuItems: MenuItem[];
+  public workerSubscription: Subscription;
 
   constructor(
     private themeService: ThemeService,
@@ -98,13 +101,19 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   startMethods() {
-    this.worker.timerStatusChanged.subscribe((status) => {
+    this.workerSubscription = this.worker.timerStatusChanged.subscribe((status) => {
       if (status.running) {
         if (status.worker === WorkerType.NODE_STATUS) { this.updateNodeStatus(); }
       }
     });
 
     this.worker.Start(WorkerType.NODE_STATUS);
+  }
+
+  private cancelSubscriptions() {
+    if (this.workerSubscription) {
+      this.workerSubscription.unsubscribe();
+    }
   }
 
   get appTitle$(): Observable<string> {
@@ -148,9 +157,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.nodeStarted = true;
     setTimeout(() => {
       this.loading = false;
-      if (this.router.url === '/app') {
-        this.router.navigate(['login']);
-      }
+      this.router.navigate(['login']);
     }, 2000);
   }
 
@@ -205,6 +212,7 @@ export class AppComponent implements OnInit, OnDestroy {
         retryWhen(errors =>
           errors.pipe(delay(this.TryDelayMilliseconds)).pipe(
             tap(errorStatus => {
+              this.failedAttempts++;
               if (retry++ === this.MaxRetryCount) {
                 this.nodeFailedToLoad();
                 throw errorStatus;
@@ -223,23 +231,32 @@ export class AppComponent implements OnInit, OnDestroy {
     this.worker.Stop(WorkerType.NODE_STATUS);
     this.apiService.getNodeStatus()
       .pipe(finalize(() => {
-        if (!this.appState.connected) {
+        if (!this.nodeStarted) {
           this.worker.Start(WorkerType.NODE_STATUS);
         }
       }))
       .subscribe(
         response => {
-          this.log.info('Node Status Update: ', response);
-          const statusResponse = response.featuresData.filter(x => x.namespace === 'Blockcore.Base.BaseFeature');
-          if (statusResponse.length > 0 && statusResponse[0].state === 'Initialized') {
+          if (this.nodeStarted) {
+            console.log('STOPPED');
             this.worker.Stop(WorkerType.NODE_STATUS);
-            this.start();
+            this.cancelSubscriptions();
+          } else {
+            this.failedAttempts = 0;
+            this.log.info('Node Status Update: ', response);
+            const statusResponse = response.featuresData.filter(x => x.namespace === 'Blockcore.Base.BaseFeature');
+            if (statusResponse.length > 0 && statusResponse[0].state === 'Initialized') {
+              this.worker.Stop(WorkerType.NODE_STATUS);
+              this.cancelSubscriptions();
+              this.start();
+            }
           }
         },
         error => {
           this.log.info('Failed to start wallet');
           this.nodeFailedToLoad();
           this.apiService.handleException(error);
+          this.failedAttempts++;
         }
       );
   }
@@ -255,13 +272,16 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   nodeFailedToLoad() {
-    this.nodeFailed = true;
-    this.loading = false;
-    this.loadingFailed = true;
+    if (this.failedAttempts >= this.MaxRetryCount) {
+      this.nodeFailed = true;
+      this.loading = false;
+      this.loadingFailed = true;
+    }
   }
 
   ngOnDestroy() {
     this.worker.Stop(WorkerType.NODE_STATUS);
+    this.cancelSubscriptions();
   }
 
   cancel() {

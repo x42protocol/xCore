@@ -16,6 +16,7 @@ import { XServerRegistrationRequest } from '../../../../../shared/models/xserver
 import { XServerTestRequest } from '../../../../../shared/models/xserver-test-request';
 import { NodeStatus } from '../../../../../shared/models/node-status';
 import { finalize } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-register-component',
@@ -37,13 +38,18 @@ export class RegisterComponent implements OnInit, OnDestroy {
     this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
   }
 
+  private server: ServerIDResponse = new ServerIDResponse();
+
+  private signedMessage: string;
+  private broadcastStarted = false;
+  private workerSubscription: Subscription;
+
   public isDarkTheme = false;
   public collateralProgress = 0;
   public currentStep = -1;
   public confirmations = 0;
   public transactionInfo: TransactionInfo;
   public registrationFailed = false;
-
   public profileName: string;
   public selectedProtocol: number;
   public networkAddress: string;
@@ -54,11 +60,6 @@ export class RegisterComponent implements OnInit, OnDestroy {
   public feeAddress: string;
   public errorMessage = '';
   public testStatus = 0;
-
-  private server: ServerIDResponse = new ServerIDResponse();
-
-  private signedMessage: string;
-  private broadcastStarted = false;
 
   public mainAccount = 'account 0';
   public coldStakingAccount = 'coldStakingColdAddresses';
@@ -79,7 +80,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
   }
 
   startMethods() {
-    this.worker.timerStatusChanged.subscribe((status) => {
+    this.workerSubscription = this.worker.timerStatusChanged.subscribe((status) => {
       if (status.running) {
         if (status.worker === WorkerType.TX_CONFIRMATION) { this.updateTransactionConfirmations(); }
       }
@@ -96,6 +97,13 @@ export class RegisterComponent implements OnInit, OnDestroy {
   }
   ngOnDestroy() {
     this.worker.Stop(WorkerType.TX_CONFIRMATION);
+    this.cancelSubscriptions();
+  }
+
+  private cancelSubscriptions() {
+    if (this.workerSubscription) {
+      this.workerSubscription.unsubscribe();
+    }
   }
 
   private testXServer(blockHeight: number) {

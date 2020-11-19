@@ -14,6 +14,7 @@ import { TransactionSending } from '../../../shared/models/transaction-sending';
 import { WalletInfo } from '../../../shared/models/wallet-info';
 import { ColdStakingWithdrawalRequest } from '../../../shared/models/coldstakingwithdrawalrequest';
 import { debounceTime, finalize } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 
 type FeeType = { id: number, display: string, value: number };
 
@@ -67,6 +68,7 @@ export class ColdStakingWithdrawComponent implements OnInit, OnDestroy {
 
   private coldStakingAccount = 'coldStakingColdAddresses';
   private hotStakingAccount = 'coldStakingHotAddresses';
+  private workerSubscription: Subscription;
 
   sendFormErrors = {
     address: '',
@@ -100,7 +102,7 @@ export class ColdStakingWithdrawComponent implements OnInit, OnDestroy {
   }
 
   startMethods() {
-    this.worker.timerStatusChanged.subscribe((status) => {
+    this.workerSubscription = this.worker.timerStatusChanged.subscribe((status) => {
       if (status.running) {
         if (status.worker === WorkerType.ACCOUNT_BALANCE) { this.updateAccountBalanceDetails(); }
       }
@@ -110,6 +112,13 @@ export class ColdStakingWithdrawComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.worker.Stop(WorkerType.ACCOUNT_BALANCE);
+    this.cancelSubscriptions();
+  }
+
+  private cancelSubscriptions() {
+    if (this.workerSubscription) {
+      this.workerSubscription.unsubscribe();
+    }
   }
 
   private setCoinUnit(): void {

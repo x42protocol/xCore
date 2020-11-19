@@ -8,6 +8,7 @@ import { WorkerType } from '../../shared/models/worker';
 import { WalletInfo } from '../../shared/models/wallet-info';
 import { TransactionInfo } from '../../shared/models/transaction-info';
 import { finalize } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-transaction-details',
@@ -30,6 +31,7 @@ export class TransactionDetailsComponent implements OnInit, OnDestroy {
   public copyType: SelectItem[];
 
   private lastBlockSyncedHeight: number;
+  private workerSubscription: Subscription;
 
   ngOnInit() {
     this.copyType = [
@@ -42,7 +44,7 @@ export class TransactionDetailsComponent implements OnInit, OnDestroy {
   }
 
   startMethods() {
-    this.worker.timerStatusChanged.subscribe((status) => {
+    this.workerSubscription = this.worker.timerStatusChanged.subscribe((status) => {
       if (status.running) {
         if (status.worker === WorkerType.GENERAL_INFO) { this.updateGeneralWalletInfo(); }
       }
@@ -52,6 +54,13 @@ export class TransactionDetailsComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.worker.Stop(WorkerType.GENERAL_INFO);
+    this.cancelSubscriptions();
+  }
+
+  private cancelSubscriptions() {
+    if (this.workerSubscription) {
+      this.workerSubscription.unsubscribe();
+    }
   }
 
   public onCopiedClick() {

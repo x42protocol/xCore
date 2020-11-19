@@ -57,6 +57,7 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
   public balanceLoaded: boolean;
   public confirmedColdBalance = 0;
   public confirmedHotBalance = 0;
+  public setupForm: FormGroup;
 
   public unconfirmedColdBalance: number;
   public unconfirmedHotBalance: number;
@@ -68,8 +69,8 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
   public hasHotBalance = false;
 
   private walletColdWalletExistsSubscription: Subscription;
+  private workerSubscription: Subscription;
 
-  public setupForm: FormGroup;
 
   ngOnInit() {
     this.buildSetupForm();
@@ -92,7 +93,7 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
   }
 
   startMethods() {
-    this.worker.timerStatusChanged.subscribe((status) => {
+    this.workerSubscription = this.worker.timerStatusChanged.subscribe((status) => {
       if (status.running) {
         if (status.worker === WorkerType.COLD_BALANCE) { this.updateColdBalanceDetails(); }
         if (status.worker === WorkerType.HOT_BALANCE) { this.updateHotBalanceDetails(); }
@@ -103,8 +104,12 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
 
     if (this.isColdWalletHot) {
       this.worker.Start(WorkerType.HOT_BALANCE);
+      this.updateHotBalanceDetails();
+      this.updateHotHistory();
     } else {
       this.worker.Start(WorkerType.COLD_BALANCE);
+      this.updateColdBalanceDetails();
+      this.updateColdHistory();
     }
   }
 
@@ -114,6 +119,16 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
     this.worker.Stop(WorkerType.COLD_HISTORY);
     this.worker.Stop(WorkerType.HOT_HISTORY);
     this.cancelSubscriptions();
+  }
+
+  private cancelSubscriptions() {
+    if (this.walletColdWalletExistsSubscription) {
+      this.walletColdWalletExistsSubscription.unsubscribe();
+    }
+
+    if (this.workerSubscription) {
+      this.workerSubscription.unsubscribe();
+    }
   }
 
   private buildSetupForm(): void {
@@ -334,12 +349,6 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
       header: 'Transaction Details',
       data: modalData
     });
-  }
-
-  private cancelSubscriptions() {
-    if (this.walletColdWalletExistsSubscription) {
-      this.walletColdWalletExistsSubscription.unsubscribe();
-    }
   }
 
   private startSubscriptions() {

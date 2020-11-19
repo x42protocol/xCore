@@ -13,6 +13,7 @@ import { DynamicDialogRef, DynamicDialogConfig, DialogService } from 'primeng/dy
 import { SubmitPaymentRequest } from '../../../shared/models/xserver-submit-payment-request';
 import { SignMessageRequest } from '../../../shared/models/wallet-signmessagerequest';
 import { ProfileReserveRequest } from '../../../shared/models/xserver-profile-reserve-request';
+import { Subscription } from 'rxjs';
 
 interface TxDetails {
   transactionFee?: number;
@@ -42,6 +43,8 @@ export class CreateProfileComponent implements OnInit, OnDestroy {
     this.buildPaymentForm();
     this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
   }
+
+  private workerSubscription: Subscription;
 
   public balanceLoaded = false;
   public paymentForm: FormGroup;
@@ -114,7 +117,7 @@ export class CreateProfileComponent implements OnInit, OnDestroy {
   }
 
   startMethods() {
-    this.worker.timerStatusChanged.subscribe((status) => {
+    this.workerSubscription = this.worker.timerStatusChanged.subscribe((status) => {
       if (status.running) {
         if (status.worker === WorkerType.ACCOUNT_BALANCE) { this.updateAccountBalanceDetails(); }
       }
@@ -125,6 +128,13 @@ export class CreateProfileComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.worker.Stop(WorkerType.ACCOUNT_BALANCE);
+    this.cancelSubscriptions();
+  }
+
+  private cancelSubscriptions() {
+    if (this.workerSubscription) {
+      this.workerSubscription.unsubscribe();
+    }
   }
 
   private buildPaymentForm(): void {

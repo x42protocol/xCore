@@ -10,6 +10,7 @@ import { WalletInfo } from '../../shared/models/wallet-info';
 import { TransactionInfo } from '../../shared/models/transaction-info';
 import { TransactionDetailsComponent } from '../transaction-details/transaction-details.component';
 import { finalize } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-history-component',
@@ -28,6 +29,8 @@ export class HistoryComponent implements OnInit, OnDestroy {
     this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
   }
 
+  private workerSubscription: Subscription;
+
   public transactions: TransactionInfo[];
   public coinUnit: string;
   public pageNumber = 1;
@@ -35,7 +38,7 @@ export class HistoryComponent implements OnInit, OnDestroy {
   public isDarkTheme = false;
 
   ngOnInit() {
-    this.worker.timerStatusChanged.subscribe((status) => {
+    this.workerSubscription = this.worker.timerStatusChanged.subscribe((status) => {
       if (status.running) {
         if (status.worker === WorkerType.HISTORY) { this.updateWalletHistory(); }
       }
@@ -46,6 +49,13 @@ export class HistoryComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.worker.Stop(WorkerType.HISTORY);
+    this.cancelSubscriptions();
+  }
+
+  private cancelSubscriptions() {
+    if (this.workerSubscription) {
+      this.workerSubscription.unsubscribe();
+    }
   }
 
   onDashboardClicked() {

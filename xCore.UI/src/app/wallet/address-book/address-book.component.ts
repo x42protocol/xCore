@@ -9,6 +9,7 @@ import { SendComponent } from '../send/send.component';
 import { AddNewAddressComponent } from '../address-book/modals/add-new-address/add-new-address.component';
 import { AddressLabel } from '../../shared/models/address-label';
 import { finalize } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-address-book',
@@ -23,6 +24,8 @@ export class AddressBookComponent implements OnInit, OnDestroy {
     private worker: WorkerService,
   ) { }
 
+  private workerSubscription: Subscription;
+
   public copyType: SelectItem[];
   addresses: AddressLabel[];
 
@@ -35,7 +38,7 @@ export class AddressBookComponent implements OnInit, OnDestroy {
   }
 
   startMethods() {
-    this.worker.timerStatusChanged.subscribe((status) => {
+    this.workerSubscription = this.worker.timerStatusChanged.subscribe((status) => {
       if (status.running) {
         if (status.worker === WorkerType.ADDRESS_BOOK) { this.getAddressBookAddresses(); }
       }
@@ -46,6 +49,13 @@ export class AddressBookComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.worker.Stop(WorkerType.ADDRESS_BOOK);
+    this.cancelSubscriptions();
+  }
+
+  private cancelSubscriptions() {
+    if (this.workerSubscription) {
+      this.workerSubscription.unsubscribe();
+    }
   }
 
   private getAddressBookAddresses() {
