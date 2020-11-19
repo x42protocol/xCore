@@ -2,6 +2,8 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ApiService } from '../../../../../shared/services/api.service';
 import { GlobalService } from '../../../../../shared/services/global.service';
 import { ThemeService } from '../../../../../shared/services/theme.service';
+import { WorkerService } from '../../../../../shared/services/worker.service';
+import { WorkerType } from '../../../../../shared/models/worker';
 import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { ColdStakingSetup } from '../../../../../shared/models/coldstakingsetup';
 import { TransactionSending } from '../../../../../shared/models/transaction-sending';
@@ -14,7 +16,6 @@ import { XServerRegistrationRequest } from '../../../../../shared/models/xserver
 import { XServerTestRequest } from '../../../../../shared/models/xserver-test-request';
 import { NodeStatus } from '../../../../../shared/models/node-status';
 import { finalize } from 'rxjs/operators';
-import { TaskTimer } from 'tasktimer';
 
 @Component({
   selector: 'app-register-component',
@@ -31,6 +32,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
     public activeModal: DynamicDialogRef,
     public config: DynamicDialogConfig,
     private log: Logger,
+    private worker: WorkerService,
   ) {
     this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
   }
@@ -54,7 +56,6 @@ export class RegisterComponent implements OnInit, OnDestroy {
   public testStatus = 0;
 
   private server: ServerIDResponse = new ServerIDResponse();
-  private transactionConfirmationsWorker = new TaskTimer(5000);
 
   private signedMessage: string;
   private broadcastStarted = false;
@@ -78,9 +79,13 @@ export class RegisterComponent implements OnInit, OnDestroy {
   }
 
   startMethods() {
-    this.transactionConfirmationsWorker.add(() => this.updateTransactionConfirmations());
-    this.updateTransactionConfirmations();
+    this.worker.timerStatusChanged.subscribe((status) => {
+      if (status.running) {
+        if (status.worker === WorkerType.TX_CONFIRMATION) { this.updateTransactionConfirmations(); }
+      }
+    });
 
+    this.worker.Start(WorkerType.TX_CONFIRMATION);
     this.apiService.getNodeStatus()
       .subscribe(
         (data: NodeStatus) => {
@@ -90,7 +95,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
       );
   }
   ngOnDestroy() {
-    this.transactionConfirmationsWorker.stop();
+    this.worker.Stop(WorkerType.TX_CONFIRMATION);
   }
 
   private testXServer(blockHeight: number) {
@@ -197,10 +202,10 @@ export class RegisterComponent implements OnInit, OnDestroy {
   }
 
   private updateTransactionConfirmations() {
-    this.transactionConfirmationsWorker.pause();
+    this.worker.Stop(WorkerType.TX_CONFIRMATION);
     this.apiService.getTxOut(this.transactionInfo.transactionId, false)
       .pipe(finalize(() => {
-        this.transactionConfirmationsWorker.resume();
+        this.worker.Start(WorkerType.TX_CONFIRMATION);
       }))
       .subscribe(
         transactionOutput => {
@@ -217,7 +222,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
   public deligatedTransactionSent(transactionInfo: TransactionInfo) {
     this.transactionInfo = transactionInfo;
     this.incrementProgress(10);
-    this.transactionConfirmationsWorker.start();
+    this.worker.Start(WorkerType.TX_CONFIRMATION);
     this.updateTransactionConfirmations();
   }
 

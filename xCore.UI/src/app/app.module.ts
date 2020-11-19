@@ -12,6 +12,7 @@ import { ThemeService } from './shared/services/theme.service';
 import { MainMenuModule } from './shared/components/main-menu/main-menu.module';
 import { ShutdownModule } from './shared/components/shutdown/shutdown.module';
 import { HttpErrorHandler } from './shared/services/http-error-handler.service';
+import { SimpleTimer } from 'ng2-simple-timer';
 import { httpInterceptorProviders } from './shared/http-interceptors/index';
 import { APP_TITLE } from './shared/services/title.service';
 
@@ -81,6 +82,7 @@ import { ToolbarModule } from 'primeng/toolbar';
     MessageService,
     DialogService,
     { provide: APP_TITLE, useValue: 'xCore' },
+    SimpleTimer,
   ],
   bootstrap: [AppComponent]
 })

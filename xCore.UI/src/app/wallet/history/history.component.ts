@@ -4,11 +4,12 @@ import { Router } from '@angular/router';
 import { ApiService } from '../../shared/services/api.service';
 import { GlobalService } from '../../shared/services/global.service';
 import { ThemeService } from '../../shared/services/theme.service';
+import { WorkerService } from '../../shared/services/worker.service';
+import { WorkerType } from '../../shared/models/worker';
 import { WalletInfo } from '../../shared/models/wallet-info';
 import { TransactionInfo } from '../../shared/models/transaction-info';
 import { TransactionDetailsComponent } from '../transaction-details/transaction-details.component';
 import { finalize } from 'rxjs/operators';
-import { TaskTimer } from 'tasktimer';
 
 @Component({
   selector: 'app-history-component',
@@ -22,6 +23,7 @@ export class HistoryComponent implements OnInit, OnDestroy {
     private router: Router,
     public dialogService: DialogService,
     public themeService: ThemeService,
+    private worker: WorkerService,
   ) {
     this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
   }
@@ -32,16 +34,18 @@ export class HistoryComponent implements OnInit, OnDestroy {
   public hasTransaction = true;
   public isDarkTheme = false;
 
-  private historyWorker = new TaskTimer(5000);
-
   ngOnInit() {
-    this.historyWorker.add(() => this.updateWalletHistory()).start();
-    this.updateWalletHistory();
+    this.worker.timerStatusChanged.subscribe((status) => {
+      if (status.running) {
+        if (status.worker === WorkerType.HISTORY) { this.updateWalletHistory(); }
+      }
+    });
+    this.worker.Start(WorkerType.HISTORY);
     this.coinUnit = this.globalService.getCoinUnit();
   }
 
   ngOnDestroy() {
-    this.historyWorker.stop();
+    this.worker.Stop(WorkerType.HISTORY);
   }
 
   onDashboardClicked() {
@@ -58,12 +62,12 @@ export class HistoryComponent implements OnInit, OnDestroy {
   }
 
   private updateWalletHistory() {
-    this.historyWorker.pause();
+    this.worker.Stop(WorkerType.HISTORY);
     const walletInfo = new WalletInfo(this.globalService.getWalletName());
     let historyResponse;
     this.apiService.getWalletHistory(walletInfo, 0, 10)
       .pipe(finalize(() => {
-        this.historyWorker.resume();
+        this.worker.Start(WorkerType.HISTORY);
       }))
       .subscribe(
         response => {

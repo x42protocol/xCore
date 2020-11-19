@@ -3,11 +3,12 @@ import { ClipboardService } from 'ngx-clipboard';
 import { SelectItem } from 'primeng/api';
 import { DialogService } from 'primeng/dynamicdialog';
 import { ApiService } from '../../shared/services/api.service';
+import { WorkerService } from '../../shared/services/worker.service';
+import { WorkerType } from '../../shared/models/worker';
 import { SendComponent } from '../send/send.component';
 import { AddNewAddressComponent } from '../address-book/modals/add-new-address/add-new-address.component';
 import { AddressLabel } from '../../shared/models/address-label';
 import { finalize } from 'rxjs/operators';
-import { TaskTimer } from 'tasktimer';
 
 @Component({
   selector: 'app-address-book',
@@ -19,10 +20,10 @@ export class AddressBookComponent implements OnInit, OnDestroy {
     private apiService: ApiService,
     private clipboardService: ClipboardService,
     public dialogService: DialogService,
+    private worker: WorkerService,
   ) { }
 
   public copyType: SelectItem[];
-  private addressBookWorker = new TaskTimer(5000);
   addresses: AddressLabel[];
 
   ngOnInit() {
@@ -34,19 +35,24 @@ export class AddressBookComponent implements OnInit, OnDestroy {
   }
 
   startMethods() {
-    this.addressBookWorker.add(() => this.getAddressBookAddresses()).start();
-    this.getAddressBookAddresses();
+    this.worker.timerStatusChanged.subscribe((status) => {
+      if (status.running) {
+        if (status.worker === WorkerType.ADDRESS_BOOK) { this.getAddressBookAddresses(); }
+      }
+    });
+
+    this.worker.Start(WorkerType.ADDRESS_BOOK);
   }
 
   ngOnDestroy() {
-    this.addressBookWorker.stop();
+    this.worker.Stop(WorkerType.ADDRESS_BOOK);
   }
 
   private getAddressBookAddresses() {
-    this.addressBookWorker.pause();
+    this.worker.Stop(WorkerType.ADDRESS_BOOK);
     this.apiService.getAddressBookAddresses()
       .pipe(finalize(() => {
-        this.addressBookWorker.resume();
+        this.worker.Start(WorkerType.ADDRESS_BOOK);
       }))
       .subscribe(
         response => {

@@ -3,10 +3,11 @@ import { SelectItem } from 'primeng/api';
 import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { ApiService } from '../../shared/services/api.service';
 import { GlobalService } from '../../shared/services/global.service';
+import { WorkerService } from '../../shared/services/worker.service';
+import { WorkerType } from '../../shared/models/worker';
 import { WalletInfo } from '../../shared/models/wallet-info';
 import { TransactionInfo } from '../../shared/models/transaction-info';
 import { finalize } from 'rxjs/operators';
-import { TaskTimer } from 'tasktimer';
 
 @Component({
   selector: 'app-transaction-details',
@@ -19,6 +20,7 @@ export class TransactionDetailsComponent implements OnInit, OnDestroy {
     private globalService: GlobalService,
     public ref: DynamicDialogRef,
     public config: DynamicDialogConfig,
+    private worker: WorkerService,
   ) { }
 
   public transaction: TransactionInfo;
@@ -27,7 +29,6 @@ export class TransactionDetailsComponent implements OnInit, OnDestroy {
   public confirmations: number;
   public copyType: SelectItem[];
 
-  private generalInfoWorker = new TaskTimer(5000);
   private lastBlockSyncedHeight: number;
 
   ngOnInit() {
@@ -41,12 +42,16 @@ export class TransactionDetailsComponent implements OnInit, OnDestroy {
   }
 
   startMethods() {
-    this.generalInfoWorker.add(() => this.updateGeneralWalletInfo()).start();
-    this.updateGeneralWalletInfo();
+    this.worker.timerStatusChanged.subscribe((status) => {
+      if (status.running) {
+        if (status.worker === WorkerType.GENERAL_INFO) { this.updateGeneralWalletInfo(); }
+      }
+    });
+    this.worker.Start(WorkerType.GENERAL_INFO);
   }
 
   ngOnDestroy() {
-    this.generalInfoWorker.stop();
+    this.worker.Stop(WorkerType.GENERAL_INFO);
   }
 
   public onCopiedClick() {
@@ -54,11 +59,11 @@ export class TransactionDetailsComponent implements OnInit, OnDestroy {
   }
 
   private updateGeneralWalletInfo() {
-    this.generalInfoWorker.pause();
+    this.worker.Stop(WorkerType.GENERAL_INFO);
     const walletInfo = new WalletInfo(this.globalService.getWalletName());
     this.apiService.getGeneralInfo(walletInfo)
       .pipe(finalize(() => {
-        this.generalInfoWorker.resume();
+        this.worker.Start(WorkerType.GENERAL_INFO);
       }))
       .subscribe(
         response => {

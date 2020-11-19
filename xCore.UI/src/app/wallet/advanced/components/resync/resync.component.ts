@@ -4,9 +4,10 @@ import { WalletInfo } from '../../../../shared/models/wallet-info';
 import { ApiService } from '../../../../shared/services/api.service';
 import { GlobalService } from '../../../../shared/services/global.service';
 import { ModalService } from '../../../../shared/services/modal.service';
+import { WorkerService } from '../../../../shared/services/worker.service';
+import { WorkerType } from '../../../../shared/models/worker';
 import { WalletRescan } from '../../../../shared/models/wallet-rescan';
 import { finalize } from 'rxjs/operators';
-import { TaskTimer } from 'tasktimer';
 
 @Component({
   selector: 'app-resync',
@@ -19,13 +20,13 @@ export class ResyncComponent implements OnInit, OnDestroy {
     private apiService: ApiService,
     private genericModalService: ModalService,
     private fb: FormBuilder,
+    private worker: WorkerService,
   ) { }
 
   private walletName: string;
   private lastBlockSyncedHeight: number;
   private chainTip: number;
   private isChainSynced: boolean;
-  private generalInfoWorker = new TaskTimer(5000);
 
   public isSyncing = true;
   public minDate = new Date('2009-08-09');
@@ -49,12 +50,17 @@ export class ResyncComponent implements OnInit, OnDestroy {
   }
 
   startMethods() {
-    this.generalInfoWorker.add(() => this.updateGeneralWalletInfo()).start();
-    this.updateGeneralWalletInfo();
+    this.worker.timerStatusChanged.subscribe((status) => {
+      if (status.running) {
+        if (status.worker === WorkerType.GENERAL_INFO) { this.updateGeneralWalletInfo(); }
+      }
+    });
+
+    this.worker.Start(WorkerType.GENERAL_INFO);
   }
 
   ngOnDestroy() {
-    this.generalInfoWorker.stop();
+    this.worker.Stop(WorkerType.GENERAL_INFO);
   }
 
   private buildRescanWalletForm(): void {
@@ -107,11 +113,11 @@ export class ResyncComponent implements OnInit, OnDestroy {
   }
 
   private updateGeneralWalletInfo() {
-    this.generalInfoWorker.pause();
+    this.worker.Stop(WorkerType.GENERAL_INFO);
     const walletInfo = new WalletInfo(this.walletName);
     this.apiService.getGeneralInfo(walletInfo)
       .pipe(finalize(() => {
-        this.generalInfoWorker.resume();
+        this.worker.Start(WorkerType.GENERAL_INFO);
       }))
       .subscribe(
         response => {

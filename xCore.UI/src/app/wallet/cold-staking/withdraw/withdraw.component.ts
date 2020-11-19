@@ -6,13 +6,14 @@ import { GlobalService } from '../../../shared/services/global.service';
 import { ThemeService } from '../../../shared/services/theme.service';
 import { CoinNotationPipe } from '../../../shared/pipes/coin-notation.pipe';
 import { ColdStakingService } from '../../../shared/services/coldstaking.service';
+import { WorkerService } from '../../../shared/services/worker.service';
+import { WorkerType } from '../../../shared/models/worker';
 import { Logger } from '../../../shared/services/logger.service';
 import { FeeEstimation } from '../../../shared/models/fee-estimation';
 import { TransactionSending } from '../../../shared/models/transaction-sending';
 import { WalletInfo } from '../../../shared/models/wallet-info';
 import { ColdStakingWithdrawalRequest } from '../../../shared/models/coldstakingwithdrawalrequest';
 import { debounceTime, finalize } from 'rxjs/operators';
-import { TaskTimer } from 'tasktimer';
 
 type FeeType = { id: number, display: string, value: number };
 
@@ -38,6 +39,7 @@ export class ColdStakingWithdrawComponent implements OnInit, OnDestroy {
     private stakingService: ColdStakingService,
     public themeService: ThemeService,
     private log: Logger,
+    private worker: WorkerService,
   ) {
     this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
     this.setCoinUnit();
@@ -62,7 +64,6 @@ export class ColdStakingWithdrawComponent implements OnInit, OnDestroy {
   public transactionComplete: boolean;
 
   private transactionHex: string;
-  private walletAccountBalanceWorker = new TaskTimer(5000);
 
   private coldStakingAccount = 'coldStakingColdAddresses';
   private hotStakingAccount = 'coldStakingHotAddresses';
@@ -99,12 +100,16 @@ export class ColdStakingWithdrawComponent implements OnInit, OnDestroy {
   }
 
   startMethods() {
-    this.walletAccountBalanceWorker.add(() => this.updateAccountBalanceDetails()).start();
-    this.updateAccountBalanceDetails();
+    this.worker.timerStatusChanged.subscribe((status) => {
+      if (status.running) {
+        if (status.worker === WorkerType.ACCOUNT_BALANCE) { this.updateAccountBalanceDetails(); }
+      }
+    });
+    this.worker.Start(WorkerType.ACCOUNT_BALANCE);
   }
 
   ngOnDestroy() {
-    this.walletAccountBalanceWorker.stop();
+    this.worker.Stop(WorkerType.ACCOUNT_BALANCE);
   }
 
   private setCoinUnit(): void {
@@ -238,12 +243,12 @@ export class ColdStakingWithdrawComponent implements OnInit, OnDestroy {
   }
 
   private updateAccountBalanceDetails() {
-    this.walletAccountBalanceWorker.pause();
+    this.worker.Stop(WorkerType.ACCOUNT_BALANCE);
     const walletInfo = new WalletInfo(this.globalService.getWalletName());
     walletInfo.accountName = this.getAccount();
     this.apiService.getWalletBalanceOnce(walletInfo)
       .pipe(finalize(() => {
-        this.walletAccountBalanceWorker.resume();
+        this.worker.Start(WorkerType.ACCOUNT_BALANCE);
       }))
       .subscribe(
         response => {

@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { DialogService } from 'primeng/dynamicdialog';
 import { ApiService } from '../../shared/services/api.service';
 import { GlobalService } from '../../shared/services/global.service';
+import { WorkerService } from '../../shared/services/worker.service';
 import { Logger } from '../../shared/services/logger.service';
 import { WalletInfo } from '../../shared/models/wallet-info';
 import { TransactionInfo } from '../../shared/models/transaction-info';
@@ -13,7 +14,7 @@ import { ReceiveComponent } from '../receive/receive.component';
 import { TransactionDetailsComponent } from '../transaction-details/transaction-details.component';
 import { CreateProfileComponent } from '../profile/create/create-profile.component';
 import { finalize } from 'rxjs/operators';
-import { TaskTimer } from 'tasktimer';
+import { WorkerType } from '../../shared/models/worker';
 
 @Component({
   selector: 'app-dashboard-component',
@@ -29,6 +30,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     public themeService: ThemeService,
     private log: Logger,
+    private worker: WorkerService,
   ) {
     this.buildStakingForm();
     this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
@@ -64,10 +66,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public profileAddress: string;
   public profile: any;
 
-  private stakingInfoWorker = new TaskTimer(5000);
-  private walletAccountBalanceWorker = new TaskTimer(5000);
-  private walletHotBalanceWorker = new TaskTimer(5000);
-  private historyWorker = new TaskTimer(5000);
   private isColdWalletHot = false;
 
   ngOnInit() {
@@ -84,22 +82,26 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   startMethods() {
+    this.worker.timerStatusChanged.subscribe((status) => {
+      if (status.running) {
+        if (status.worker === WorkerType.STAKING_INFO) { this.updateStakingInfoDetails(); }
+        if (status.worker === WorkerType.ACCOUNT_BALANCE) { this.updateAccountBalanceDetails(); }
+        if (status.worker === WorkerType.HOT_BALANCE) { this.updateHotBalanceDetails(); }
+        if (status.worker === WorkerType.HISTORY) { this.updateWalletHistory(); }
+      }
+    });
+
     this.updateAccountBalanceDetails();
     this.updateHotBalanceDetails();
     this.updateStakingInfoDetails();
     this.updateWalletHistory();
-
-    this.stakingInfoWorker.add(() => this.updateStakingInfoDetails()).start();
-    this.walletAccountBalanceWorker.add(() => this.updateAccountBalanceDetails()).start();
-    this.walletHotBalanceWorker.add(() => this.updateHotBalanceDetails()).start();
-    this.historyWorker.add(() => this.updateWalletHistory());
   }
 
   ngOnDestroy() {
-    this.stakingInfoWorker.stop();
-    this.walletAccountBalanceWorker.stop();
-    this.walletHotBalanceWorker.stop();
-    this.historyWorker.stop();
+    this.worker.Stop(WorkerType.STAKING_INFO);
+    this.worker.Stop(WorkerType.ACCOUNT_BALANCE);
+    this.worker.Stop(WorkerType.HOT_BALANCE);
+    this.worker.Stop(WorkerType.HISTORY);
   }
 
   private buildStakingForm(): void {
@@ -202,11 +204,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private updateAccountBalanceDetails() {
-    this.walletAccountBalanceWorker.pause();
+    this.worker.Stop(WorkerType.ACCOUNT_BALANCE);
     const walletInfo = new WalletInfo(this.globalService.getWalletName());
     this.apiService.getWalletBalanceOnce(walletInfo)
       .pipe(finalize(() => {
-        this.walletAccountBalanceWorker.resume();
+        this.worker.Start(WorkerType.ACCOUNT_BALANCE);
       }))
       .subscribe(
         response => {
@@ -222,7 +224,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             this.hasBalance = false;
           }
           this.balanceLoaded = true;
-          this.startHistoryWorker();
+          this.worker.Start(WorkerType.HISTORY);
         },
         error => {
           this.apiService.handleException(error);
@@ -232,12 +234,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private updateHotBalanceDetails() {
     if (this.isColdWalletHot) {
-      this.walletHotBalanceWorker.pause();
+      this.worker.Stop(WorkerType.HOT_BALANCE);
       const walletInfo = new WalletInfo(this.globalService.getWalletName());
       walletInfo.accountName = this.hotStakingAccount;
       this.apiService.getWalletBalanceOnce(walletInfo)
         .pipe(finalize(() => {
-          this.walletHotBalanceWorker.resume();
+          this.worker.Start(WorkerType.HOT_BALANCE);
         }))
         .subscribe(
           hotBalanceResponse => {
@@ -256,22 +258,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  startHistoryWorker() {
-    if (this.historyWorker.state === TaskTimer.State.IDLE) {
-      this.log.info('History is not running, starting...');
-      this.hasTX = true;
-      this.historyWorker.start();
-    }
-  }
-
   // TODO: add history in seperate service to make it reusable
   private updateWalletHistory() {
-    this.historyWorker.pause();
+    this.worker.Stop(WorkerType.HISTORY);
     const walletInfo = new WalletInfo(this.globalService.getWalletName());
     let historyResponse;
     this.apiService.getWalletHistory(walletInfo, 0, 10)
       .pipe(finalize(() => {
-        this.historyWorker.resume();
+        this.worker.Start(WorkerType.HISTORY, 10);
       }))
       .subscribe(
         response => {
@@ -365,10 +359,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private updateStakingInfoDetails() {
-    this.stakingInfoWorker.pause();
+    this.worker.Stop(WorkerType.STAKING_INFO);
     this.apiService.getStakingInfo()
       .pipe(finalize(() => {
-        this.stakingInfoWorker.resume();
+        this.worker.Start(WorkerType.STAKING_INFO);
       }))
       .subscribe(
         response => {

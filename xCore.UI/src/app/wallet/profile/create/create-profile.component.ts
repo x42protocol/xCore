@@ -6,13 +6,13 @@ import { Logger } from '../../../shared/services/logger.service';
 import { TransactionBuilding } from '../../../shared/models/transaction-building';
 import { WalletInfo } from '../../../shared/models/wallet-info';
 import { ThemeService } from '../../../shared/services/theme.service';
-import { Subscription } from 'rxjs';
+import { WorkerService } from '../../../shared/services/worker.service';
+import { WorkerType } from '../../../shared/models/worker';
 import { debounceTime, finalize } from 'rxjs/operators';
 import { DynamicDialogRef, DynamicDialogConfig, DialogService } from 'primeng/dynamicdialog';
 import { SubmitPaymentRequest } from '../../../shared/models/xserver-submit-payment-request';
 import { SignMessageRequest } from '../../../shared/models/wallet-signmessagerequest';
 import { ProfileReserveRequest } from '../../../shared/models/xserver-profile-reserve-request';
-import { TaskTimer } from 'tasktimer';
 
 interface TxDetails {
   transactionFee?: number;
@@ -37,6 +37,7 @@ export class CreateProfileComponent implements OnInit, OnDestroy {
     public config: DynamicDialogConfig,
     public themeService: ThemeService,
     private log: Logger,
+    private worker: WorkerService,
   ) {
     this.buildPaymentForm();
     this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
@@ -84,7 +85,6 @@ export class CreateProfileComponent implements OnInit, OnDestroy {
   public innerColor = '#C7E596';
 
   private paymentPairId: number;
-  private walletAccountBalanceWorker = new TaskTimer(5000);
 
   public mainAccount = 'account 0';
   public coldStakingAccount = 'coldStakingColdAddresses';
@@ -114,12 +114,17 @@ export class CreateProfileComponent implements OnInit, OnDestroy {
   }
 
   startMethods() {
-    this.walletAccountBalanceWorker.add(() => this.updateAccountBalanceDetails()).start();
+    this.worker.timerStatusChanged.subscribe((status) => {
+      if (status.running) {
+        if (status.worker === WorkerType.ACCOUNT_BALANCE) { this.updateAccountBalanceDetails(); }
+      }
+    });
+    this.worker.Start(WorkerType.ACCOUNT_BALANCE);
     this.updateAccountBalanceDetails();
   }
 
   ngOnDestroy() {
-    this.walletAccountBalanceWorker.stop();
+    this.worker.Stop(WorkerType.ACCOUNT_BALANCE);
   }
 
   private buildPaymentForm(): void {
@@ -461,11 +466,11 @@ export class CreateProfileComponent implements OnInit, OnDestroy {
   }
 
   private updateAccountBalanceDetails() {
-    this.walletAccountBalanceWorker.pause();
+    this.worker.Stop(WorkerType.ACCOUNT_BALANCE);
     const walletInfo = new WalletInfo(this.globalService.getWalletName());
     this.apiService.getWalletBalanceOnce(walletInfo)
       .pipe(finalize(() => {
-        this.walletAccountBalanceWorker.resume();
+        this.worker.Start(WorkerType.ACCOUNT_BALANCE);
       }))
       .subscribe(
         balanceResponse => {

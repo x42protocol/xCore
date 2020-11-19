@@ -6,13 +6,14 @@ import { Logger } from '../app/shared/services/logger.service';
 import { ElectronService } from 'ngx-electron';
 import { ThemeService } from './shared/services/theme.service';
 import { TitleService } from './shared/services/title.service';
+import { WorkerService } from './shared/services/worker.service';
 import { MenuItem } from 'primeng/api';
 import { Observable } from 'rxjs';
 import { delay, retryWhen, tap, finalize } from 'rxjs/operators';
 import { environment } from '../environments/environment';
-import { TaskTimer } from 'tasktimer';
 import * as signalR from '@aspnet/signalr';
 import * as coininfo from 'x42-coininfo';
+import { WorkerType } from './shared/models/worker';
 
 export interface ListItem {
   name: string;
@@ -39,8 +40,6 @@ export class AppComponent implements OnInit, OnDestroy {
   nodeStarted = false;
   nodeFailed = false;
 
-  private nodeStatusWorker = new TaskTimer(5000);
-
   private readonly TryDelayMilliseconds = 3000;
   private readonly MaxRetryCount = 50;
   loadingFailed = false;
@@ -56,6 +55,7 @@ export class AppComponent implements OnInit, OnDestroy {
     private apiService: ApiService,
     public appState: ApplicationStateService,
     private readonly titleService: TitleService,
+    private worker: WorkerService,
   ) {
 
     this.modes = [
@@ -98,7 +98,13 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   startMethods() {
-    this.nodeStatusWorker.add(() => this.updateNodeStatus());
+    this.worker.timerStatusChanged.subscribe((status) => {
+      if (status.running) {
+        if (status.worker === WorkerType.NODE_STATUS) { this.updateNodeStatus(); }
+      }
+    });
+
+    this.worker.Start(WorkerType.NODE_STATUS);
   }
 
   get appTitle$(): Observable<string> {
@@ -142,7 +148,9 @@ export class AppComponent implements OnInit, OnDestroy {
     this.nodeStarted = true;
     setTimeout(() => {
       this.loading = false;
-      this.router.navigate(['login']);
+      if (this.router.url === '/app') {
+        this.router.navigate(['login']);
+      }
     }, 2000);
   }
 
@@ -207,25 +215,25 @@ export class AppComponent implements OnInit, OnDestroy {
         )
       ).subscribe(() => {
         this.apiConnected = true;
-        this.nodeStatusWorker.start();
         this.updateNodeStatus();
       });
   }
 
   private updateNodeStatus() {
-    this.nodeStatusWorker.pause();
+    this.worker.Stop(WorkerType.NODE_STATUS);
     this.apiService.getNodeStatus()
       .pipe(finalize(() => {
-        this.nodeStatusWorker.resume();
+        if (!this.appState.connected) {
+          this.worker.Start(WorkerType.NODE_STATUS);
+        }
       }))
       .subscribe(
         response => {
+          this.log.info('Node Status Update: ', response);
           const statusResponse = response.featuresData.filter(x => x.namespace === 'Blockcore.Base.BaseFeature');
           if (statusResponse.length > 0 && statusResponse[0].state === 'Initialized') {
-            this.nodeStatusWorker.stop();
-            if (!this.appState.connected) {
-              this.start();
-            }
+            this.worker.Stop(WorkerType.NODE_STATUS);
+            this.start();
           }
         },
         error => {
@@ -253,11 +261,11 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.nodeStatusWorker.stop();
+    this.worker.Stop(WorkerType.NODE_STATUS);
   }
 
   cancel() {
-    this.nodeStatusWorker.stop();
+    this.worker.Stop(WorkerType.NODE_STATUS);
     this.appState.connected = false;
     this.loading = false;
     this.delayed = false;

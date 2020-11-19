@@ -132,7 +132,6 @@ export class LoginComponent implements OnInit {
   public onDecryptClicked() {
     this.isDecrypting = true;
     const selectedWalletName: string = this.openWalletForm.get('selectWallet').value.label;
-    this.globalService.setWalletName(selectedWalletName);
     const walletLoad = new WalletLoad(
       selectedWalletName,
       this.openWalletForm.get('password').value
@@ -159,6 +158,7 @@ export class LoginComponent implements OnInit {
   private getKeyAddress(walletName: string, walletPassword: string) {
     this.stakingService.getProfileAddress(walletName, walletPassword).subscribe(
       getProfileAddressResponse => {
+        this.globalService.setWalletName(walletName);
         this.globalService.setWalletKeyAddress(getProfileAddressResponse.address);
         console.log(getProfileAddressResponse.address);
         this.router.navigate(['wallet/dashboard']);

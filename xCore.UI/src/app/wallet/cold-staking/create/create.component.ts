@@ -6,14 +6,13 @@ import { CoinNotationPipe } from '../../../shared/pipes/coin-notation.pipe';
 import { ApiService } from '../../../shared/services/api.service';
 import { Logger } from '../../../shared/services/logger.service';
 import { ThemeService } from '../../../shared/services/theme.service';
+import { WorkerService } from '../../../shared/services/worker.service';
+import { WorkerType } from '../../../shared/models/worker';
 import { FeeEstimation } from '../../../shared/models/fee-estimation';
 import { ColdStakingService } from '../../../shared/services/coldstaking.service';
 import { TransactionSending } from '../../../shared/models/transaction-sending';
 import { ColdStakingSetup } from '../../../shared/models/coldstakingsetup';
-import { WalletInfo } from '../../../shared/models/wallet-info';
 import { debounceTime, finalize } from 'rxjs/operators';
-import { TaskTimer } from 'tasktimer';
-
 type FeeType = { id: number, display: string, value: number };
 
 @Component({
@@ -34,6 +33,7 @@ export class ColdStakingCreateComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     public themeService: ThemeService,
     private log: Logger,
+    private worker: WorkerService,
   ) {
     this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
     this.setCoinUnit();
@@ -76,15 +76,18 @@ export class ColdStakingCreateComponent implements OnInit, OnDestroy {
     }
   };
 
-  private walletAccountBalanceWorker = new TaskTimer(5000);
-
   public ngOnInit() {
-    this.walletAccountBalanceWorker.add(() => this.updateAccountBalanceDetails()).start();
-    this.updateAccountBalanceDetails();
+    this.worker.timerStatusChanged.subscribe((status) => {
+      if (status.running) {
+        if (status.worker === WorkerType.ACCOUNT_BALANCE) { this.updateAccountBalanceDetails(); }
+      }
+    });
+
+    this.worker.Start(WorkerType.ACCOUNT_BALANCE);
   }
 
   public ngOnDestroy() {
-    this.walletAccountBalanceWorker.stop();
+    this.worker.Stop(WorkerType.ACCOUNT_BALANCE);
   }
 
   private setCoinUnit(): void {
@@ -133,14 +136,14 @@ export class ColdStakingCreateComponent implements OnInit, OnDestroy {
   }
 
   private updateAccountBalanceDetails() {
-    this.walletAccountBalanceWorker.pause();
+    this.worker.Stop(WorkerType.ACCOUNT_BALANCE);
     const maxBalanceRequest = {
       walletName: this.globalService.getWalletName(),
       feeType: this.sendForm.get('fee').value
     };
     this.apiService.getMaximumBalance(maxBalanceRequest)
       .pipe(finalize(() => {
-        this.walletAccountBalanceWorker.resume();
+        this.worker.Start(WorkerType.ACCOUNT_BALANCE);
       }))
       .subscribe(
         response => {

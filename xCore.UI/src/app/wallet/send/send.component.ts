@@ -4,6 +4,8 @@ import { FormGroup, Validators, FormBuilder, AbstractControl } from '@angular/fo
 import { ApiService } from '../../shared/services/api.service';
 import { GlobalService } from '../../shared/services/global.service';
 import { Logger } from '../../shared/services/logger.service';
+import { WorkerService } from '../../shared/services/worker.service';
+import { WorkerType } from '../../shared/models/worker';
 import { CoinNotationPipe } from '../../shared/pipes/coin-notation.pipe';
 
 import { FeeEstimation } from '../../shared/models/fee-estimation';
@@ -16,7 +18,6 @@ import { DynamicDialogRef, DynamicDialogConfig, DialogService } from 'primeng/dy
 import { PriceLockUtil } from '../../shared/models/pricelockutil';
 import { SubmitPaymentRequest } from '../../shared/models/xserver-submit-payment-request';
 import { SignMessageRequest } from '../../shared/models/wallet-signmessagerequest';
-import { TaskTimer } from 'tasktimer';
 
 interface TxDetails {
   transactionFee?: number;
@@ -42,6 +43,7 @@ export class SendComponent implements OnInit, OnDestroy {
     public config: DynamicDialogConfig,
     public themeService: ThemeService,
     private log: Logger,
+    private worker: WorkerService,
   ) {
     this.buildSendForm();
     this.buildPaymentForm();
@@ -94,8 +96,6 @@ export class SendComponent implements OnInit, OnDestroy {
 
   private paymentPairId: number;
   private transactionHex: string;
-
-  private walletAccountBalanceWorker = new TaskTimer(5000);
 
   paymentFormErrors = {
     paymentPassword: ''
@@ -183,12 +183,16 @@ export class SendComponent implements OnInit, OnDestroy {
   }
 
   startMethods() {
-    this.walletAccountBalanceWorker.add(() => this.updateAccountBalanceDetails()).start();
-    this.updateAccountBalanceDetails();
+    this.worker.timerStatusChanged.subscribe((status) => {
+      if (status.running) {
+        if (status.worker === WorkerType.ACCOUNT_BALANCE) { this.updateAccountBalanceDetails(); }
+      }
+    });
+    this.worker.Start(WorkerType.ACCOUNT_BALANCE);
   }
 
   ngOnDestroy() {
-    this.walletAccountBalanceWorker.stop();
+    this.worker.Stop(WorkerType.ACCOUNT_BALANCE);
   }
 
   private buildSendForm(): void {
@@ -601,14 +605,14 @@ export class SendComponent implements OnInit, OnDestroy {
   }
 
   private updateAccountBalanceDetails() {
-    this.walletAccountBalanceWorker.pause();
+    this.worker.Stop(WorkerType.ACCOUNT_BALANCE);
     const maxBalanceRequest = {
       walletName: this.globalService.getWalletName(),
       feeType: this.sendForm.get('fee').value
     };
     this.apiService.getMaximumBalance(maxBalanceRequest)
       .pipe(finalize(() => {
-        this.walletAccountBalanceWorker.resume();
+        this.worker.Start(WorkerType.ACCOUNT_BALANCE);
       }))
       .subscribe(
         response => {

@@ -16,7 +16,8 @@ import { ModalService } from '../../../shared/services/modal.service';
 import { UpdateService } from '../../../shared/services/update.service';
 import { Logger } from '../../../shared/services/logger.service';
 import { ApiService } from '../../services/api.service';
-import { TaskTimer } from 'tasktimer';
+import { WorkerService } from '../../../shared/services/worker.service';
+import { WorkerType } from '../../../shared/models/worker';
 
 @Component({
   selector: 'app-main-menu',
@@ -45,8 +46,6 @@ export class MainMenuComponent implements OnInit {
   toolTip = '';
   connectedNodesTooltip = '';
 
-  private updateCheckWorker = new TaskTimer(86400000); // Check every 24 hours
-  private coldTypeWorker = new TaskTimer(1000);
   private isDelegated = false;
 
   constructor(
@@ -62,6 +61,7 @@ export class MainMenuComponent implements OnInit {
     private zone: NgZone,
     private fb: FormBuilder,
     public modalService: ModalService,
+    private worker: WorkerService,
   ) {
 
     this.groupedThemes = [
@@ -172,8 +172,15 @@ export class MainMenuComponent implements OnInit {
         );
     }
 
-    this.updateCheckWorker.add(() => this.checkForUpdates()).start();
-    this.coldTypeWorker.add(() => this.checkForColdTypeChange()).start();
+    this.worker.timerStatusChanged.subscribe((status) => {
+      if (status.running) {
+        if (status.worker === WorkerType.UPDATE) { this.checkForUpdates(); }
+        if (status.worker === WorkerType.COLD_TYPE) { this.checkForColdTypeChange(); }
+      }
+    });
+
+    this.worker.Start(WorkerType.UPDATE, 43200000);
+    this.worker.Start(WorkerType.COLD_TYPE, 1000);
   }
 
   checkForColdTypeChange() {

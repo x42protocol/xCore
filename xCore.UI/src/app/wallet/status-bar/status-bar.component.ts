@@ -1,11 +1,12 @@
 import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { ApiService } from '../../shared/services/api.service';
 import { GlobalService } from '../../shared/services/global.service';
+import { WorkerService } from '../../shared/services/worker.service';
 import { NodeStatus } from '../../shared/models/node-status';
 import { XServerStatus } from '../../shared/models/xserver-status';
 import { WalletInfo } from '../../shared/models/wallet-info';
 import { finalize } from 'rxjs/operators';
-import { TaskTimer } from 'tasktimer';
+import { WorkerType } from '../../shared/models/worker';
 
 @Component({
   selector: 'app-status-bar',
@@ -13,10 +14,6 @@ import { TaskTimer } from 'tasktimer';
   styleUrls: ['./status-bar.component.css']
 })
 export class StatusBarComponent implements OnInit, OnDestroy {
-  private stakingInfoWorker = new TaskTimer(5000);
-  private xServerInfoWorker = new TaskTimer(5000);
-  private generalInfoWorker = new TaskTimer(5000);
-  private nodeStatusWorker = new TaskTimer(5000);
   private connectedNodesTooltip = '';
   private connectedXServerTooltip = '';
   private isChainSynced: boolean;
@@ -37,28 +34,34 @@ export class StatusBarComponent implements OnInit, OnDestroy {
   constructor(
     private apiService: ApiService,
     private globalService: GlobalService,
+    private worker: WorkerService,
   ) { }
 
   ngOnInit() {
-    this.setDefaultConnectionToolTip();
-    this.getGeneralWalletInfo();
     this.startMethods();
+    this.setDefaultConnectionToolTip();
+    this.setGeneralWalletInfo();
   }
 
   startMethods() {
-    this.updateStakingInfoDetails();
-    this.getGeneralxServerInfo();
-    this.stakingInfoWorker.add(() => this.updateStakingInfoDetails()).start();
-    this.xServerInfoWorker.add(() => this.getGeneralxServerInfo()).start();
-    this.generalInfoWorker.add(() => this.updateGeneralWalletInfo());
-    this.nodeStatusWorker.add(() => this.updateNodeStatus());
+    this.worker.timerStatusChanged.subscribe((status) => {
+      if (status.running) {
+        if (status.worker === WorkerType.STAKING_INFO) { this.updateStakingInfoDetails(); }
+        if (status.worker === WorkerType.XSERVER_INFO) { this.getGeneralxServerInfo(); }
+        if (status.worker === WorkerType.NODE_STATUS) { this.updateNodeStatus(); }
+        if (status.worker === WorkerType.GENERAL_INFO) { this.updateGeneralWalletInfo(); }
+      }
+    });
+
+    this.worker.Start(WorkerType.STAKING_INFO);
+    this.worker.Start(WorkerType.XSERVER_INFO);
   }
 
   ngOnDestroy() {
-    this.stakingInfoWorker.stop();
-    this.xServerInfoWorker.stop();
-    this.generalInfoWorker.stop();
-    this.nodeStatusWorker.stop();
+    this.worker.Stop(WorkerType.STAKING_INFO);
+    this.worker.Stop(WorkerType.XSERVER_INFO);
+    this.worker.Stop(WorkerType.NODE_STATUS);
+    this.worker.Stop(WorkerType.GENERAL_INFO);
   }
 
   private updateConnectionToolTip() {
@@ -72,10 +75,10 @@ export class StatusBarComponent implements OnInit, OnDestroy {
   }
 
   private getGeneralxServerInfo() {
-    this.xServerInfoWorker.pause();
+    this.worker.Stop(WorkerType.XSERVER_INFO);
     this.apiService.getxServerStatus()
       .pipe(finalize(() => {
-        this.xServerInfoWorker.resume();
+        this.worker.Start(WorkerType.XSERVER_INFO);
       }))
       .subscribe(
         (xServerInfoResponse: XServerStatus) => {
@@ -94,21 +97,19 @@ export class StatusBarComponent implements OnInit, OnDestroy {
       );
   }
 
-  private getGeneralWalletInfo() {
+  private setGeneralWalletInfo() {
     if (this.globalService.getWalletName() === '') {
       this.updateNodeStatus();
-      this.nodeStatusWorker.start();
     } else {
       this.updateGeneralWalletInfo();
-      this.generalInfoWorker.start();
     }
   }
 
   private updateNodeStatus() {
-    this.nodeStatusWorker.pause();
+    this.worker.Stop(WorkerType.NODE_STATUS);
     this.apiService.getNodeStatus()
       .pipe(finalize(() => {
-        this.nodeStatusWorker.resume();
+        this.worker.Start(WorkerType.NODE_STATUS);
       }))
       .subscribe(
         (statusResponse: NodeStatus) => {
@@ -152,11 +153,11 @@ export class StatusBarComponent implements OnInit, OnDestroy {
   }
 
   private updateGeneralWalletInfo() {
-    this.generalInfoWorker.pause();
+    this.worker.Stop(WorkerType.GENERAL_INFO);
     const walletInfo = new WalletInfo(this.globalService.getWalletName());
     this.apiService.getGeneralInfo(walletInfo)
       .pipe(finalize(() => {
-        this.generalInfoWorker.resume();
+        this.worker.Start(WorkerType.GENERAL_INFO);
       }))
       .subscribe(
         response => {
@@ -200,10 +201,10 @@ export class StatusBarComponent implements OnInit, OnDestroy {
   }
 
   private updateStakingInfoDetails() {
-    this.stakingInfoWorker.pause();
+    this.worker.Stop(WorkerType.STAKING_INFO);
     this.apiService.getStakingInfo()
       .pipe(finalize(() => {
-        this.stakingInfoWorker.resume();
+        this.worker.Start(WorkerType.STAKING_INFO);
       })
       ).subscribe(
         stakingResponse => {

@@ -7,6 +7,8 @@ import { Logger } from '../../shared/services/logger.service';
 import { ThemeService } from '../../shared/services/theme.service';
 import { ApiService } from '../../shared/services/api.service';
 import { ColdStakingService } from '../../shared/services/coldstaking.service';
+import { WorkerService } from '../../shared/services/worker.service';
+import { WorkerType } from '../../shared/models/worker';
 import { ColdStakingCreateAddressComponent } from './create-address/create-address.component';
 import { ColdStakingWithdrawComponent } from './withdraw/withdraw.component';
 import { ColdStakingCreateComponent } from './create/create.component';
@@ -16,7 +18,6 @@ import { TransactionInfo } from '../../shared/models/transaction-info';
 import { WalletInfo } from '../../shared/models/wallet-info';
 import { Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { TaskTimer } from 'tasktimer';
 
 @Component({
   selector: 'app-staking-scene',
@@ -32,6 +33,7 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     public themeService: ThemeService,
     private log: Logger,
+    private worker: WorkerService,
   ) {
     this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
   }
@@ -66,10 +68,6 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
   public hasHotBalance = false;
 
   private walletColdWalletExistsSubscription: Subscription;
-  private walletColdBalanceWorker = new TaskTimer(5000);
-  private walletHotBalanceWorker = new TaskTimer(5000);
-  private walletColdHistoryWorker = new TaskTimer(5000);
-  private walletHotHistoryWorker = new TaskTimer(5000);
 
   public setupForm: FormGroup;
 
@@ -94,23 +92,27 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
   }
 
   startMethods() {
+    this.worker.timerStatusChanged.subscribe((status) => {
+      if (status.running) {
+        if (status.worker === WorkerType.COLD_BALANCE) { this.updateColdBalanceDetails(); }
+        if (status.worker === WorkerType.HOT_BALANCE) { this.updateHotBalanceDetails(); }
+        if (status.worker === WorkerType.COLD_HISTORY) { this.updateColdHistory(); }
+        if (status.worker === WorkerType.HOT_HISTORY) { this.updateHotHistory(); }
+      }
+    });
+
     if (this.isColdWalletHot) {
-      this.walletHotBalanceWorker.add(() => this.updateHotBalanceDetails()).start();
-      this.walletHotHistoryWorker.add(() => this.updateHotHistory());
-      this.updateHotBalanceDetails();
+      this.worker.Start(WorkerType.HOT_BALANCE);
     } else {
-      this.walletColdBalanceWorker.add(() => this.updateColdBalanceDetails()).start();
-      this.walletColdHistoryWorker.add(() => this.updateColdHistory());
-      this.updateColdBalanceDetails();
+      this.worker.Start(WorkerType.COLD_BALANCE);
     }
   }
 
   ngOnDestroy() {
-    this.walletColdBalanceWorker.stop();
-    this.walletHotBalanceWorker.stop();
-    this.walletColdHistoryWorker.stop();
-    this.walletHotHistoryWorker.stop();
-
+    this.worker.Stop(WorkerType.COLD_BALANCE);
+    this.worker.Stop(WorkerType.HOT_BALANCE);
+    this.worker.Stop(WorkerType.COLD_HISTORY);
+    this.worker.Stop(WorkerType.HOT_HISTORY);
     this.cancelSubscriptions();
   }
 
@@ -172,12 +174,12 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
   }
 
   private updateColdHistory() {
-    this.walletColdHistoryWorker.pause();
+    this.worker.Stop(WorkerType.COLD_HISTORY);
     const walletInfo = new WalletInfo(this.globalService.getWalletName());
     walletInfo.accountName = this.coldStakingAccount;
     this.apiService.getWalletHistory(walletInfo, 0, 100, true)
       .pipe(finalize(() => {
-        this.walletColdHistoryWorker.resume();
+        this.worker.Stop(WorkerType.COLD_HISTORY);
       }))
       .subscribe(
         response => {
@@ -196,12 +198,12 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
   }
 
   private updateHotHistory() {
-    this.walletHotHistoryWorker.pause();
+    this.worker.Stop(WorkerType.HOT_HISTORY);
     const walletInfo = new WalletInfo(this.globalService.getWalletName());
     walletInfo.accountName = this.hotStakingAccount;
     this.apiService.getWalletHistory(walletInfo, 0, 100, true)
       .pipe(finalize(() => {
-        this.walletHotHistoryWorker.resume();
+        this.worker.Start(WorkerType.HOT_HISTORY);
       }))
       .subscribe(
         response => {
@@ -264,12 +266,12 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
   }
 
   private updateColdBalanceDetails() {
-    this.walletColdBalanceWorker.pause();
+    this.worker.Stop(WorkerType.COLD_BALANCE);
     const walletInfo = new WalletInfo(this.globalService.getWalletName());
     walletInfo.accountName = this.coldStakingAccount;
     this.apiService.getWalletBalanceOnce(walletInfo)
       .pipe(finalize(() => {
-        this.walletColdBalanceWorker.resume();
+        this.worker.Start(WorkerType.COLD_BALANCE);
       }))
       .subscribe(
         response => {
@@ -284,7 +286,8 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
             this.hasColdBalance = false;
           }
           this.balanceLoaded = true;
-          this.startColdHistoryWorker();
+          this.hasColdTransaction = true;
+          this.worker.Start(WorkerType.COLD_HISTORY);
         },
         error => {
           this.apiService.handleException(error);
@@ -292,22 +295,13 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
       );
   }
 
-  startColdHistoryWorker() {
-    if (this.walletColdHistoryWorker.state === TaskTimer.State.IDLE) {
-      this.log.info('Cold history is not running, starting...');
-      this.hasColdTransaction = true;
-      this.updateColdHistory();
-      this.walletColdHistoryWorker.start();
-    }
-  }
-
   private updateHotBalanceDetails() {
-    this.walletHotBalanceWorker.pause();
+    this.worker.Stop(WorkerType.HOT_BALANCE);
     const walletInfo = new WalletInfo(this.globalService.getWalletName());
     walletInfo.accountName = this.hotStakingAccount;
     this.apiService.getWalletBalanceOnce(walletInfo)
       .pipe(finalize(() => {
-        this.walletHotBalanceWorker.resume();
+        this.worker.Start(WorkerType.HOT_BALANCE);
       }))
       .subscribe(
         hotBalanceResponse => {
@@ -324,21 +318,13 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
             this.hasHotBalance = false;
           }
           this.balanceLoaded = true;
-          this.startHotHistoryWorker();
+          this.hasHotTransaction = true;
+          this.worker.Start(WorkerType.HOT_HISTORY);
         },
         error => {
           this.apiService.handleException(error);
         }
       );
-  }
-
-  startHotHistoryWorker() {
-    if (this.walletHotHistoryWorker.state === TaskTimer.State.IDLE) {
-      this.log.info('Hot history is not running, starting...');
-      this.hasHotTransaction = true;
-      this.updateHotHistory();
-      this.walletHotHistoryWorker.start();
-    }
   }
 
   public openTransactionDetailDialog(transaction: TransactionInfo) {
