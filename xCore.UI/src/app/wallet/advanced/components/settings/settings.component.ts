@@ -60,7 +60,7 @@ export class SettingsComponent implements OnInit {
 
     this.coldWalletTypeOptions = [
       { label: 'Cold (Default)', value: false, icon: 'fa fa-shield' },
-      { label: 'Hot (Delegated)', value: true, icon: 'fa fa-fire' }
+      { label: 'Delegated', value: true, icon: 'fa fa-fire' }
     ];
 
     this.selectedAddressType = this.addressType.Type;

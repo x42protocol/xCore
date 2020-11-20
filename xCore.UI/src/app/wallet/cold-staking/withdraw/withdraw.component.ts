@@ -104,10 +104,11 @@ export class ColdStakingWithdrawComponent implements OnInit, OnDestroy {
   startMethods() {
     this.workerSubscription = this.worker.timerStatusChanged.subscribe((status) => {
       if (status.running) {
-        if (status.worker === WorkerType.ACCOUNT_BALANCE) { this.updateAccountBalanceDetails(); }
+        if (status.worker === WorkerType.COLD_BALANCE) { this.updateColdBalanceDetails(); }
       }
     });
     this.worker.Start(WorkerType.ACCOUNT_BALANCE);
+    this.updateColdBalanceDetails();
   }
 
   ngOnDestroy() {
@@ -262,6 +263,25 @@ export class ColdStakingWithdrawComponent implements OnInit, OnDestroy {
       .subscribe(
         response => {
           this.log.info('Get account balance result:', response);
+          
+        },
+        error => {
+          this.apiService.handleException(error);
+        }
+      );
+  }
+
+  private updateColdBalanceDetails() {
+    this.worker.Stop(WorkerType.COLD_BALANCE);
+    const walletInfo = new WalletInfo(this.globalService.getWalletName());
+    walletInfo.accountName = this.coldStakingAccount;
+    this.apiService.getWalletBalanceOnce(walletInfo)
+      .pipe(finalize(() => {
+        this.worker.Start(WorkerType.COLD_BALANCE);
+      }))
+      .subscribe(
+        response => {
+          this.log.info('Get cold balance result:', response);
           const balanceResponse = response;
           this.totalBalance = balanceResponse.balances[0].amountConfirmed + balanceResponse.balances[0].amountUnconfirmed;
           this.spendableBalance = balanceResponse.balances[0].spendableAmount;

@@ -22,7 +22,7 @@
       </span>
     </label>
     <div class="input-group">
-      <input type="text" class="form-control" [class.is-invalid]="sendFormErrors.amount" [class.is-valid]="!sendFormErrors.amount && sendForm.get('amount').valid" formControlName="amount" [disabled]="!balanceLoaded" placeholder="0.00 {{ coinUnit }}">
+      <input type="text" class="form-control" [class.is-invalid]="sendFormErrors.amount" [class.is-valid]="!sendFormErrors.amount && sendForm.get('amount').valid" formControlName="amount" [disableControl]="!balanceLoaded" placeholder="0.00 {{ coinUnit }}" pInputText>
       <button class="ui-button-info" (click)="getMaxBalance()" label="MAX" [disabled]="!balanceLoaded" pButton></button>
     </div>
     <div *ngIf="sendFormErrors.amount" class="invalid-feedback">{{ sendFormErrors.amount }}</div>
@@ -30,7 +30,7 @@
   <div class="form-group clearfix">
     <label for="hotWalletAddress">Delegated wallet address</label>
     <i class="lnr lnr-question-circle ml-2" data-placement="right" ngbTooltip="This is the address of the wallet that will be always online and staking your coins. You can setup you own node and get a delegated staking address, or use a third-party delegated address to stake your coins."></i>
-    <input type="text" class="form-control" [class.is-invalid]="sendFormErrors.hotWalletAddress" [class.is-valid]="!sendFormErrors.hotWalletAddress && sendForm.get('hotWalletAddress').valid" formControlName="hotWalletAddress" id="hotWalletAddress" placeholder="Please enter the delgated staking address here.">
+    <input type="text" class="form-control" [class.is-invalid]="sendFormErrors.hotWalletAddress" [class.is-valid]="!sendFormErrors.hotWalletAddress && sendForm.get('hotWalletAddress').valid" formControlName="hotWalletAddress" id="hotWalletAddress" placeholder="Please enter the delgated staking address here." pInputText>
     <div *ngIf="sendFormErrors.hotWalletAddress" class="invalid-feedback">{{ sendFormErrors.hotWalletAddress }}</div>
   </div>
   <div class="form-group clearfix">
@@ -43,7 +43,7 @@
   </div>
   <div class="form-group clearfix">
     <label for="walletPassword">Wallet Password</label>
-    <input type="password" class="form-control" [class.is-invalid]="sendFormErrors.password" [class.is-valid]="!sendFormErrors.password && sendForm.get('password').valid" formControlName="password" id="walletPassword" placeholder="Please enter your wallet password.">
+    <input type="password" class="form-control" [class.is-invalid]="sendFormErrors.password" [class.is-valid]="!sendFormErrors.password && sendForm.get('password').valid" formControlName="password" id="walletPassword" placeholder="Please enter your wallet password." pInputText>
     <div *ngIf="sendFormErrors.password" class="invalid-feedback">{{sendFormErrors.password}}</div>
   </div>
   <small *ngIf="apiError" class="text-danger">{{ apiError }}</small>
