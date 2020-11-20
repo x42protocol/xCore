@@ -252,25 +252,6 @@ export class ColdStakingWithdrawComponent implements OnInit, OnDestroy {
       );
   }
 
-  private updateAccountBalanceDetails() {
-    this.worker.Stop(WorkerType.ACCOUNT_BALANCE);
-    const walletInfo = new WalletInfo(this.globalService.getWalletName());
-    walletInfo.accountName = this.getAccount();
-    this.apiService.getWalletBalanceOnce(walletInfo)
-      .pipe(finalize(() => {
-        this.worker.Start(WorkerType.ACCOUNT_BALANCE);
-      }))
-      .subscribe(
-        response => {
-          this.log.info('Get account balance result:', response);
-          
-        },
-        error => {
-          this.apiService.handleException(error);
-        }
-      );
-  }
-
   private updateColdBalanceDetails() {
     this.worker.Stop(WorkerType.COLD_BALANCE);
     const walletInfo = new WalletInfo(this.globalService.getWalletName());
