@@ -170,6 +170,7 @@ export class MainMenuComponent implements OnInit, OnDestroy {
         .subscribe(
           isHot => {
             this.appState.delegated = isHot;
+            this.checkForColdTypeChange();
           }
         );
     }
@@ -181,8 +182,8 @@ export class MainMenuComponent implements OnInit, OnDestroy {
       }
     });
 
-    this.worker.Start(WorkerType.UPDATE, 43200000);
-    this.worker.Start(WorkerType.COLD_TYPE, 1000);
+    this.worker.Start(WorkerType.UPDATE, 43200);
+    this.worker.Start(WorkerType.COLD_TYPE, 1);
   }
 
   ngOnDestroy() {
