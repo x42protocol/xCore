@@ -54,6 +54,7 @@
   <button *ngIf="!isSending" type="button" [disabled]="isSending" class="btn btn-outline-light" (click)="activeModal.close('Close clicked')">Cancel</button>
   <button *ngIf="!isSending" type="button" class="btn-block" [disabled]="!sendForm.valid || isSending" (click)="send()" label="Withdraw" pButton></button>
   <!-- SVG -->
+  <span *ngIf="isSending" class="text-info"><span class="lnr lnr-clock"></span> Withdraw of cold funds can take a long time, please wait...</span>
   <div *ngIf="isSending" [className]="isDarkTheme ? 'LoadingWhite' : 'Loading'" class="LoadingSend col-2 mx-auto" style="padding: 30px;">
     <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="30px" height="30px" viewBox="0 0 300 300" enable-background="new 0 0 300 300" xml:space="preserve">
       <g>
