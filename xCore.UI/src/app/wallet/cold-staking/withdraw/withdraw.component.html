@@ -22,7 +22,6 @@
       </label>
       <div class="input-group">
         <input type="text" class="form-control" [class.is-invalid]="sendFormErrors.amount" [class.is-valid]="!sendFormErrors.amount && sendForm.get('amount').valid" formControlName="amount" placeholder="0.00 {{ coinUnit }}" [disableControl]="!balanceLoaded" pInputText>
-        <button class="ui-button-info" (click)="getMaxBalance()" label="MAX" [disabled]="!balanceLoaded" pButton></button>
       </div>
       <div *ngIf="sendFormErrors.amount" class="invalid-feedback">{{ sendFormErrors.amount }}</div>
     </div>
