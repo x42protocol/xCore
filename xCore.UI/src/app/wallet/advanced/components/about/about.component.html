@@ -91,7 +91,7 @@
         <p [innerHTML]="updateService.info.releaseNotes"></p>
       </div>
       <div>
-        <button type="button" class="btn-block" (click)="updateService.checkForUpdate()" label="Check for update" pButton></button>
+        <button type="button" class="btn-block" (click)="updateService.checkForUpdate()" label="Check for update" [disabled]="updateService.IsChecking" pButton></button>
       </div>
     </div>
 

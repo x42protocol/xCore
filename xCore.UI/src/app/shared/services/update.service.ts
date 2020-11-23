@@ -17,6 +17,7 @@ export class UpdateService {
   public available = false;
   public downloading = false;
   public LastUpdateCheck: Date;
+  public IsChecking = false;
 
   constructor(
     private electronService: ElectronService,
@@ -29,6 +30,8 @@ export class UpdateService {
       if (!UpdateService.singletonInstance) {
 
         this.ipc.on('check-for-update', (event, info: UpdateInfo) => {
+          this.IsChecking = false;
+          this.LastUpdateCheck = new Date();
           console.log('check-for-update: ', info);
         });
 
@@ -44,6 +47,7 @@ export class UpdateService {
 
         this.ipc.on('update-not-available', (event, info: UpdateInfo) => {
           console.log('update-not-available: ', info);
+          this.IsChecking = false;
           this.LastUpdateCheck = new Date();
           this.info = info;
           this.available = false;
@@ -72,6 +76,7 @@ export class UpdateService {
 
   checkForUpdate() {
     if (this.ipc) {
+      this.IsChecking = true;
       this.electronService.ipcRenderer.send('check-for-update');
     }
   }
