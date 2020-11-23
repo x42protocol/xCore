@@ -467,6 +467,10 @@ export class SendComponent implements OnInit, OnDestroy {
           );
           console.log(signatureResponse);
           this.submitPayment(payment);
+        },
+        error => {
+          this.isSending = false;
+          this.apiError = error.error.errors[0].message;
         }
       );
   }
