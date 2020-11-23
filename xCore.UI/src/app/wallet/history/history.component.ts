@@ -1,15 +1,12 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { DialogService } from 'primeng/dynamicdialog';
 import { Router } from '@angular/router';
-import { ApiService } from '../../shared/services/api.service';
 import { GlobalService } from '../../shared/services/global.service';
 import { ThemeService } from '../../shared/services/theme.service';
-import { WorkerService } from '../../shared/services/worker.service';
+import { ApiEvents } from '../../shared/services/api.events';
 import { WorkerType } from '../../shared/models/worker';
-import { WalletInfo } from '../../shared/models/wallet-info';
 import { TransactionInfo } from '../../shared/models/transaction-info';
 import { TransactionDetailsComponent } from '../transaction-details/transaction-details.component';
-import { finalize } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -19,17 +16,16 @@ import { Subscription } from 'rxjs';
 })
 export class HistoryComponent implements OnInit, OnDestroy {
   constructor(
-    private apiService: ApiService,
     private globalService: GlobalService,
     private router: Router,
     public dialogService: DialogService,
     public themeService: ThemeService,
-    private worker: WorkerService,
+    private apiEvents: ApiEvents,
   ) {
     this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
   }
 
-  private workerSubscription: Subscription;
+  private historySubscription: Subscription;
 
   public transactions: TransactionInfo[];
   public coinUnit: string;
@@ -38,23 +34,22 @@ export class HistoryComponent implements OnInit, OnDestroy {
   public isDarkTheme = false;
 
   ngOnInit() {
-    this.workerSubscription = this.worker.timerStatusChanged.subscribe((status) => {
-      if (status.running) {
-        if (status.worker === WorkerType.HISTORY) { this.updateWalletHistory(); }
+    this.historySubscription = this.apiEvents.History.subscribe((result) => {
+      if (result !== null) {
+        this.updateWalletHistory(result);
       }
     });
-    this.worker.Start(WorkerType.HISTORY);
+    this.apiEvents.ManualTick(WorkerType.HISTORY);
     this.coinUnit = this.globalService.getCoinUnit();
   }
 
   ngOnDestroy() {
-    this.worker.Stop(WorkerType.HISTORY);
     this.cancelSubscriptions();
   }
 
   private cancelSubscriptions() {
-    if (this.workerSubscription) {
-      this.workerSubscription.unsubscribe();
+    if (this.historySubscription) {
+      this.historySubscription.unsubscribe();
     }
   }
 
@@ -71,27 +66,15 @@ export class HistoryComponent implements OnInit, OnDestroy {
     });
   }
 
-  private updateWalletHistory() {
-    this.worker.Stop(WorkerType.HISTORY);
-    const walletInfo = new WalletInfo(this.globalService.getWalletName());
+  private updateWalletHistory(response) {
     let historyResponse;
-    this.apiService.getWalletHistory(walletInfo, 0, 10)
-      .pipe(finalize(() => {
-        this.worker.Start(WorkerType.HISTORY);
-      }))
-      .subscribe(
-        response => {
-          if (!!response.history && response.history[0].transactionsHistory.length > 0) {
-            historyResponse = response.history[0].transactionsHistory;
-            this.getTransactionInfo(historyResponse);
-          } else {
-            this.hasTransaction = false;
-          }
-        },
-        error => {
-          this.apiService.handleException(error);
-        }
-      );
+    // TODO - add account feature instead of using first entry in array
+    if (!!response.history && response.history[0].transactionsHistory.length > 0) {
+      historyResponse = response.history[0].transactionsHistory;
+      this.getTransactionInfo(historyResponse);
+    } else {
+      this.hasTransaction = false;
+    }
   }
 
   private getTransactionInfo(transactions: any) {

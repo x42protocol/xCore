@@ -2,16 +2,15 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormGroup, Validators, FormBuilder, AbstractControl } from '@angular/forms';
 
 import { ApiService } from '../../shared/services/api.service';
+import { ApiEvents } from '../../shared/services/api.events';
 import { GlobalService } from '../../shared/services/global.service';
-import { Logger } from '../../shared/services/logger.service';
-import { WorkerService } from '../../shared/services/worker.service';
 import { WorkerType } from '../../shared/models/worker';
 import { CoinNotationPipe } from '../../shared/pipes/coin-notation.pipe';
 import { FeeEstimation } from '../../shared/models/fee-estimation';
 import { TransactionBuilding } from '../../shared/models/transaction-building';
 import { TransactionSending } from '../../shared/models/transaction-sending';
 import { ThemeService } from '../../shared/services/theme.service';
-import { debounceTime, finalize } from 'rxjs/operators';
+import { debounceTime } from 'rxjs/operators';
 import { DynamicDialogRef, DynamicDialogConfig, DialogService } from 'primeng/dynamicdialog';
 import { PriceLockUtil } from '../../shared/models/pricelockutil';
 import { SubmitPaymentRequest } from '../../shared/models/xserver-submit-payment-request';
@@ -41,15 +40,14 @@ export class SendComponent implements OnInit, OnDestroy {
     public ref: DynamicDialogRef,
     public config: DynamicDialogConfig,
     public themeService: ThemeService,
-    private log: Logger,
-    private worker: WorkerService,
+    private apiEvents: ApiEvents,
   ) {
     this.buildSendForm();
     this.buildPaymentForm();
     this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
   }
 
-  private workerSubscription: Subscription;
+  private accountMaxBalanceSubscription: Subscription;
 
   public balanceLoaded: boolean;
   public sendForm: FormGroup;
@@ -181,16 +179,15 @@ export class SendComponent implements OnInit, OnDestroy {
     }
 
     this.startMethods();
-    this.updateAccountBalanceDetails();
   }
 
   startMethods() {
-    this.workerSubscription = this.worker.timerStatusChanged.subscribe((status) => {
-      if (status.running) {
-        if (status.worker === WorkerType.ACCOUNT_BALANCE) { this.updateAccountBalanceDetails(); }
+    this.accountMaxBalanceSubscription = this.apiEvents.AccountMaxBalance.subscribe((result) => {
+      if (result !== null) {
+        this.updateAccountMaxBalanceDetails(result);
       }
     });
-    this.worker.Start(WorkerType.ACCOUNT_BALANCE);
+    this.apiEvents.ManualTick(WorkerType.ACCOUNT_MAX_BALANCE);
   }
 
   ngOnDestroy() {
@@ -198,8 +195,8 @@ export class SendComponent implements OnInit, OnDestroy {
   }
 
   private cancelSubscriptions() {
-    if (this.workerSubscription) {
-      this.workerSubscription.unsubscribe();
+    if (this.accountMaxBalanceSubscription) {
+      this.accountMaxBalanceSubscription.unsubscribe();
     }
   }
 
@@ -482,7 +479,7 @@ export class SendComponent implements OnInit, OnDestroy {
           if (paymentResponse.success) {
             this.paymentMessage = 'Payment sent!';
             this.paymentSeverity = 'success';
-            this.worker.Start(WorkerType.ACCOUNT_BALANCE);
+            this.apiEvents.ManualTick(WorkerType.ACCOUNT_BALANCE);
           }
           this.isSending = false;
         }
@@ -566,8 +563,8 @@ export class SendComponent implements OnInit, OnDestroy {
               hasOpReturn: this.hasOpReturn,
               amount: this.sendForm.get('amount').value
             };
-            this.worker.Start(WorkerType.ACCOUNT_BALANCE);
             this.transactionComplete = true;
+            this.apiEvents.ManualTick(WorkerType.ACCOUNT_BALANCE);
           }
         },
         error => {
@@ -577,27 +574,10 @@ export class SendComponent implements OnInit, OnDestroy {
       );
   }
 
-  private updateAccountBalanceDetails() {
-    this.worker.Stop(WorkerType.ACCOUNT_BALANCE);
-    const maxBalanceRequest = {
-      walletName: this.globalService.getWalletName(),
-      feeType: this.sendForm.get('fee').value
-    };
-    this.apiService.getMaximumBalance(maxBalanceRequest)
-      .pipe(finalize(() => {
-        this.worker.Start(WorkerType.ACCOUNT_BALANCE);
-      }))
-      .subscribe(
-        response => {
-          this.log.info('Get max balance result:', response);
-          this.estimatedFee = response.fee;
-          this.totalBalance = response.maxSpendableAmount;
-          this.balanceLoaded = true;
-        },
-        error => {
-          this.apiService.handleException(error);
-        }
-      );
+  private updateAccountMaxBalanceDetails(response) {
+    this.estimatedFee = response.fee;
+    this.totalBalance = response.maxSpendableAmount;
+    this.balanceLoaded = true;
   }
 
   public goBack() {

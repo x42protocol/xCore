@@ -1,13 +1,10 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { SelectItem } from 'primeng/api';
 import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
-import { ApiService } from '../../shared/services/api.service';
+import { ApiEvents } from '../../shared/services/api.events';
 import { GlobalService } from '../../shared/services/global.service';
-import { WorkerService } from '../../shared/services/worker.service';
 import { WorkerType } from '../../shared/models/worker';
-import { WalletInfo } from '../../shared/models/wallet-info';
 import { TransactionInfo } from '../../shared/models/transaction-info';
-import { finalize } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -17,11 +14,10 @@ import { Subscription } from 'rxjs';
 })
 export class TransactionDetailsComponent implements OnInit, OnDestroy {
   constructor(
-    private apiService: ApiService,
     private globalService: GlobalService,
     public ref: DynamicDialogRef,
     public config: DynamicDialogConfig,
-    private worker: WorkerService,
+    private apiEvents: ApiEvents,
   ) { }
 
   public transaction: TransactionInfo;
@@ -31,7 +27,7 @@ export class TransactionDetailsComponent implements OnInit, OnDestroy {
   public copyType: SelectItem[];
 
   private lastBlockSyncedHeight: number;
-  private workerSubscription: Subscription;
+  private generalInfoSubscription: Subscription;
 
   ngOnInit() {
     this.copyType = [
@@ -44,22 +40,21 @@ export class TransactionDetailsComponent implements OnInit, OnDestroy {
   }
 
   startMethods() {
-    this.workerSubscription = this.worker.timerStatusChanged.subscribe((status) => {
-      if (status.running) {
-        if (status.worker === WorkerType.GENERAL_INFO) { this.updateGeneralWalletInfo(); }
+    this.generalInfoSubscription = this.apiEvents.GeneralInfo.subscribe((result) => {
+      if (result !== null) {
+        this.updateGeneralWalletInfo(result);
       }
     });
-    this.worker.Start(WorkerType.GENERAL_INFO);
+    this.apiEvents.ManualTick(WorkerType.GENERAL_INFO);
   }
 
   ngOnDestroy() {
-    this.worker.Stop(WorkerType.GENERAL_INFO);
     this.cancelSubscriptions();
   }
 
   private cancelSubscriptions() {
-    if (this.workerSubscription) {
-      this.workerSubscription.unsubscribe();
+    if (this.generalInfoSubscription) {
+      this.generalInfoSubscription.unsubscribe();
     }
   }
 
@@ -67,23 +62,9 @@ export class TransactionDetailsComponent implements OnInit, OnDestroy {
     this.copied = true;
   }
 
-  private updateGeneralWalletInfo() {
-    this.worker.Stop(WorkerType.GENERAL_INFO);
-    const walletInfo = new WalletInfo(this.globalService.getWalletName());
-    this.apiService.getGeneralInfo(walletInfo)
-      .pipe(finalize(() => {
-        this.worker.Start(WorkerType.GENERAL_INFO);
-      }))
-      .subscribe(
-        response => {
-          const generalWalletInfoResponse = response;
-          this.lastBlockSyncedHeight = generalWalletInfoResponse.lastBlockSyncedHeight;
-          this.getConfirmations(this.transaction);
-        },
-        error => {
-          this.apiService.handleException(error);
-        }
-      );
+  private updateGeneralWalletInfo(generalWalletInfoResponse) {
+    this.lastBlockSyncedHeight = generalWalletInfoResponse.lastBlockSyncedHeight;
+    this.getConfirmations(this.transaction);
   }
 
   private getConfirmations(transaction: TransactionInfo) {

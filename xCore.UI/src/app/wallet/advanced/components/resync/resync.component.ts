@@ -1,13 +1,11 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { WalletInfo } from '../../../../shared/models/wallet-info';
 import { ApiService } from '../../../../shared/services/api.service';
+import { ApiEvents } from '../../../../shared/services/api.events';
 import { GlobalService } from '../../../../shared/services/global.service';
 import { ModalService } from '../../../../shared/services/modal.service';
-import { WorkerService } from '../../../../shared/services/worker.service';
 import { WorkerType } from '../../../../shared/models/worker';
 import { WalletRescan } from '../../../../shared/models/wallet-rescan';
-import { finalize } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -21,14 +19,14 @@ export class ResyncComponent implements OnInit, OnDestroy {
     private apiService: ApiService,
     private genericModalService: ModalService,
     private fb: FormBuilder,
-    private worker: WorkerService,
+    private apiEvents: ApiEvents,
   ) { }
 
   private walletName: string;
   private lastBlockSyncedHeight: number;
   private chainTip: number;
   private isChainSynced: boolean;
-  private workerSubscription: Subscription;
+  private generalStatusSubscription: Subscription;
 
   public isSyncing = true;
   public minDate = new Date('2009-08-09');
@@ -52,23 +50,21 @@ export class ResyncComponent implements OnInit, OnDestroy {
   }
 
   startMethods() {
-    this.workerSubscription = this.worker.timerStatusChanged.subscribe((status) => {
-      if (status.running) {
-        if (status.worker === WorkerType.GENERAL_INFO) { this.updateGeneralWalletInfo(); }
+    this.generalStatusSubscription = this.apiEvents.GeneralInfo.subscribe((result) => {
+      if (result !== null) {
+        this.updateGeneralWalletInfo(result);
       }
     });
-
-    this.worker.Start(WorkerType.GENERAL_INFO);
+    this.apiEvents.ManualTick(WorkerType.GENERAL_INFO);
   }
 
   ngOnDestroy() {
-    this.worker.Stop(WorkerType.GENERAL_INFO);
     this.cancelSubscriptions();
   }
 
   private cancelSubscriptions() {
-    if (this.workerSubscription) {
-      this.workerSubscription.unsubscribe();
+    if (this.generalStatusSubscription) {
+      this.generalStatusSubscription.unsubscribe();
     }
   }
 
@@ -121,29 +117,15 @@ export class ResyncComponent implements OnInit, OnDestroy {
       );
   }
 
-  private updateGeneralWalletInfo() {
-    this.worker.Stop(WorkerType.GENERAL_INFO);
-    const walletInfo = new WalletInfo(this.walletName);
-    this.apiService.getGeneralInfo(walletInfo)
-      .pipe(finalize(() => {
-        this.worker.Start(WorkerType.GENERAL_INFO);
-      }))
-      .subscribe(
-        response => {
-          const generalWalletInfoResponse = response;
-          this.lastBlockSyncedHeight = generalWalletInfoResponse.lastBlockSyncedHeight;
-          this.chainTip = generalWalletInfoResponse.chainTip;
-          this.isChainSynced = generalWalletInfoResponse.isChainSynced;
+  private updateGeneralWalletInfo(generalWalletInfoResponse) {
+    this.lastBlockSyncedHeight = generalWalletInfoResponse.lastBlockSyncedHeight;
+    this.chainTip = generalWalletInfoResponse.chainTip;
+    this.isChainSynced = generalWalletInfoResponse.isChainSynced;
 
-          if (this.isChainSynced && this.lastBlockSyncedHeight === this.chainTip) {
-            this.isSyncing = false;
-          } else {
-            this.isSyncing = true;
-          }
-        },
-        error => {
-          this.apiService.handleException(error);
-        }
-      );
+    if (this.isChainSynced && this.lastBlockSyncedHeight === this.chainTip) {
+      this.isSyncing = false;
+    } else {
+      this.isSyncing = true;
+    }
   }
 }

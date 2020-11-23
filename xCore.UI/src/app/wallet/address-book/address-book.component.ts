@@ -3,7 +3,7 @@ import { ClipboardService } from 'ngx-clipboard';
 import { SelectItem } from 'primeng/api';
 import { DialogService } from 'primeng/dynamicdialog';
 import { ApiService } from '../../shared/services/api.service';
-import { WorkerService } from '../../shared/services/worker.service';
+import { ApiEvents } from '../../shared/services/api.events';
 import { WorkerType } from '../../shared/models/worker';
 import { SendComponent } from '../send/send.component';
 import { AddNewAddressComponent } from '../address-book/modals/add-new-address/add-new-address.component';
@@ -21,10 +21,10 @@ export class AddressBookComponent implements OnInit, OnDestroy {
     private apiService: ApiService,
     private clipboardService: ClipboardService,
     public dialogService: DialogService,
-    private worker: WorkerService,
+    private apiEvents: ApiEvents,
   ) { }
 
-  private workerSubscription: Subscription;
+  private addressBookSubscription: Subscription;
 
   public copyType: SelectItem[];
   addresses: AddressLabel[];
@@ -38,48 +38,33 @@ export class AddressBookComponent implements OnInit, OnDestroy {
   }
 
   startMethods() {
-    this.workerSubscription = this.worker.timerStatusChanged.subscribe((status) => {
-      if (status.running) {
-        if (status.worker === WorkerType.ADDRESS_BOOK) { this.getAddressBookAddresses(); }
+    this.addressBookSubscription = this.apiEvents.AddressBook.subscribe((result) => {
+      if (result !== null) {
+        this.getAddressBookAddresses(result);
       }
     });
-
-    this.worker.Start(WorkerType.ADDRESS_BOOK);
+    this.apiEvents.ManualTick(WorkerType.ADDRESS_BOOK);
   }
 
   ngOnDestroy() {
-    this.worker.Stop(WorkerType.ADDRESS_BOOK);
     this.cancelSubscriptions();
   }
 
   private cancelSubscriptions() {
-    if (this.workerSubscription) {
-      this.workerSubscription.unsubscribe();
+    if (this.addressBookSubscription) {
+      this.addressBookSubscription.unsubscribe();
     }
   }
 
-  private getAddressBookAddresses() {
-    this.worker.Stop(WorkerType.ADDRESS_BOOK);
-    this.apiService.getAddressBookAddresses()
-      .pipe(finalize(() => {
-        this.worker.Start(WorkerType.ADDRESS_BOOK);
-      }))
-      .subscribe(
-        response => {
-          if (response != null) {
-            this.addresses = null;
-            if (response.addresses[0]) {
-              this.addresses = [];
-              const addressResponse = response.addresses;
-              for (const address of addressResponse) {
-                this.addresses.push(new AddressLabel(address.label, address.address));
-              }
-            }
-          }
-        }, error => {
-          this.apiService.handleException(error);
-        }
-      );
+  private getAddressBookAddresses(response) {
+    this.addresses = null;
+    if (response.addresses[0]) {
+      this.addresses = [];
+      const addressResponse = response.addresses;
+      for (const address of addressResponse) {
+        this.addresses.push(new AddressLabel(address.label, address.address));
+      }
+    }
   }
 
   copyToClipboardClicked(address: AddressLabel) {
@@ -102,7 +87,7 @@ export class AddressBookComponent implements OnInit, OnDestroy {
   removeClicked(address: AddressLabel) {
     this.apiService.removeAddressBookAddress(address.label)
       .subscribe(() => {
-        this.getAddressBookAddresses();
+        this.apiEvents.ManualTick(WorkerType.ADDRESS_BOOK);
       });
   }
 

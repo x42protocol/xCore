@@ -6,14 +6,14 @@ import { Logger } from '../app/shared/services/logger.service';
 import { ElectronService } from 'ngx-electron';
 import { ThemeService } from './shared/services/theme.service';
 import { TitleService } from './shared/services/title.service';
-import { WorkerService } from './shared/services/worker.service';
+import { ApiEvents } from './shared/services/api.events';
+import { NodeStatus } from './shared/models/node-status';
 import { MenuItem } from 'primeng/api';
 import { Observable, Subscription } from 'rxjs';
 import { delay, retryWhen, tap, finalize } from 'rxjs/operators';
 import { environment } from '../environments/environment';
 import * as signalR from '@aspnet/signalr';
 import * as coininfo from 'x42-coininfo';
-import { WorkerType } from './shared/models/worker';
 
 export interface ListItem {
   name: string;
@@ -47,7 +47,7 @@ export class AppComponent implements OnInit, OnDestroy {
   public loadingFailed = false;
   public apiConnected = false;
   public contextMenuItems: MenuItem[];
-  public workerSubscription: Subscription;
+  public nodeStatusSubscription: Subscription;
 
   constructor(
     private themeService: ThemeService,
@@ -58,7 +58,7 @@ export class AppComponent implements OnInit, OnDestroy {
     private apiService: ApiService,
     public appState: ApplicationStateService,
     private readonly titleService: TitleService,
-    private worker: WorkerService,
+    private apiEvents: ApiEvents,
   ) {
 
     this.modes = [
@@ -96,23 +96,17 @@ export class AppComponent implements OnInit, OnDestroy {
         icon: 'pi goat-icon'
       }
     ];
-
-    this.startMethods();
   }
 
-  startMethods() {
-    this.workerSubscription = this.worker.timerStatusChanged.subscribe((status) => {
-      if (status.running) {
-        if (status.worker === WorkerType.NODE_STATUS) { this.updateNodeStatus(); }
-      }
+  private startNodeStatus() {
+    this.nodeStatusSubscription = this.apiEvents.NodeStatus.subscribe((status) => {
+      this.updateNodeStatus(status);
     });
-
-    this.worker.Start(WorkerType.NODE_STATUS);
   }
 
   private cancelSubscriptions() {
-    if (this.workerSubscription) {
-      this.workerSubscription.unsubscribe();
+    if (this.nodeStatusSubscription) {
+      this.nodeStatusSubscription.unsubscribe();
     }
   }
 
@@ -223,42 +217,29 @@ export class AppComponent implements OnInit, OnDestroy {
         )
       ).subscribe(() => {
         this.apiConnected = true;
-        this.updateNodeStatus();
+        this.startNodeStatus();
       });
   }
 
-  private updateNodeStatus() {
-    this.worker.Stop(WorkerType.NODE_STATUS);
-    this.apiService.getNodeStatus()
-      .pipe(finalize(() => {
-        if (!this.nodeStarted) {
-          this.worker.Start(WorkerType.NODE_STATUS);
+  private updateNodeStatus(nodeSatus: NodeStatus) {
+    if (nodeSatus !== null) {
+      if (this.nodeStarted) {
+        console.log('STOPPED');
+        this.cancelSubscriptions();
+      } else {
+        this.failedAttempts = 0;
+        this.log.info('Node Status Update: ', nodeSatus);
+        const statusResponse = nodeSatus.featuresData.filter(x => x.namespace === 'Blockcore.Base.BaseFeature');
+        if (statusResponse.length > 0 && statusResponse[0].state === 'Initialized') {
+          this.cancelSubscriptions();
+          this.start();
         }
-      }))
-      .subscribe(
-        response => {
-          if (this.nodeStarted) {
-            console.log('STOPPED');
-            this.worker.Stop(WorkerType.NODE_STATUS);
-            this.cancelSubscriptions();
-          } else {
-            this.failedAttempts = 0;
-            this.log.info('Node Status Update: ', response);
-            const statusResponse = response.featuresData.filter(x => x.namespace === 'Blockcore.Base.BaseFeature');
-            if (statusResponse.length > 0 && statusResponse[0].state === 'Initialized') {
-              this.worker.Stop(WorkerType.NODE_STATUS);
-              this.cancelSubscriptions();
-              this.start();
-            }
-          }
-        },
-        error => {
-          this.log.info('Failed to start wallet');
-          this.nodeFailedToLoad();
-          this.apiService.handleException(error);
-          this.failedAttempts++;
-        }
-      );
+      }
+    } else {
+      this.log.info('Failed to start wallet');
+      this.nodeFailedToLoad();
+      this.failedAttempts++;
+    }
   }
 
   start() {
@@ -280,12 +261,10 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.worker.Stop(WorkerType.NODE_STATUS);
     this.cancelSubscriptions();
   }
 
   cancel() {
-    this.worker.Stop(WorkerType.NODE_STATUS);
     this.appState.connected = false;
     this.loading = false;
     this.delayed = false;

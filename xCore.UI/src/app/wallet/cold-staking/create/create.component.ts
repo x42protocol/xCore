@@ -4,15 +4,14 @@ import { FormGroup, Validators, FormBuilder, AbstractControl } from '@angular/fo
 import { GlobalService } from '../../../shared/services/global.service';
 import { CoinNotationPipe } from '../../../shared/pipes/coin-notation.pipe';
 import { ApiService } from '../../../shared/services/api.service';
-import { Logger } from '../../../shared/services/logger.service';
+import { ApiEvents } from '../../../shared/services/api.events';
 import { ThemeService } from '../../../shared/services/theme.service';
-import { WorkerService } from '../../../shared/services/worker.service';
 import { WorkerType } from '../../../shared/models/worker';
 import { FeeEstimation } from '../../../shared/models/fee-estimation';
 import { ColdStakingService } from '../../../shared/services/coldstaking.service';
 import { TransactionSending } from '../../../shared/models/transaction-sending';
 import { ColdStakingSetup } from '../../../shared/models/coldstakingsetup';
-import { debounceTime, finalize } from 'rxjs/operators';
+import { debounceTime } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 
 type FeeType = { id: number, display: string, value: number };
@@ -34,15 +33,14 @@ export class ColdStakingCreateComponent implements OnInit, OnDestroy {
     public dialogService: DialogService,
     private fb: FormBuilder,
     public themeService: ThemeService,
-    private log: Logger,
-    private worker: WorkerService,
+    private apiEvents: ApiEvents,
   ) {
     this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
     this.setCoinUnit();
     this.buildSendForm();
   }
 
-  private workerSubscription: Subscription;
+  private accountMaxBalanceSubscription: Subscription;
 
   public balanceLoaded: boolean;
   public sendForm: FormGroup;
@@ -81,25 +79,21 @@ export class ColdStakingCreateComponent implements OnInit, OnDestroy {
   };
 
   public ngOnInit() {
-    this.workerSubscription = this.worker.timerStatusChanged.subscribe((status) => {
-      if (status.running) {
-        if (status.worker === WorkerType.ACCOUNT_BALANCE) { this.updateAccountBalanceDetails(); }
+    this.accountMaxBalanceSubscription = this.apiEvents.AccountMaxBalance.subscribe((result) => {
+      if (result !== null) {
+        this.updateAccountMaxBalanceDetails(result);
       }
     });
-
-    this.worker.Start(WorkerType.ACCOUNT_BALANCE);
-
-    this.updateAccountBalanceDetails();
+    this.apiEvents.ManualTick(WorkerType.ACCOUNT_MAX_BALANCE);
   }
 
   public ngOnDestroy() {
-    this.worker.Stop(WorkerType.ACCOUNT_BALANCE);
     this.cancelSubscriptions();
   }
 
   private cancelSubscriptions() {
-    if (this.workerSubscription) {
-      this.workerSubscription.unsubscribe();
+    if (this.accountMaxBalanceSubscription) {
+      this.accountMaxBalanceSubscription.unsubscribe();
     }
   }
 
@@ -148,27 +142,10 @@ export class ColdStakingCreateComponent implements OnInit, OnDestroy {
     this.sendForm.patchValue({ amount: +new CoinNotationPipe(this.globalService).transform(this.totalBalance) });
   }
 
-  private updateAccountBalanceDetails() {
-    this.worker.Stop(WorkerType.ACCOUNT_BALANCE);
-    const maxBalanceRequest = {
-      walletName: this.globalService.getWalletName(),
-      feeType: this.sendForm.get('fee').value
-    };
-    this.apiService.getMaximumBalance(maxBalanceRequest)
-      .pipe(finalize(() => {
-        this.worker.Start(WorkerType.ACCOUNT_BALANCE);
-      }))
-      .subscribe(
-        response => {
-          this.log.info('Get max balance result:', response);
-          this.estimatedFee = response.fee;
-          this.totalBalance = response.maxSpendableAmount;
-          this.balanceLoaded = true;
-        },
-        error => {
-          this.apiService.handleException(error);
-        }
-      );
+  private updateAccountMaxBalanceDetails(response) {
+    this.estimatedFee = response.fee;
+    this.totalBalance = response.maxSpendableAmount;
+    this.balanceLoaded = true;
   }
 
   public send() {

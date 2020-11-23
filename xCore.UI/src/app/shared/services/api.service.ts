@@ -123,7 +123,7 @@ export class ApiService {
   /**
    * Get the status of the xServer network
    */
-  getxServerStatus(): Observable<XServerStatus> {
+  getxServerInfo(): Observable<XServerStatus> {
     return this.http
       .get(this.apiUrl + '/xServer/getxserverstats')
       .pipe(catchError(this.handleInitialError.bind(this)))
@@ -378,7 +378,7 @@ export class ApiService {
   /**
    *  Get wallet balance from the API once.
    */
-  getWalletBalanceOnce(data: WalletInfo): Observable<any> {
+  getWalletBalance(data: WalletInfo): Observable<any> {
     const params = new HttpParams()
       .set('walletName', data.walletName)
       .set('accountName', data.accountName);
@@ -409,7 +409,7 @@ export class ApiService {
    * Get a wallets transaction history info from the API.
    * This uses the historyslim method.
    */
-  getWalletHistory(data: WalletInfo, skip: number = -1, take: number = -1, silent?: boolean): Observable<any> {
+  getWalletHistory(data: WalletInfo, skip: number = -1, take: number = -1): Observable<any> {
     let params = new HttpParams()
       .set('walletName', data.walletName)
       .set('accountName', data.accountName);

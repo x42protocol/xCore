@@ -2,13 +2,12 @@ import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { FormGroup, Validators, FormBuilder, AbstractControl } from '@angular/forms';
 import { DynamicDialogRef, DynamicDialogConfig, DialogService } from 'primeng/dynamicdialog';
 import { ApiService } from '../../../shared/services/api.service';
+import { ApiEvents } from '../../../shared/services/api.events';
 import { GlobalService } from '../../../shared/services/global.service';
 import { ThemeService } from '../../../shared/services/theme.service';
 import { CoinNotationPipe } from '../../../shared/pipes/coin-notation.pipe';
 import { ColdStakingService } from '../../../shared/services/coldstaking.service';
-import { WorkerService } from '../../../shared/services/worker.service';
 import { WorkerType } from '../../../shared/models/worker';
-import { Logger } from '../../../shared/services/logger.service';
 import { FeeEstimation } from '../../../shared/models/fee-estimation';
 import { TransactionSending } from '../../../shared/models/transaction-sending';
 import { WalletInfo } from '../../../shared/models/wallet-info';
@@ -39,8 +38,7 @@ export class ColdStakingWithdrawComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private stakingService: ColdStakingService,
     public themeService: ThemeService,
-    private log: Logger,
-    private worker: WorkerService,
+    private apiEvents: ApiEvents,
   ) {
     this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
     this.setCoinUnit();
@@ -68,7 +66,7 @@ export class ColdStakingWithdrawComponent implements OnInit, OnDestroy {
 
   private coldStakingAccount = 'coldStakingColdAddresses';
   private hotStakingAccount = 'coldStakingHotAddresses';
-  private workerSubscription: Subscription;
+  private coldBalanceSubscription: Subscription;
 
   sendFormErrors = {
     address: '',
@@ -102,23 +100,21 @@ export class ColdStakingWithdrawComponent implements OnInit, OnDestroy {
   }
 
   startMethods() {
-    this.workerSubscription = this.worker.timerStatusChanged.subscribe((status) => {
-      if (status.running) {
-        if (status.worker === WorkerType.COLD_BALANCE) { this.updateColdBalanceDetails(); }
+    this.coldBalanceSubscription = this.apiEvents.ColdBalance.subscribe((result) => {
+      if (result !== null) {
+        this.updateColdBalanceDetails(result);
       }
     });
-    this.worker.Start(WorkerType.ACCOUNT_BALANCE);
-    this.updateColdBalanceDetails();
+    this.apiEvents.ManualTick(WorkerType.COLD_BALANCE);
   }
 
   ngOnDestroy() {
-    this.worker.Stop(WorkerType.ACCOUNT_BALANCE);
     this.cancelSubscriptions();
   }
 
   private cancelSubscriptions() {
-    if (this.workerSubscription) {
-      this.workerSubscription.unsubscribe();
+    if (this.coldBalanceSubscription) {
+      this.coldBalanceSubscription.unsubscribe();
     }
   }
 
@@ -252,26 +248,10 @@ export class ColdStakingWithdrawComponent implements OnInit, OnDestroy {
       );
   }
 
-  private updateColdBalanceDetails() {
-    this.worker.Stop(WorkerType.COLD_BALANCE);
-    const walletInfo = new WalletInfo(this.globalService.getWalletName());
-    walletInfo.accountName = this.coldStakingAccount;
-    this.apiService.getWalletBalanceOnce(walletInfo)
-      .pipe(finalize(() => {
-        this.worker.Start(WorkerType.COLD_BALANCE);
-      }))
-      .subscribe(
-        response => {
-          this.log.info('Get cold balance result:', response);
-          const balanceResponse = response;
-          this.totalBalance = balanceResponse.balances[0].amountConfirmed + balanceResponse.balances[0].amountUnconfirmed;
-          this.spendableBalance = balanceResponse.balances[0].spendableAmount;
-          this.balanceLoaded = true;
-        },
-        error => {
-          this.apiService.handleException(error);
-        }
-      );
+  private updateColdBalanceDetails(balanceResponse) {
+    this.totalBalance = balanceResponse.balances[0].amountConfirmed + balanceResponse.balances[0].amountUnconfirmed;
+    this.spendableBalance = balanceResponse.balances[0].spendableAmount;
+    this.balanceLoaded = true;
   }
 
 }

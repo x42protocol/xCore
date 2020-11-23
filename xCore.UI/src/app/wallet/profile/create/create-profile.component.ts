@@ -1,14 +1,13 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormGroup, Validators, FormBuilder } from '@angular/forms';
 import { ApiService } from '../../../shared/services/api.service';
+import { ApiEvents } from '../../../shared/services/api.events';
 import { GlobalService } from '../../../shared/services/global.service';
-import { Logger } from '../../../shared/services/logger.service';
 import { TransactionBuilding } from '../../../shared/models/transaction-building';
 import { WalletInfo } from '../../../shared/models/wallet-info';
 import { ThemeService } from '../../../shared/services/theme.service';
-import { WorkerService } from '../../../shared/services/worker.service';
 import { WorkerType } from '../../../shared/models/worker';
-import { debounceTime, finalize } from 'rxjs/operators';
+import { debounceTime } from 'rxjs/operators';
 import { DynamicDialogRef, DynamicDialogConfig, DialogService } from 'primeng/dynamicdialog';
 import { SubmitPaymentRequest } from '../../../shared/models/xserver-submit-payment-request';
 import { SignMessageRequest } from '../../../shared/models/wallet-signmessagerequest';
@@ -37,14 +36,13 @@ export class CreateProfileComponent implements OnInit, OnDestroy {
     public ref: DynamicDialogRef,
     public config: DynamicDialogConfig,
     public themeService: ThemeService,
-    private log: Logger,
-    private worker: WorkerService,
+    private apiEvents: ApiEvents,
   ) {
     this.buildPaymentForm();
     this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
   }
 
-  private workerSubscription: Subscription;
+  private accountBalanceSubscription: Subscription;
 
   public balanceLoaded = false;
   public paymentForm: FormGroup;
@@ -117,23 +115,21 @@ export class CreateProfileComponent implements OnInit, OnDestroy {
   }
 
   startMethods() {
-    this.workerSubscription = this.worker.timerStatusChanged.subscribe((status) => {
-      if (status.running) {
-        if (status.worker === WorkerType.ACCOUNT_BALANCE) { this.updateAccountBalanceDetails(); }
+    this.accountBalanceSubscription = this.apiEvents.AccountBalance.subscribe((result) => {
+      if (result !== null) {
+        this.updateAccountBalanceDetails(result);
       }
     });
-    this.worker.Start(WorkerType.ACCOUNT_BALANCE);
-    this.updateAccountBalanceDetails();
+    this.apiEvents.ManualTick(WorkerType.ACCOUNT_BALANCE);
   }
 
   ngOnDestroy() {
-    this.worker.Stop(WorkerType.ACCOUNT_BALANCE);
     this.cancelSubscriptions();
   }
 
   private cancelSubscriptions() {
-    if (this.workerSubscription) {
-      this.workerSubscription.unsubscribe();
+    if (this.accountBalanceSubscription) {
+      this.accountBalanceSubscription.unsubscribe();
     }
   }
 
@@ -475,23 +471,9 @@ export class CreateProfileComponent implements OnInit, OnDestroy {
       );
   }
 
-  private updateAccountBalanceDetails() {
-    this.worker.Stop(WorkerType.ACCOUNT_BALANCE);
-    const walletInfo = new WalletInfo(this.globalService.getWalletName());
-    this.apiService.getWalletBalanceOnce(walletInfo)
-      .pipe(finalize(() => {
-        this.worker.Start(WorkerType.ACCOUNT_BALANCE);
-      }))
-      .subscribe(
-        balanceResponse => {
-          this.log.info('Get account balance result:', balanceResponse);
-          this.totalBalance = balanceResponse.balances[0].amountConfirmed + balanceResponse.balances[0].amountUnconfirmed;
-          this.balanceLoaded = true;
-        },
-        error => {
-          this.apiService.handleException(error);
-        }
-      );
+  private updateAccountBalanceDetails(balanceResponse) {
+    this.totalBalance = balanceResponse.balances[0].amountConfirmed + balanceResponse.balances[0].amountUnconfirmed;
+    this.balanceLoaded = true;
   }
 
   public goBack() {

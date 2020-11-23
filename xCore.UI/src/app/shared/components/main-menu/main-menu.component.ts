@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, Input, NgZone } from '@angular/core';
-import { FormGroup, Validators, FormBuilder } from '@angular/forms';
+import { FormGroup, FormBuilder } from '@angular/forms';
 import { ThemeService } from '../../services/theme.service';
 import { SelectItemGroup, MenuItem, SelectItem } from 'primeng/api';
 import { DialogService } from 'primeng/dynamicdialog';
@@ -16,9 +16,6 @@ import { ModalService } from '../../../shared/services/modal.service';
 import { UpdateService } from '../../../shared/services/update.service';
 import { Logger } from '../../../shared/services/logger.service';
 import { ApiService } from '../../services/api.service';
-import { WorkerService } from '../../../shared/services/worker.service';
-import { WorkerType } from '../../../shared/models/worker';
-import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-main-menu',
@@ -27,7 +24,8 @@ import { Subscription } from 'rxjs';
 })
 export class MainMenuComponent implements OnInit, OnDestroy {
   private ipc: Electron.IpcRenderer;
-  private workerSubscription: Subscription;
+  private updateTimerId: any;
+  private coldTypeTimerId: any;
 
   @Input() public isUnLocked = false;
 
@@ -63,7 +61,6 @@ export class MainMenuComponent implements OnInit, OnDestroy {
     private zone: NgZone,
     private fb: FormBuilder,
     public modalService: ModalService,
-    private worker: WorkerService,
   ) {
 
     this.groupedThemes = [
@@ -157,11 +154,9 @@ export class MainMenuComponent implements OnInit, OnDestroy {
       this.setDefaultMenuItems();
     }
 
-    this.checkForUpdates();
-
     setTimeout(() => {
       this.checkForUpdates();
-    }, 12000);
+    }, 20000);
 
     const walletName = this.globalService.getWalletName();
     if (walletName !== '') {
@@ -175,25 +170,13 @@ export class MainMenuComponent implements OnInit, OnDestroy {
         );
     }
 
-    this.workerSubscription = this.worker.timerStatusChanged.subscribe((status) => {
-      if (status.running) {
-        if (status.worker === WorkerType.UPDATE) { this.checkForUpdates(); }
-        if (status.worker === WorkerType.COLD_TYPE) { this.checkForColdTypeChange(); }
-      }
-    });
-
-    this.worker.Start(WorkerType.UPDATE, 43200);
-    this.worker.Start(WorkerType.COLD_TYPE, 1);
+    this.updateTimerId = setInterval(() => this.checkForUpdates(), 43200000);
+    this.coldTypeTimerId = setInterval(() => this.checkForColdTypeChange(), 1000);
   }
 
   ngOnDestroy() {
-    this.cancelSubscriptions();
-  }
-
-  private cancelSubscriptions() {
-    if (this.workerSubscription) {
-      this.workerSubscription.unsubscribe();
-    }
+    clearInterval(this.updateTimerId);
+    clearInterval(this.coldTypeTimerId);
   }
 
   checkForColdTypeChange() {

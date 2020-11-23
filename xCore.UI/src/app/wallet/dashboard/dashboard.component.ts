@@ -3,8 +3,8 @@ import { FormGroup, Validators, FormBuilder } from '@angular/forms';
 import { Router } from '@angular/router';
 import { DialogService } from 'primeng/dynamicdialog';
 import { ApiService } from '../../shared/services/api.service';
+import { ApiEvents } from '../../shared/services/api.events';
 import { GlobalService } from '../../shared/services/global.service';
-import { WorkerService } from '../../shared/services/worker.service';
 import { Logger } from '../../shared/services/logger.service';
 import { WalletInfo } from '../../shared/models/wallet-info';
 import { TransactionInfo } from '../../shared/models/transaction-info';
@@ -13,9 +13,8 @@ import { SendComponent } from '../send/send.component';
 import { ReceiveComponent } from '../receive/receive.component';
 import { TransactionDetailsComponent } from '../transaction-details/transaction-details.component';
 import { CreateProfileComponent } from '../profile/create/create-profile.component';
-import { finalize } from 'rxjs/operators';
-import { WorkerType } from '../../shared/models/worker';
 import { Subscription } from 'rxjs';
+import { WorkerType } from '../../shared/models/worker';
 
 @Component({
   selector: 'app-dashboard-component',
@@ -31,7 +30,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     public themeService: ThemeService,
     private log: Logger,
-    private worker: WorkerService,
+    private apiEvents: ApiEvents,
   ) {
     this.buildStakingForm();
     this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
@@ -68,7 +67,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public profile: any;
 
   private isColdWalletHot = false;
-  private workerSubscription: Subscription;
+  private accountBalanceSubscription: Subscription;
+  private hotBalanceSubscription: Subscription;
+  private stakingInfoSubscription: Subscription;
 
   ngOnInit() {
     this.walletName = this.globalService.getWalletName();
@@ -84,32 +85,46 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   startMethods() {
-    this.workerSubscription = this.worker.timerStatusChanged.subscribe((status) => {
-      if (status.running) {
-        if (status.worker === WorkerType.STAKING_INFO) { this.updateStakingInfoDetails(); }
-        if (status.worker === WorkerType.ACCOUNT_BALANCE) { this.updateAccountBalanceDetails(); }
-        if (status.worker === WorkerType.HOT_BALANCE) { this.updateHotBalanceDetails(); }
-        // if (status.worker === WorkerType.HISTORY) { this.updateWalletHistory(); }
+
+    this.stakingInfoSubscription = this.apiEvents.StakingInfo.subscribe((result) => {
+      if (result !== null) {
+        this.updateStakingInfoDetails(result);
       }
     });
+    this.apiEvents.ManualTick(WorkerType.STAKING_INFO);
 
-    this.updateAccountBalanceDetails();
-    this.updateHotBalanceDetails();
-    this.updateStakingInfoDetails();
+    this.accountBalanceSubscription = this.apiEvents.AccountBalance.subscribe((result) => {
+      if (result !== null) {
+        this.updateAccountBalanceDetails(result);
+      }
+    });
+    this.apiEvents.ManualTick(WorkerType.ACCOUNT_BALANCE);
+
+    if (this.isColdWalletHot) {
+      this.hotBalanceSubscription = this.apiEvents.HotBalance.subscribe((result) => {
+        if (result !== null) {
+          this.updateHotBalanceDetails(result);
+        }
+      });
+      this.apiEvents.ManualTick(WorkerType.HOT_BALANCE);
+    }
+
     this.updateWalletHistory();
   }
 
   ngOnDestroy() {
-    this.worker.Stop(WorkerType.STAKING_INFO);
-    this.worker.Stop(WorkerType.ACCOUNT_BALANCE);
-    this.worker.Stop(WorkerType.HOT_BALANCE);
-    this.worker.Stop(WorkerType.HISTORY);
     this.cancelSubscriptions();
   }
 
   private cancelSubscriptions() {
-    if (this.workerSubscription) {
-      this.workerSubscription.unsubscribe();
+    if (this.stakingInfoSubscription) {
+      this.stakingInfoSubscription.unsubscribe();
+    }
+    if (this.accountBalanceSubscription) {
+      this.accountBalanceSubscription.unsubscribe();
+    }
+    if (this.hotBalanceSubscription) {
+      this.hotBalanceSubscription.unsubscribe();
     }
   }
 
@@ -212,79 +227,42 @@ export class DashboardComponent implements OnInit, OnDestroy {
       );
   }
 
-  private updateAccountBalanceDetails() {
-    this.worker.Stop(WorkerType.ACCOUNT_BALANCE);
-    const walletInfo = new WalletInfo(this.globalService.getWalletName());
-    this.apiService.getWalletBalanceOnce(walletInfo)
-      .pipe(finalize(() => {
-        this.worker.Start(WorkerType.ACCOUNT_BALANCE);
-      }))
-      .subscribe(
-        response => {
-          const balanceResponse = response;
-          let balanceChanged = false;
-          if (this.confirmedBalance !== balanceResponse.balances[0].amountConfirmed) {
-            balanceChanged = true;
-          } else if (this.unconfirmedBalance !== balanceResponse.balances[0].amountUnconfirmed) {
-            balanceChanged = true;
-          }
-          // TODO - add account feature instead of using first entry in array
-          this.confirmedBalance = balanceResponse.balances[0].amountConfirmed;
-          this.unconfirmedBalance = balanceResponse.balances[0].amountUnconfirmed;
-          this.spendableBalance = balanceResponse.balances[0].spendableAmount;
-          if ((this.confirmedBalance + this.unconfirmedBalance) > 0) {
-            this.hasBalance = true;
-          } else {
-            this.hasBalance = false;
-          }
-          this.balanceLoaded = true;
-          // this.worker.Start(WorkerType.HISTORY);
-          if (balanceChanged) {
-            this.log.info('Balance changed', response);
-            this.updateWalletHistory();
-          }
-        },
-        error => {
-          this.apiService.handleException(error);
-        }
-      );
-  }
-
-  private updateHotBalanceDetails() {
-    if (this.isColdWalletHot) {
-      this.worker.Stop(WorkerType.HOT_BALANCE);
-      const walletInfo = new WalletInfo(this.globalService.getWalletName());
-      walletInfo.accountName = this.hotStakingAccount;
-      this.apiService.getWalletBalanceOnce(walletInfo)
-        .pipe(finalize(() => {
-          this.worker.Start(WorkerType.HOT_BALANCE);
-        }))
-        .subscribe(
-          hotBalanceResponse => {
-            this.log.info('Get hot balance result:', hotBalanceResponse);
-            if (hotBalanceResponse.balances[0].amountConfirmed > 0 || hotBalanceResponse.balances[0].amountUnconfirmed > 0) {
-              this.hasHotBalance = true;
-            }
-            this.confirmedHotBalance = hotBalanceResponse.balances[0].amountConfirmed;
-            this.unconfirmedHotBalance = hotBalanceResponse.balances[0].amountUnconfirmed;
-            this.spendableHotBalance = hotBalanceResponse.balances[0].spendableAmount;
-          },
-          error => {
-            this.apiService.handleException(error);
-          }
-        );
+  private updateAccountBalanceDetails(balanceResponse) {
+    let balanceChanged = false;
+    if (this.confirmedBalance !== balanceResponse.balances[0].amountConfirmed) {
+      balanceChanged = true;
+    } else if (this.unconfirmedBalance !== balanceResponse.balances[0].amountUnconfirmed) {
+      balanceChanged = true;
+    }
+    // TODO - add account feature instead of using first entry in array
+    this.confirmedBalance = balanceResponse.balances[0].amountConfirmed;
+    this.unconfirmedBalance = balanceResponse.balances[0].amountUnconfirmed;
+    this.spendableBalance = balanceResponse.balances[0].spendableAmount;
+    if ((this.confirmedBalance + this.unconfirmedBalance) > 0) {
+      this.hasBalance = true;
+    } else {
+      this.hasBalance = false;
+    }
+    this.balanceLoaded = true;
+    if (balanceChanged) {
+      this.log.info('Balance changed', balanceResponse);
+      this.updateWalletHistory();
     }
   }
 
-  // TODO: add history in seperate service to make it reusable
+  private updateHotBalanceDetails(hotBalanceResponse) {
+    if (hotBalanceResponse.balances[0].amountConfirmed > 0 || hotBalanceResponse.balances[0].amountUnconfirmed > 0) {
+      this.hasHotBalance = true;
+    }
+    this.confirmedHotBalance = hotBalanceResponse.balances[0].amountConfirmed;
+    this.unconfirmedHotBalance = hotBalanceResponse.balances[0].amountUnconfirmed;
+    this.spendableHotBalance = hotBalanceResponse.balances[0].spendableAmount;
+  }
+
   private updateWalletHistory() {
-    // this.worker.Stop(WorkerType.HISTORY);
     const walletInfo = new WalletInfo(this.globalService.getWalletName());
     let historyResponse;
     this.apiService.getWalletHistory(walletInfo, 0, 10)
-      .pipe(finalize(() => {
-        // this.worker.Start(WorkerType.HISTORY, 10);
-      }))
       .subscribe(
         response => {
           // TODO - add account feature instead of using first entry in array
@@ -339,7 +317,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private makeLatestTxListSmall() {
     if (this.latestTransactions !== undefined && this.latestTransactions.length > 0) {
-      this.latestTransactions = this.latestTransactions.slice(0, 3);
+      this.latestTransactions = this.latestTransactions.slice(0, 5);
     }
   }
 
@@ -376,33 +354,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
       );
   }
 
-  private updateStakingInfoDetails() {
-    this.worker.Stop(WorkerType.STAKING_INFO);
-    this.apiService.getStakingInfo()
-      .pipe(finalize(() => {
-        this.worker.Start(WorkerType.STAKING_INFO);
-      }))
-      .subscribe(
-        response => {
-          this.log.info('Get staking info result:', response);
-          const stakingResponse = response;
-          this.stakingEnabled = stakingResponse.enabled;
-          this.stakingActive = stakingResponse.staking;
-          this.stakingWeight = stakingResponse.weight;
-          this.netStakingWeight = stakingResponse.netStakeWeight;
-          this.awaitingMaturity = (this.unconfirmedBalance + this.confirmedBalance) - this.spendableBalance;
-          this.expectedTime = stakingResponse.expectedTime;
-          this.dateTime = this.secondsToString(this.expectedTime);
-          if (this.stakingActive) {
-            this.makeLatestTxListSmall();
-            this.isStarting = false;
-          } else {
-            this.isStopping = false;
-          }
-        }, error => {
-          this.apiService.handleException(error);
-        }
-      );
+  private updateStakingInfoDetails(stakingResponse) {
+    this.stakingEnabled = stakingResponse.enabled;
+    this.stakingActive = stakingResponse.staking;
+    this.stakingWeight = stakingResponse.weight;
+    this.netStakingWeight = stakingResponse.netStakeWeight;
+    this.awaitingMaturity = (this.unconfirmedBalance + this.confirmedBalance) - this.spendableBalance;
+    this.expectedTime = stakingResponse.expectedTime;
+    this.dateTime = this.secondsToString(this.expectedTime);
+    if (this.stakingActive) {
+      this.makeLatestTxListSmall();
+      this.isStarting = false;
+    } else {
+      this.isStopping = false;
+    }
   }
 
   private secondsToString(seconds: number) {

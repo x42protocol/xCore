@@ -1,9 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ApiService } from '../../../../../shared/services/api.service';
+import { ApiEvents } from '../../../../../shared/services/api.events';
 import { GlobalService } from '../../../../../shared/services/global.service';
 import { ThemeService } from '../../../../../shared/services/theme.service';
-import { WorkerService } from '../../../../../shared/services/worker.service';
-import { WorkerType } from '../../../../../shared/models/worker';
 import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { ColdStakingSetup } from '../../../../../shared/models/coldstakingsetup';
 import { TransactionSending } from '../../../../../shared/models/transaction-sending';
@@ -15,7 +14,6 @@ import { SignMessageRequest } from '../../../../../shared/models/wallet-signmess
 import { XServerRegistrationRequest } from '../../../../../shared/models/xserver-registration-request';
 import { XServerTestRequest } from '../../../../../shared/models/xserver-test-request';
 import { NodeStatus } from '../../../../../shared/models/node-status';
-import { finalize } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -33,7 +31,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
     public activeModal: DynamicDialogRef,
     public config: DynamicDialogConfig,
     private log: Logger,
-    private worker: WorkerService,
+    private apiEvents: ApiEvents,
   ) {
     this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
   }
@@ -42,7 +40,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
 
   private signedMessage: string;
   private broadcastStarted = false;
-  private workerSubscription: Subscription;
+  private txConfirmationSubscription: Subscription;
 
   public isDarkTheme = false;
   public collateralProgress = 0;
@@ -80,13 +78,6 @@ export class RegisterComponent implements OnInit, OnDestroy {
   }
 
   startMethods() {
-    this.workerSubscription = this.worker.timerStatusChanged.subscribe((status) => {
-      if (status.running) {
-        if (status.worker === WorkerType.TX_CONFIRMATION) { this.updateTransactionConfirmations(); }
-      }
-    });
-
-    this.worker.Start(WorkerType.TX_CONFIRMATION);
     this.apiService.getNodeStatus()
       .subscribe(
         (data: NodeStatus) => {
@@ -95,14 +86,22 @@ export class RegisterComponent implements OnInit, OnDestroy {
         }
       );
   }
+
+  startTransactionConfirmation() {
+    this.txConfirmationSubscription = this.apiEvents.TransactionConfirmation(this.transactionInfo.transactionId).subscribe((result) => {
+      if (result !== null) {
+        this.updateTransactionConfirmations(result);
+      }
+    });
+  }
+
   ngOnDestroy() {
-    this.worker.Stop(WorkerType.TX_CONFIRMATION);
     this.cancelSubscriptions();
   }
 
   private cancelSubscriptions() {
-    if (this.workerSubscription) {
-      this.workerSubscription.unsubscribe();
+    if (this.txConfirmationSubscription) {
+      this.txConfirmationSubscription.unsubscribe();
     }
   }
 
@@ -209,29 +208,16 @@ export class RegisterComponent implements OnInit, OnDestroy {
     this.collateralProgress = totalProgress;
   }
 
-  private updateTransactionConfirmations() {
-    this.worker.Stop(WorkerType.TX_CONFIRMATION);
-    this.apiService.getTxOut(this.transactionInfo.transactionId, false)
-      .pipe(finalize(() => {
-        this.worker.Start(WorkerType.TX_CONFIRMATION);
-      }))
-      .subscribe(
-        transactionOutput => {
-          if (transactionOutput != null) {
-            this.confirmations = transactionOutput.confirmations;
-          }
-        },
-        error => {
-          this.apiService.handleException(error);
-        }
-      );
+  private updateTransactionConfirmations(transactionOutput) {
+    if (transactionOutput != null) {
+      this.confirmations = transactionOutput.confirmations;
+    }
   }
 
   public deligatedTransactionSent(transactionInfo: TransactionInfo) {
     this.transactionInfo = transactionInfo;
     this.incrementProgress(10);
-    this.worker.Start(WorkerType.TX_CONFIRMATION);
-    this.updateTransactionConfirmations();
+    this.startTransactionConfirmation();
   }
 
   public broadcastTransaction(): void {
