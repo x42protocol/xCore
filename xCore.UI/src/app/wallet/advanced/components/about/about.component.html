@@ -84,9 +84,8 @@
     <div *ngIf="updateService.info && !updateService.available" class="update-card">
       <div class="h5"><span class="pi pi-check-circle text-success"></span> You are running the latest version.</div>
       <div>
-        <div></div>
         <div>Installed {{updateService.info.releaseName}}</div>
-        <div>Version: {{updateService.info.version}} ({{releaseDateFormatted()}})</div>
+        <div>Version: {{updateService.info.version}} ({{releaseDateFormatted()}}) <span class="text-info">Last Checked: {{lastCheckDateFormatted()}}</span></div>
       </div>
       <div>
         <p [innerHTML]="updateService.info.releaseNotes"></p>

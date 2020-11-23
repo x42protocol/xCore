@@ -16,6 +16,7 @@ export class UpdateService {
   public downloaded = false;
   public available = false;
   public downloading = false;
+  public LastUpdateCheck: Date;
 
   constructor(
     private electronService: ElectronService,
@@ -43,6 +44,7 @@ export class UpdateService {
 
         this.ipc.on('update-not-available', (event, info: UpdateInfo) => {
           console.log('update-not-available: ', info);
+          this.LastUpdateCheck = new Date();
           this.info = info;
           this.available = false;
         });

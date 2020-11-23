@@ -34,6 +34,11 @@ export class AboutComponent implements OnInit {
     return updatedTime.toLocaleDateString();
   }
 
+  lastCheckDateFormatted() {
+    const lastCheckedTime = new Date(this.updateService.LastUpdateCheck);
+    return lastCheckedTime.toLocaleString();
+  }
+
   releaseNotesFormatted() {
     console.log(this.updateService.info.releaseNotes.replace(/<[^>]*>?/gm, ''));
     this.updateService.info.releaseNotes.replace(/<[^>]*>?/gm, '');
