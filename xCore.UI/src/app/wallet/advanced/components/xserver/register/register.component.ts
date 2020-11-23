@@ -41,6 +41,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
   private signedMessage: string;
   private broadcastStarted = false;
   private txConfirmationSubscription: Subscription;
+  private registrationIntervalId: any;
 
   public isDarkTheme = false;
   public collateralProgress = 0;
@@ -91,18 +92,27 @@ export class RegisterComponent implements OnInit, OnDestroy {
     this.txConfirmationSubscription = this.apiEvents.TransactionConfirmation(this.transactionInfo.transactionId).subscribe((result) => {
       if (result !== null) {
         this.updateTransactionConfirmations(result);
+      } else {
+        this.confirmations = 0;
       }
     });
   }
 
   ngOnDestroy() {
-    this.cancelSubscriptions();
+    this.cleanup();
   }
 
   private cancelSubscriptions() {
     if (this.txConfirmationSubscription) {
       this.txConfirmationSubscription.unsubscribe();
     }
+  }
+
+  private cleanup() {
+    clearInterval(this.registrationIntervalId);
+    this.confirmations = 0;
+    this.apiEvents.TransactionConfirmation('');
+    this.cancelSubscriptions();
   }
 
   private testXServer(blockHeight: number) {
@@ -138,7 +148,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
     let previousConfirmation = 0;
     this.broadcastTransaction();
     this.currentStep++;
-    const interval = setInterval(() => {
+    this.registrationIntervalId = setInterval(() => {
       if (this.errorMessage === '') {
         if (this.collateralProgress > 0 && this.currentStep < 1) {
           if (this.confirmations >= 6) {
@@ -157,11 +167,11 @@ export class RegisterComponent implements OnInit, OnDestroy {
         }
         if (this.collateralProgress >= 100) {
           this.collateralProgress = 100;
-          clearInterval(interval);
+          clearInterval(this.registrationIntervalId);
         }
         previousConfirmation = this.confirmations;
       } else {
-        clearInterval(interval);
+        clearInterval(this.registrationIntervalId);
         this.log.info('Registration Error', this.errorMessage);
       }
     }, 1000);

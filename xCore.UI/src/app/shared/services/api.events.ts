@@ -384,6 +384,8 @@ export class ApiEvents {
             this.apiService.handleException(error);
           }
         );
+    } else {
+      this.transactionId = '';
     }
   }
 

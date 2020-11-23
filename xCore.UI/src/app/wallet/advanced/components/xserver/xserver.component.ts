@@ -206,7 +206,8 @@ export class XServerComponent implements OnInit, OnDestroy {
     this.dialogService.open(RegisterComponent, {
       header: 'Setting up remote xServer',
       width: '540px',
-      data: modalData
+      data: modalData,
+      closable: false
     });
   }
 }
