@@ -29,7 +29,7 @@
               <label class="float-left" for="pair">Change Currency</label>
             </div>
             <div class="ui-inputgroup">
-              <p-dropdown [options]="pairs" placeholder="Change Pair" formControlName="pair" autoWidth="true" filter="true" filterBy="label,title">
+              <p-dropdown [options]="pairs" placeholder="USD" formControlName="pair" autoWidth="true" filter="true" filterBy="label,title">
                 <ng-template let-item pTemplate="selectedItem">
                   ({{item.label}}) <span style="vertical-align:middle; margin-left: .5em">{{item.title}}</span>
                 </ng-template>
