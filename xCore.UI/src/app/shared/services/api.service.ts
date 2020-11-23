@@ -510,7 +510,7 @@ export class ApiService {
   /**
    * Send transaction
    */
-  sendTransaction(data: TransactionSending, silent?: boolean): Observable<any> {
+  sendTransaction(data: TransactionSending): Observable<any> {
     return this.http
       .post(this.apiUrl + '/wallet/send-transaction', JSON.stringify(data))
       .pipe(catchError(this.handleError.bind(this)))
@@ -640,11 +640,9 @@ export class ApiService {
   }
 
   /** Use this to handle error (exceptions) that happens in RXJS pipes. This handler will rethrow the error. */
-  handleError(error: HttpErrorResponse | any, silent?: boolean) {
+  handleError(error: HttpErrorResponse | any) {
     this.handleException(error);
-    if (!silent) {
-      return throwError(error);
-    }
+    return throwError(error);
   }
 
   /** Use this to handle errors (exceptions) that happens outside of an RXJS pipe. See the "handleError" for pipeline error handling. */
@@ -654,7 +652,7 @@ export class ApiService {
     if (error.error instanceof ErrorEvent) {
       errorMessage = 'An error occurred:' + error.error.message;
       // A client-side or network error occurred. Handle it accordingly.
-    } else if (error.error !== undefined && error.error.errors) {
+    } else if (error.error !== undefined && error.error !== null && error.error.errors !== null) {
       errorMessage = `${error.error.errors[0].message} (Code: ${error.error.errors[0].status})`;
     } else if (error.name === 'HttpErrorResponse') {
       errorMessage = `Unable to connect with background daemon: ${error.message} (${error.status})`;
