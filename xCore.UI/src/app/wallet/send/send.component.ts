@@ -556,7 +556,7 @@ export class SendComponent implements OnInit, OnDestroy {
   private sendTransaction(hex: string) {
     const transaction = new TransactionSending(hex);
     this.apiService
-      .sendTransaction(transaction, true)
+      .sendTransaction(transaction)
       .subscribe(
         response => {
           if (response.transactionId) {

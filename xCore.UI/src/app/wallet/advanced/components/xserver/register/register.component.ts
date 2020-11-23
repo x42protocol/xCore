@@ -254,7 +254,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
           createColdstakingResponse => {
             const transaction = new TransactionSending(createColdstakingResponse.transactionHex);
             this.apiService
-              .sendTransaction(transaction, true)
+              .sendTransaction(transaction)
               .subscribe(
                 sendTransactionResponse => {
                   this.deligatedTransactionSent(sendTransactionResponse);
