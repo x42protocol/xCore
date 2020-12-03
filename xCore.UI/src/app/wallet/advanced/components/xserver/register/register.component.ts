@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Router } from '@angular/router';
 import { ApiService } from '../../../../../shared/services/api.service';
 import { ApiEvents } from '../../../../../shared/services/api.events';
 import { GlobalService } from '../../../../../shared/services/global.service';
@@ -32,6 +33,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
     public config: DynamicDialogConfig,
     private log: Logger,
     private apiEvents: ApiEvents,
+    private router: Router,
   ) {
     this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
   }
@@ -277,6 +279,9 @@ export class RegisterComponent implements OnInit, OnDestroy {
   }
 
   public Close() {
+    if (this.currentStep == 3) {
+      this.router.navigate(['/wallet/advanced/about']);
+    }
     this.activeModal.close('Close click');
   }
 
