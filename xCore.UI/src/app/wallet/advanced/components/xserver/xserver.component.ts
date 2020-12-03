@@ -58,7 +58,9 @@ export class XServerComponent implements OnInit, OnDestroy {
   public allAddresses: SelectItem[];
   public isUnlocking: boolean;
   public unlockError: string;
-
+  public xServerCheck = 0;
+  public amountInFeeAddress = 0;
+  public feeAddressChecked: boolean;
   public keyAddress: string;
   public feeAddress: string;
   public profileName = '';
@@ -67,6 +69,7 @@ export class XServerComponent implements OnInit, OnDestroy {
   public serverId: string;
   public selectedTier: string;
   public walletPassword: string;
+  public xServerInfo: any;
 
   public mainAccount = 'account 0';
   public coldStakingAccount = 'coldStakingColdAddresses';
@@ -118,8 +121,35 @@ export class XServerComponent implements OnInit, OnDestroy {
     const profile = this.globalService.getProfile();
     if (profile != null && profile.status === 2) {
       this.profileName = profile.name;
+      this.xServerCheck = 1;
+      this.checkForXServer();
     }
   }
+
+  private checkForXServer() {
+    this.apiService.searchForXServerByProfile(this.profileName)
+      .subscribe(
+        response => {
+          this.xServerInfo = response;
+          console.log(this.xServerInfo);
+          if (this.xServerInfo.id > 0) {
+            this.xServerCheck = 3;
+            this.apiService.receivedByAddress(this.xServerInfo.feeAddress).subscribe(
+              receivedByAddressResult => {
+                this.feeAddressChecked = true;
+                this.amountInFeeAddress = receivedByAddressResult.spendableAmount;
+              },
+              error => {
+                this.feeAddressChecked = true;
+              }
+            );
+          } else {
+            this.xServerCheck = 2;
+          }
+        }
+      );
+  }
+
 
   private startSubscriptions() {
     const walletRequestInfo = {

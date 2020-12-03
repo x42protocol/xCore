@@ -217,6 +217,17 @@ export class ApiService {
   }
 
   /**
+   * Search for xServer by Profile Name
+   */
+  searchForXServerByProfile(profileName: string): Observable<any> {
+    const params = new HttpParams().set('profileName', profileName);
+    return this.http
+      .get(this.apiUrl + '/xServer/searchforxserver', { params })
+      .pipe(catchError(this.handleInitialError.bind(this)))
+      .pipe(map((response: Response) => response));
+  }
+
+  /**
    * Get addresss from address book.
    */
   getAddressBookAddresses(): Observable<any> {
@@ -304,7 +315,7 @@ export class ApiService {
       .set('wordCount', '12');
 
     return this.http
-      .get(this.apiUrl + '/wallet/mnemonic')
+      .get(this.apiUrl + '/wallet/mnemonic', { params })
       .pipe(catchError(this.handleInitialError.bind(this)))
       .pipe(map((response: Response) => response));
   }
@@ -564,6 +575,19 @@ export class ApiService {
     return this.http
       .post(this.apiUrl + '/wallet/verifymessage', JSON.stringify(data))
       .pipe(catchError(this.handleError.bind(this)))
+      .pipe(map((response: Response) => response));
+  }
+
+  /**
+   *  Gets the balance at a specific wallet address
+   */
+  receivedByAddress(address: string): Observable<any> {
+    const params = new HttpParams()
+      .set('Address', address);
+
+    return this.http
+      .get(this.apiUrl + '/wallet/received-by-address', { params })
+      .pipe(catchError(this.handleInitialError.bind(this)))
       .pipe(map((response: Response) => response));
   }
 
