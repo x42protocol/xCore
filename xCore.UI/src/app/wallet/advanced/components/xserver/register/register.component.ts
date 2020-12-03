@@ -279,7 +279,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
   }
 
   public Close() {
-    if (this.currentStep == 3) {
+    if (this.currentStep === 3) {
       this.router.navigate(['/wallet/advanced/about']);
     }
     this.activeModal.close('Close click');
