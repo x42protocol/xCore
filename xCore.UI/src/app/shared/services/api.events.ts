@@ -164,10 +164,6 @@ export class ApiEvents {
         .subscribe(
           response => {
             this.nodeStatusSubject.next(response);
-          },
-          error => {
-            this.nodeStatusSubject.error(error);
-            this.apiService.handleException(error);
           }
         );
     }
@@ -184,10 +180,6 @@ export class ApiEvents {
         .subscribe(
           response => {
             this.generalStatusSubject.next(response);
-          },
-          error => {
-            this.generalStatusSubject.error(error);
-            this.apiService.handleException(error);
           }
         );
     }
@@ -203,9 +195,6 @@ export class ApiEvents {
         ).subscribe(
           response => {
             this.stakingStatusSubject.next(response);
-          }, error => {
-            this.stakingStatusSubject.error(error);
-            this.apiService.handleException(error);
           }
         );
     }
@@ -221,9 +210,6 @@ export class ApiEvents {
         ).subscribe(
           response => {
             this.xServerStatusSubject.next(response);
-          }, error => {
-            this.xServerStatusSubject.error(error);
-            this.apiService.handleException(error);
           }
         );
     }
@@ -240,9 +226,6 @@ export class ApiEvents {
         ).subscribe(
           response => {
             this.accountBalanceSubject.next(response);
-          }, error => {
-            this.accountBalanceSubject.error(error);
-            this.apiService.handleException(error);
           }
         );
     }
@@ -262,9 +245,6 @@ export class ApiEvents {
         ).subscribe(
           response => {
             this.accountMaxBalanceSubject.next(response);
-          }, error => {
-            this.accountMaxBalanceSubject.error(error);
-            this.apiService.handleException(error);
           }
         );
     }
@@ -282,9 +262,6 @@ export class ApiEvents {
         ).subscribe(
           response => {
             this.hotBalanceSubject.next(response);
-          }, error => {
-            this.hotBalanceSubject.error(error);
-            this.apiService.handleException(error);
           }
         );
     }
@@ -302,9 +279,6 @@ export class ApiEvents {
         ).subscribe(
           response => {
             this.coldBalanceSubject.next(response);
-          }, error => {
-            this.coldBalanceSubject.error(error);
-            this.apiService.handleException(error);
           }
         );
     }
@@ -321,9 +295,6 @@ export class ApiEvents {
         ).subscribe(
           response => {
             this.historySubject.next(response);
-          }, error => {
-            this.historySubject.error(error);
-            this.apiService.handleException(error);
           }
         );
     }
@@ -341,9 +312,6 @@ export class ApiEvents {
         ).subscribe(
           response => {
             this.hotHistorySubject.next(response);
-          }, error => {
-            this.hotHistorySubject.error(error);
-            this.apiService.handleException(error);
           }
         );
     }
@@ -361,9 +329,6 @@ export class ApiEvents {
         ).subscribe(
           response => {
             this.coldHistorySubject.next(response);
-          }, error => {
-            this.coldHistorySubject.error(error);
-            this.apiService.handleException(error);
           }
         );
     }
@@ -379,9 +344,6 @@ export class ApiEvents {
         .subscribe(
           response => {
             this.txConfirmationSubject.next(response);
-          }, error => {
-            this.txConfirmationSubject.error(error);
-            this.apiService.handleException(error);
           }
         );
     } else {
@@ -399,9 +361,6 @@ export class ApiEvents {
         .subscribe(
           response => {
             this.addressBookSubject.next(response);
-          }, error => {
-            this.addressBookSubject.error(error);
-            this.apiService.handleException(error);
           }
         );
     }

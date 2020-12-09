@@ -1,8 +1,8 @@
 <app-main-menu [isUnLocked]="false"></app-main-menu>
-<div>
+<div class="mt-5">
 	<form class="col-6 mx-auto d-flex align-content-center flex-wrap">
-		<div class="col-12 text-center">
-			<h3 class="display-4 mb-4">x42<br /><i class="pi pi-lock" style="font-size: 3em"></i></h3>
+		<div class="mt-3 col-12 text-center mt-5">
+			<img class="LoadingWhite" src="./assets/images/xcore-anim.svg" style="width: 350px" />
 		</div>
 		<form *ngIf="hasWallet" class="form-group col-12" [formGroup]="openWalletForm">
 			<div class="form-group mt-3">

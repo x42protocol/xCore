@@ -1,9 +1,0 @@
-# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
-version: v1.13.5
-# ignores vulnerabilities until expiry date; change duration by modifying expiry date
-ignore:
-  SNYK-JS-PUPA-174563:
-    - electron-context-menu > electron-dl > pupa:
-        reason: 'No other option for remediation, will upgrade when available.'
-        expires: '2020-02-21T17:46:17.086Z'
-patch: {}

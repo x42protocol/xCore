@@ -11,7 +11,11 @@ import { DialogService } from 'primeng/dynamicdialog';
   styleUrls: ['./menu.component.css'],
 })
 export class MenuComponent {
-  constructor(private globalService: GlobalService, private router: Router, public dialogService: DialogService) {
+  constructor(
+    private globalService: GlobalService,
+    private router: Router,
+    public dialogService: DialogService,
+  ) {
     this.walletName = this.globalService.getWalletName();
   }
 
