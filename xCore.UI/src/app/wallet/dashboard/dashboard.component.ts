@@ -61,7 +61,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public spendableHotBalance: number;
   public hotStakingAccount = 'coldStakingHotAddresses';
   public stakingForm: FormGroup;
-  public apps: any[];
   public profileStatus = 0;
   public profileAddress: string;
   public profile: any;
@@ -75,11 +74,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.walletName = this.globalService.getWalletName();
     this.coinUnit = this.globalService.getCoinUnit();
     this.getProfileOnConnection();
-
-    this.apps = [
-      { name: 'Search For Apps', image: 'https://cdn1.iconfinder.com/data/icons/hawcons/32/698628-icon-112-search-plus-512.png' }
-    ];
-
     this.checkWalletHotColdState();
     this.startMethods();
   }

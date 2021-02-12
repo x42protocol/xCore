@@ -1,22 +1,5 @@
 <section style="display: flex;">
-  <div class="col-2">
-    <p-carousel [value]="apps" orientation="vertical" [style]="{'max-width':'200px', 'margin-top':'1em'}" [numVisible]="1" [numScroll]="1">
-      <p-header>Apps</p-header>
-      <ng-template let-apps pTemplate="item">
-        <div class="apps-details">
-          <div class="p-grid p-nogutter">
-            <div class="p-col-12">
-              <img src="{{apps.image}}" style="width: 64px;" />
-            </div>
-            <div class="p-col-12 apps-data">
-              <div class="apps-title">{{apps.name}}</div>
-            </div>
-          </div>
-        </div>
-      </ng-template>
-    </p-carousel>
-  </div>
-  <div class="col-10">
+  <div class="col-12">
     <p-toolbar>
       <div class="ui-toolbar-group-left">
         <span class="ui-message ui-widget ui-corner-all ui-message-info ng-star-inserted">
