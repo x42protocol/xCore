@@ -427,7 +427,7 @@ function startDaemon(chain: Chain) {
   let daemonName;
 
   if (chain.name === 'x42') {
-    daemonName = 'x42.Node';
+    daemonName = 'Blockcore.Node';
   }
 
   // If path is not specified and Win32, we'll append .exe
@@ -466,6 +466,8 @@ function launchDaemon(apiPath: string, chain: Chain) {
 
   const commandLineArguments = [];
 
+  commandLineArguments.push('--chain=X42');
+
   if (chain.mode === 'local') {
     if (!apiPath || apiPath.length < 3 || !chain.datafolder || chain.datafolder.length < 3) {
       contents.send('daemon-error', `CRITICAL: Cannot launch daemon, missing either daemon path or data folder path.`);
@@ -477,14 +479,17 @@ function launchDaemon(apiPath: string, chain: Chain) {
     commandLineArguments.push(apiPath);
   }
 
-  if (chain.datafolder) {
-    commandLineArguments.push('-datadir=' + chain.datafolder);
-  }
-
   commandLineArguments.push('-port=' + chain.port);
   commandLineArguments.push('-rpcport=' + chain.rpcPort);
   commandLineArguments.push('-apiport=' + chain.apiPort);
   commandLineArguments.push('-wsport=' + chain.wsPort);
+
+  if (chain.datafolder) {
+    commandLineArguments.push('-datadir=' + chain.datafolder);
+  } else {
+    const enviromentPath = path.join(process.env.APPDATA, 'x42') || (process.platform == 'darwin' ? process.env.HOME + '/Library/.x42' : process.env.HOME + "/.x42")
+    commandLineArguments.push('-datadir=' + enviromentPath);
+  }
 
   if (chain.mode === 'light') {
     commandLineArguments.push('-light');
