@@ -390,10 +390,6 @@ function launchDaemon(apiPath, chain) {
     if (chain.datafolder) {
         commandLineArguments.push('-datadir=' + chain.datafolder);
     }
-    else {
-        var enviromentPath = path.join(process.env.APPDATA, 'x42') || (process.platform == 'darwin' ? process.env.HOME + '/Library/.x42' : process.env.HOME + "/.x42");
-        commandLineArguments.push('-datadir=' + enviromentPath);
-    }
     if (chain.mode === 'light') {
         commandLineArguments.push('-light');
     }
