@@ -90,8 +90,8 @@ export class ColdStakingService {
    */
   getProfileAddress(walletName: string, walletPassword: string): Observable<any> {
     const params = new HttpParams()
-      .set('walletName', walletName)
-      .set('walletPassword', walletPassword)
+      .set('walletName', encodeURIComponent(walletName))
+      .set('walletPassword', encodeURIComponent(walletPassword))
       .set('isColdWalletAccount', 'true')
       .set('segwit', 'false');
     console.log(params);
