@@ -33,6 +33,7 @@ export class TitleService {
   private readonly title = new BehaviorSubject<string>(this.document.title);
 
   initialize() {
+    /*
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd),
       map(() => this.router.routerState.root),
@@ -65,5 +66,6 @@ export class TitleService {
 
       this.title.next(formattedTitle);
     });
+    */
   }
 }
