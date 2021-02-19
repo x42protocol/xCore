@@ -122,6 +122,7 @@ export class GlobalService {
         break;
       case 'EUR':
         result = '€';
+        break;
       case 'GBP':
         result = '£';
         break;
