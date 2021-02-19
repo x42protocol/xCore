@@ -120,6 +120,8 @@ export class GlobalService {
       case 'DKK':
         result = 'kr';
         break;
+      case 'EUR':
+        result = '€';
       case 'GBP':
         result = '£';
         break;
