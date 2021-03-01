@@ -13,6 +13,7 @@ import { SubmitPaymentRequest } from '../../../shared/models/xserver-submit-paym
 import { SignMessageRequest } from '../../../shared/models/wallet-signmessagerequest';
 import { ProfileReserveRequest } from '../../../shared/models/xserver-profile-reserve-request';
 import { Subscription } from 'rxjs';
+import { AddressType } from '../../../shared/models/address-type';
 
 interface TxDetails {
   transactionFee?: number;
@@ -37,6 +38,7 @@ export class CreateProfileComponent implements OnInit, OnDestroy {
     public config: DynamicDialogConfig,
     public themeService: ThemeService,
     private apiEvents: ApiEvents,
+    private addressType: AddressType,
   ) {
     this.buildPaymentForm();
     this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
@@ -413,7 +415,8 @@ export class CreateProfileComponent implements OnInit, OnDestroy {
       this.paymentAmount.toString(),
       this.estimatedFee / 100000000,
       true,
-      false
+      false,
+      this.addressType.IsSegwit()
     );
 
     this.transaction.AddRecipient(this.payFeeToAddress, this.paymentFee.toString());

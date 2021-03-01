@@ -16,6 +16,7 @@ import { PriceLockUtil } from '../../shared/models/pricelockutil';
 import { SubmitPaymentRequest } from '../../shared/models/xserver-submit-payment-request';
 import { SignMessageRequest } from '../../shared/models/wallet-signmessagerequest';
 import { Subscription } from 'rxjs';
+import { AddressType } from '../../shared/models/address-type';
 
 interface TxDetails {
   transactionFee?: number;
@@ -41,6 +42,7 @@ export class SendComponent implements OnInit, OnDestroy {
     public config: DynamicDialogConfig,
     public themeService: ThemeService,
     private apiEvents: ApiEvents,
+    private addressType: AddressType,
   ) {
     this.buildSendForm();
     this.buildPaymentForm();
@@ -425,7 +427,8 @@ export class SendComponent implements OnInit, OnDestroy {
       this.paymentAmount.toString(),
       this.estimatedFee / 100000000,
       true,
-      false
+      false,
+      this.addressType.IsSegwit()
     );
 
     this.transaction.AddRecipient(this.payFeeToAddress, this.paymentFee.toString());
@@ -522,11 +525,10 @@ export class SendComponent implements OnInit, OnDestroy {
       this.sendForm.get('password').value,
       this.sendForm.get('address').value.trim(),
       this.sendForm.get('amount').value,
-      // this.sendForm.get("fee").value,
-      // TO DO: use coin notation
       this.estimatedFee / 100000000,
       true,
-      false
+      false,
+      this.addressType.IsSegwit()
     );
 
     this.apiService
