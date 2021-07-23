@@ -15,11 +15,12 @@ import { TransactionDetailsComponent } from '../transaction-details/transaction-
 import { CreateProfileComponent } from '../profile/create/create-profile.component';
 import { Subscription } from 'rxjs';
 import { WorkerType } from '../../shared/models/worker';
+import { ExchangeDetailsComponent } from '../exchange-details/exchange-details.component';
 
 @Component({
   selector: 'app-dashboard-component',
   templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.css']
+  styleUrls: ['./dashboard.component.css'],
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   constructor(
@@ -30,7 +31,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     public themeService: ThemeService,
     private log: Logger,
-    private apiEvents: ApiEvents,
+    private apiEvents: ApiEvents
   ) {
     this.buildStakingForm();
     this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
@@ -64,6 +65,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public profileStatus = 0;
   public profileAddress: string;
   public profile: any;
+  public usdPrice: number;
+  public usdBalanceLoaded: boolean;
+  public btcPrice: number;
+  public btcBalanceLoaded: boolean;
 
   private isColdWalletHot = false;
   private accountBalanceSubscription: Subscription;
@@ -76,30 +81,43 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.getProfileOnConnection();
     this.checkWalletHotColdState();
     this.startMethods();
+    this.apiService.getUsdPrice().subscribe((res) => {
+      this.usdPrice = res[Object.keys(res)[0]].usd;
+      this.usdBalanceLoaded = true;
+    });
+    this.apiService.getBTCPrice().subscribe((res) => {
+      this.btcPrice = res[Object.keys(res)[0]].btc;
+      this.btcBalanceLoaded = true;
+    });
   }
 
   startMethods() {
-
-    this.stakingInfoSubscription = this.apiEvents.StakingInfo.subscribe((result) => {
-      if (result !== null) {
-        this.updateStakingInfoDetails(result);
+    this.stakingInfoSubscription = this.apiEvents.StakingInfo.subscribe(
+      (result) => {
+        if (result !== null) {
+          this.updateStakingInfoDetails(result);
+        }
       }
-    });
+    );
     this.apiEvents.ManualTick(WorkerType.STAKING_INFO);
 
-    this.accountBalanceSubscription = this.apiEvents.AccountBalance.subscribe((result) => {
-      if (result !== null) {
-        this.updateAccountBalanceDetails(result);
+    this.accountBalanceSubscription = this.apiEvents.AccountBalance.subscribe(
+      (result) => {
+        if (result !== null) {
+          this.updateAccountBalanceDetails(result);
+        }
       }
-    });
+    );
     this.apiEvents.ManualTick(WorkerType.ACCOUNT_BALANCE);
 
     if (this.isColdWalletHot) {
-      this.hotBalanceSubscription = this.apiEvents.HotBalance.subscribe((result) => {
-        if (result !== null) {
-          this.updateHotBalanceDetails(result);
+      this.hotBalanceSubscription = this.apiEvents.HotBalance.subscribe(
+        (result) => {
+          if (result !== null) {
+            this.updateHotBalanceDetails(result);
+          }
         }
-      });
+      );
       this.apiEvents.ManualTick(WorkerType.HOT_BALANCE);
     }
 
@@ -124,18 +142,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private buildStakingForm(): void {
     this.stakingForm = this.fb.group({
-      walletPassword: ['', Validators.required]
+      walletPassword: ['', Validators.required],
     });
   }
 
   private checkWalletHotColdState() {
     this.apiService
       .getColdHotState(this.globalService.getWalletName())
-      .subscribe(
-        isHot => {
-          this.isColdWalletHot = isHot;
-        }
-      );
+      .subscribe((isHot) => {
+        this.isColdWalletHot = isHot;
+      });
   }
 
   public goToHistory() {
@@ -145,14 +161,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public openSendDialog() {
     this.dialogService.open(SendComponent, {
       header: 'Send',
-      width: '700px'
+      width: '700px',
     });
   }
 
   public openReceiveDialog() {
     this.dialogService.open(ReceiveComponent, {
       header: 'Receive',
-      width: '540px'
+      width: '540px',
     });
   }
 
@@ -166,7 +182,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.dialogService.open(CreateProfileComponent, {
       header: 'Create Profile',
       width: '540px',
-      data: modalData
+      data: modalData,
     });
   }
 
@@ -175,7 +191,26 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     this.dialogService.open(TransactionDetailsComponent, {
       header: 'Transaction Details',
-      data: modalData
+      data: modalData,
+    });
+  }
+
+  public openExchangeDetailDialog(transaction: any) {
+    const modalData = { transaction };
+    this.apiService.getExchangeRates().subscribe((res) => {
+      const exchangeRates = [];
+      for (const [key, value] of Object.entries(res[Object.keys(res)[0]])) {
+        if (value.toString().includes('e')) {
+          exchangeRates.push({ symbol: key, rate: Number.parseFloat(value.toString()).toFixed(12)});
+        } else {
+          exchangeRates.push({ symbol: key, rate: Number.parseFloat(value.toString()).toFixed(2)});
+        }
+      }
+      this.dialogService.open(ExchangeDetailsComponent, {
+        header: 'Exchange Details',
+        data: {rates : exchangeRates, balance: this.confirmedBalance},
+        width: '540px',
+      });
     });
   }
 
@@ -184,7 +219,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const interval = setInterval(() => {
       const xServerStatus = this.globalService.getxServerStatus();
       if (xServerStatus.nodes.length > 0) {
-        const tierTwo = xServerStatus.nodes.find(n => n.tier === 2);
+        const tierTwo = xServerStatus.nodes.find((n) => n.tier === 2);
         if (tierTwo) {
           const cachedProfile = this.globalService.getProfile();
           if (cachedProfile != null) {
@@ -205,34 +240,35 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private setProfileInfo() {
-    this.apiService.getProfile('', this.globalService.getWalletKeyAddress())
-      .subscribe(
-        response => {
-          if (response.success) {
-            this.profileStatus = response.status;
-            this.globalService.setProfile(response);
-            this.profile = response;
-          } else {
-            this.profileStatus = -1;
-            const profile = { status: this.profileStatus };
-            this.globalService.setProfile(profile);
-          }
+    this.apiService
+      .getProfile('', this.globalService.getWalletKeyAddress())
+      .subscribe((response) => {
+        if (response.success) {
+          this.profileStatus = response.status;
+          this.globalService.setProfile(response);
+          this.profile = response;
+        } else {
+          this.profileStatus = -1;
+          const profile = { status: this.profileStatus };
+          this.globalService.setProfile(profile);
         }
-      );
+      });
   }
 
   private updateAccountBalanceDetails(balanceResponse) {
     let balanceChanged = false;
     if (this.confirmedBalance !== balanceResponse.balances[0].amountConfirmed) {
       balanceChanged = true;
-    } else if (this.unconfirmedBalance !== balanceResponse.balances[0].amountUnconfirmed) {
+    } else if (
+      this.unconfirmedBalance !== balanceResponse.balances[0].amountUnconfirmed
+    ) {
       balanceChanged = true;
     }
     // TODO - add account feature instead of using first entry in array
     this.confirmedBalance = balanceResponse.balances[0].amountConfirmed;
     this.unconfirmedBalance = balanceResponse.balances[0].amountUnconfirmed;
     this.spendableBalance = balanceResponse.balances[0].spendableAmount;
-    if ((this.confirmedBalance + this.unconfirmedBalance) > 0) {
+    if (this.confirmedBalance + this.unconfirmedBalance > 0) {
       this.hasBalance = true;
     } else {
       this.hasBalance = false;
@@ -245,32 +281,38 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private updateHotBalanceDetails(hotBalanceResponse) {
-    if (hotBalanceResponse.balances[0].amountConfirmed > 0 || hotBalanceResponse.balances[0].amountUnconfirmed > 0) {
+    if (
+      hotBalanceResponse.balances[0].amountConfirmed > 0 ||
+      hotBalanceResponse.balances[0].amountUnconfirmed > 0
+    ) {
       this.hasHotBalance = true;
     }
     this.confirmedHotBalance = hotBalanceResponse.balances[0].amountConfirmed;
-    this.unconfirmedHotBalance = hotBalanceResponse.balances[0].amountUnconfirmed;
+    this.unconfirmedHotBalance =
+      hotBalanceResponse.balances[0].amountUnconfirmed;
     this.spendableHotBalance = hotBalanceResponse.balances[0].spendableAmount;
   }
 
   private updateWalletHistory() {
     const walletInfo = new WalletInfo(this.globalService.getWalletName());
     let historyResponse;
-    this.apiService.getWalletHistory(walletInfo, 0, 10)
-      .subscribe(
-        response => {
-          // TODO - add account feature instead of using first entry in array
-          if (!!response.history && response.history[0].transactionsHistory.length > 0) {
-            historyResponse = response.history[0].transactionsHistory;
-            this.getTransactionInfo(historyResponse);
-          } else {
-            this.hasTX = false;
-          }
-        },
-        error => {
-          this.apiService.handleException(error);
+    this.apiService.getWalletHistory(walletInfo, 0, 10).subscribe(
+      (response) => {
+        // TODO - add account feature instead of using first entry in array
+        if (
+          !!response.history &&
+          response.history[0].transactionsHistory.length > 0
+        ) {
+          historyResponse = response.history[0].transactionsHistory;
+          this.getTransactionInfo(historyResponse);
+        } else {
+          this.hasTX = false;
         }
-      );
+      },
+      (error) => {
+        this.apiService.handleException(error);
+      }
+    );
   }
 
   private getTransactionInfo(transactions: any) {
@@ -296,10 +338,22 @@ export class DashboardComponent implements OnInit, OnDestroy {
       const transactionConfirmedInBlock = transaction.confirmedInBlock;
       const transactionTimestamp = transaction.timestamp;
 
-      this.latestTransactions.push(new TransactionInfo(transactionType, transactionId, transactionAmount, transactionFee, transactionConfirmedInBlock, transactionTimestamp));
+      this.latestTransactions.push(
+        new TransactionInfo(
+          transactionType,
+          transactionId,
+          transactionAmount,
+          transactionFee,
+          transactionConfirmedInBlock,
+          transactionTimestamp
+        )
+      );
     }
 
-    if (this.latestTransactions !== undefined && this.latestTransactions.length > 0) {
+    if (
+      this.latestTransactions !== undefined &&
+      this.latestTransactions.length > 0
+    ) {
       this.hasTX = true;
       if (this.stakingEnabled) {
         this.makeLatestTxListSmall();
@@ -310,7 +364,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private makeLatestTxListSmall() {
-    if (this.latestTransactions !== undefined && this.latestTransactions.length > 0) {
+    if (
+      this.latestTransactions !== undefined &&
+      this.latestTransactions.length > 0
+    ) {
       this.latestTransactions = this.latestTransactions.slice(0, 5);
     }
   }
@@ -320,32 +377,28 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.isStopping = false;
     const walletData = {
       name: this.globalService.getWalletName(),
-      password: this.stakingForm.get('walletPassword').value
+      password: this.stakingForm.get('walletPassword').value,
     };
-    this.apiService.startStaking(walletData)
-      .subscribe(
-        response => {
-          this.makeLatestTxListSmall();
-          this.stakingEnabled = true;
-          this.stakingForm.patchValue({ walletPassword: '' });
-        },
-        error => {
-          this.isStarting = false;
-          this.stakingEnabled = false;
-          this.stakingForm.patchValue({ walletPassword: '' });
-        }
-      );
+    this.apiService.startStaking(walletData).subscribe(
+      (response) => {
+        this.makeLatestTxListSmall();
+        this.stakingEnabled = true;
+        this.stakingForm.patchValue({ walletPassword: '' });
+      },
+      (error) => {
+        this.isStarting = false;
+        this.stakingEnabled = false;
+        this.stakingForm.patchValue({ walletPassword: '' });
+      }
+    );
   }
 
   public stopStaking() {
     this.isStopping = true;
     this.isStarting = false;
-    this.apiService.stopStaking()
-      .subscribe(
-        response => {
-          this.stakingEnabled = false;
-        }
-      );
+    this.apiService.stopStaking().subscribe((response) => {
+      this.stakingEnabled = false;
+    });
   }
 
   private updateStakingInfoDetails(stakingResponse) {
@@ -353,7 +406,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.stakingActive = stakingResponse.staking;
     this.stakingWeight = stakingResponse.weight;
     this.netStakingWeight = stakingResponse.netStakeWeight;
-    this.awaitingMaturity = (this.unconfirmedBalance + this.confirmedBalance) - this.spendableBalance;
+    this.awaitingMaturity =
+      this.unconfirmedBalance + this.confirmedBalance - this.spendableBalance;
     this.expectedTime = stakingResponse.expectedTime;
     this.dateTime = this.secondsToString(this.expectedTime);
     if (this.stakingActive) {
@@ -401,5 +455,4 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     return dateString;
   }
-
 }

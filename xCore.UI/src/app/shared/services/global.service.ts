@@ -176,10 +176,9 @@ export class GlobalService {
         break;
       case 'USD':
         result = '$';
-        break;     
-       case 'BTC':
-          result = '฿';
-        
+        break;
+      case 'BTC':
+        result = '฿';
         break;
       default:
         result = symbol;

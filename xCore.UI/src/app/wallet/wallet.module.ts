@@ -66,6 +66,7 @@ import { RatingModule } from 'primeng/rating';
 import { SliderModule } from 'primeng/slider';
 
 import { NgCircleProgressModule } from 'ng-circle-progress';
+import { ExchangeDetailsComponent } from './exchange-details/exchange-details.component';
 
 @NgModule({
   imports: [
@@ -129,7 +130,8 @@ import { NgCircleProgressModule } from 'ng-circle-progress';
     ColdStakingCreateAddressComponent,
     ColdStakingWithdrawComponent,
     ColdStakingCreateHotComponent,
-    CreateProfileComponent
+    CreateProfileComponent,
+    ExchangeDetailsComponent,
   ],
   providers: [
     MessageService,
@@ -149,7 +151,8 @@ import { NgCircleProgressModule } from 'ng-circle-progress';
     ColdStakingCreateHotComponent,
     RegisterComponent,
     CreateProfileComponent,
-    AddNewAddressComponent
+    AddNewAddressComponent,
+    ExchangeDetailsComponent
   ]
 })
 
