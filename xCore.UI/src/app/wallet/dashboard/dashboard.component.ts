@@ -195,8 +195,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
   }
 
-  public openExchangeDetailDialog(transaction: any) {
-    const modalData = { transaction };
+  public openExchangeDetailDialog() {
     this.apiService.getExchangeRates().subscribe((res) => {
       const exchangeRates = [];
       for (const [key, value] of Object.entries(res[Object.keys(res)[0]])) {
