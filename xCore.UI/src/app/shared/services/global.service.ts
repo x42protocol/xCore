@@ -174,8 +174,14 @@ export class GlobalService {
       case 'ZAR':
         result = 'R';
         break;
-      default:
+      case 'USD':
         result = '$';
+        break;
+      case 'BTC':
+        result = '฿';
+        break;
+      default:
+        result = symbol;
     }
     return result;
   }

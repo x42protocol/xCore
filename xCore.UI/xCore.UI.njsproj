@@ -105,6 +105,8 @@
     <Content Include="src\app\wallet\advanced\components\resync\resync.component.html" />
     <Content Include="src\app\wallet\dashboard\dashboard.component.css" />
     <Content Include="src\app\wallet\dashboard\dashboard.component.html" />
+    <Content Include="src\app\wallet\exchange-details\exchange-details.component.css" />
+    <Content Include="src\app\wallet\exchange-details\exchange-details.component.html" />
     <Content Include="src\app\wallet\history\history.component.css" />
     <Content Include="src\app\wallet\history\history.component.html" />
     <Content Include="src\app\wallet\logout-confirmation\logout-confirmation.component.css" />
@@ -547,6 +549,7 @@
     <TypeScriptCompile Include="src\app\wallet\advanced\components\generate-addresses\generate-addresses.component.ts" />
     <TypeScriptCompile Include="src\app\wallet\advanced\components\resync\resync.component.ts" />
     <TypeScriptCompile Include="src\app\wallet\dashboard\dashboard.component.ts" />
+    <TypeScriptCompile Include="src\app\wallet\exchange-details\exchange-details.component.ts" />
     <TypeScriptCompile Include="src\app\wallet\history\history.component.ts" />
     <TypeScriptCompile Include="src\app\wallet\logout-confirmation\logout-confirmation.component.ts" />
     <TypeScriptCompile Include="src\app\wallet\menu\menu.component.ts" />
@@ -617,6 +620,7 @@
     <Folder Include="src\app\wallet\advanced\components\generate-addresses\" />
     <Folder Include="src\app\wallet\advanced\components\resync\" />
     <Folder Include="src\app\wallet\dashboard\" />
+    <Folder Include="src\app\wallet\exchange-details\" />
     <Folder Include="src\app\wallet\history\" />
     <Folder Include="src\app\wallet\logout-confirmation\" />
     <Folder Include="src\app\wallet\menu\" />

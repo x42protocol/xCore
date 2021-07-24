@@ -60,6 +60,7 @@ export class ApiService {
   private daemon;
 
   public apiUrl: string;
+  public coinGeckoApiUrl: string;
   public genesisDate: Date;
   public apiPort: number;
 
@@ -108,6 +109,7 @@ export class ApiService {
   setApiPort(port: number) {
     this.apiPort = port;
     this.apiUrl = 'http://localhost:' + port + '/api';
+    this.coinGeckoApiUrl = 'https://api.coingecko.com/api/v3/simple';
   }
 
   /**
@@ -649,6 +651,51 @@ export class ApiService {
     return this.http
       .post(this.apiUrl + '/wallet/splitcoins', splitCoins)
       .pipe(catchError(err => this.handleError(err)))
+      .pipe(map((response: Response) => response));
+  }
+
+  /*
+  *  Get CoinGeckoUSDPrice API once.
+  */
+  getUsdPrice(): Observable<any> {
+
+    const params = new HttpParams()
+      .set('ids', 'x42-protocol')
+      .set('vs_currencies', 'USD');
+
+    return this.http
+      .get(this.coinGeckoApiUrl + '/price', { params })
+      .pipe(catchError(err => this.handleInitialError(err)))
+      .pipe(map((response: Response) => response));
+  }
+
+  /*
+  *  Get CoinGeckoUSDPrice API once.
+  */
+  getBTCPrice(): Observable<any> {
+
+    const params = new HttpParams()
+      .set('ids', 'x42-protocol')
+      .set('vs_currencies', 'BTC');
+
+    return this.http
+      .get(this.coinGeckoApiUrl + '/price', { params })
+      .pipe(catchError(err => this.handleInitialError(err)))
+      .pipe(map((response: Response) => response));
+  }
+
+  /*
+  *  Get CoinGeckoAllPrices API once.
+  */
+  getExchangeRates(): Observable<any> {
+
+    const params = new HttpParams()
+      .set('ids', 'x42-protocol')
+      .set('vs_currencies', 'AED,BDT,BRL,CHF,CZK,DKK,EUR,GBP,HKD,HUF,ILS,INR,LKR,MYR,NOK,PHP,PKR,PLN,SEK,THB,TRY,UAH,VND,ZAR,USD,BTC');
+
+    return this.http
+      .get(this.coinGeckoApiUrl + '/price', { params })
+      .pipe(catchError(err => this.handleInitialError(err)))
       .pipe(map((response: Response) => response));
   }
 

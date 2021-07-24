@@ -1,0 +1,40 @@
+<!-- CONTENT -->
+<section class="col-12">
+    <div class="row" *ngIf="exchangeData">
+        <!-- Exchange Data -->
+        <p-table [responsive]="true" [value]="exchangeData" [style]="{'margin-top':'20px'}"
+            *ngIf="exchangeData.length>0" [paginator]="true" [rows]="10">
+            <ng-template pTemplate="caption">
+                Exchange Rates
+            </ng-template>
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>Currency</th>
+                    <th>Rate</th>
+                    <th>Value</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-exchangeData>
+                <tr>
+                    <td class="text-uppercase text-left">
+                        <span class="ui-column-title">Currency</span>
+                        {{ exchangeData.symbol }}
+                    </td>
+                    <td class="text-right">
+                        <span class="ui-column-title">Rate</span>
+                        <!-- {{ transaction.transactionTimestamp * 1000 | date:'medium' }} -->
+                        {{ exchangeData.rate }}
+
+                    </td>
+                    <td class="text-right">
+                        <span class="ui-column-title">Value</span>
+                        <!-- {{ transaction.transactionTimestamp * 1000 | date:'medium' }} -->
+                        {{ exchangeData.total }}
+
+                    </td>
+
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+</section>
