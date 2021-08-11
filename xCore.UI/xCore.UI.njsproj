@@ -56,6 +56,7 @@
     <Content Include="src\app\shared\components\shutdown\shutdown.component.html" />
     <Content Include="src\app\shared\components\main-menu\main-menu.component.css" />
     <Content Include="src\app\shared\components\main-menu\main-menu.component.html" />
+    <Content Include="src\app\shared\services\currencies.json" />
     <Content Include="src\app\wallet\advanced\components\xserver\register\register.component.css" />
     <Content Include="src\app\wallet\advanced\components\xserver\register\register.component.html" />
     <Content Include="src\app\wallet\advanced\components\xserver\xserver.component.css" />
@@ -486,6 +487,7 @@
     <TypeScriptCompile Include="src\app\shared\pipes\size-unit.pipe.ts" />
     <TypeScriptCompile Include="src\app\shared\pipes\sort-by.pipe.ts" />
     <TypeScriptCompile Include="src\app\shared\pipes\yesno.pipe.ts" />
+    <TypeScriptCompile Include="src\app\shared\services\api.events.ts" />
     <TypeScriptCompile Include="src\app\shared\services\application-state.service.ts" />
     <TypeScriptCompile Include="src\app\shared\services\chain.service.ts" />
     <TypeScriptCompile Include="src\app\shared\services\coldstaking.service.ts" />

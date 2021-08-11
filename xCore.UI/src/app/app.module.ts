@@ -38,6 +38,7 @@ import { SlideMenuModule } from 'primeng/slidemenu';
 import { ContextMenuModule } from 'primeng/contextmenu';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { ToolbarModule } from 'primeng/toolbar';
+
 @NgModule({
   imports: [
     BrowserModule,
@@ -68,7 +69,7 @@ import { ToolbarModule } from 'primeng/toolbar';
     ContextMenuModule,
     ProgressBarModule,
     ToolbarModule,
-    ShutdownModule,
+    ShutdownModule
   ],
   declarations: [
     AppComponent,

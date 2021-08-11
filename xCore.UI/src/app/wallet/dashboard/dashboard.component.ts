@@ -16,6 +16,8 @@ import { CreateProfileComponent } from '../profile/create/create-profile.compone
 import { Subscription } from 'rxjs';
 import { WorkerType } from '../../shared/models/worker';
 import { ExchangeDetailsComponent } from '../exchange-details/exchange-details.component';
+import { SettingsService } from '../../shared/services/settings.service';
+import { CoinNotationPipe } from '../../shared/pipes/coin-notation.pipe';
 
 @Component({
   selector: 'app-dashboard-component',
@@ -23,6 +25,12 @@ import { ExchangeDetailsComponent } from '../exchange-details/exchange-details.c
   styleUrls: ['./dashboard.component.css'],
 })
 export class DashboardComponent implements OnInit, OnDestroy {
+  exchageRates: any;
+    fiatCurrencyEntrySymbol: any;
+    preferedCryptoExchangeCoinBalance: string;
+    confirmedFiatHotBalance: string;
+    preferedExchangeCoinColdUnconfirmedBalance: string;
+    preferedCryptoExchangeCoinUnconfirmedBalance: string;
   constructor(
     private apiService: ApiService,
     private globalService: GlobalService,
@@ -31,7 +39,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     public themeService: ThemeService,
     private log: Logger,
-    private apiEvents: ApiEvents
+    private apiEvents: ApiEvents,
+    private settingsService: SettingsService
   ) {
     this.buildStakingForm();
     this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
@@ -65,30 +74,32 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public profileStatus = 0;
   public profileAddress: string;
   public profile: any;
-  public usdPrice: number;
-  public usdBalanceLoaded: boolean;
-  public btcPrice: number;
-  public btcBalanceLoaded: boolean;
+  public preferedExchangeCoinBalance: string;
+  public preferedExchangeCoinBalanceLoaded: boolean;
+  public coinGeckoLoading: boolean;
 
   private isColdWalletHot = false;
   private accountBalanceSubscription: Subscription;
   private hotBalanceSubscription: Subscription;
   private stakingInfoSubscription: Subscription;
+  private exchangeRatesSubscription: Subscription;
 
   ngOnInit() {
+    if (!this.settingsService.preferredFiatExchangeCurrency) {
+      this.settingsService.preferredFiatExchangeCurrency = 'USD';
+    }
+
+    if (!this.settingsService.preferredCryptoExchangeCurrency) {
+      this.settingsService.preferredCryptoExchangeCurrency = 'BTC';
+    }
+
     this.walletName = this.globalService.getWalletName();
     this.coinUnit = this.globalService.getCoinUnit();
     this.getProfileOnConnection();
     this.checkWalletHotColdState();
     this.startMethods();
-    this.apiService.getUsdPrice().subscribe((res) => {
-      this.usdPrice = res[Object.keys(res)[0]].usd;
-      this.usdBalanceLoaded = true;
-    });
-    this.apiService.getBTCPrice().subscribe((res) => {
-      this.btcPrice = res[Object.keys(res)[0]].btc;
-      this.btcBalanceLoaded = true;
-    });
+
+    this.apiEvents.ManualTick(WorkerType.ADDRESS_BOOK);
   }
 
   startMethods() {
@@ -121,6 +132,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.apiEvents.ManualTick(WorkerType.HOT_BALANCE);
     }
 
+    this.exchangeRatesSubscription = this.apiEvents.ExchangeRates.subscribe(
+      (result) => {
+        if (result !== null) {
+          this.updateExchangeRates(result);
+        }
+      }
+    );
+    this.apiEvents.ManualTick(WorkerType.COINGECKO_EXCHANGE_RATES);
+
     this.updateWalletHistory();
   }
 
@@ -137,6 +157,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
     if (this.hotBalanceSubscription) {
       this.hotBalanceSubscription.unsubscribe();
+    }
+    if (this.hotBalanceSubscription) {
+      this.exchangeRatesSubscription.unsubscribe();
     }
   }
 
@@ -196,20 +219,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   public openExchangeDetailDialog() {
-    this.apiService.getExchangeRates().subscribe((res) => {
-      const exchangeRates = [];
-      for (const [key, value] of Object.entries(res[Object.keys(res)[0]])) {
-        if (value.toString().includes('e')) {
-          exchangeRates.push({ symbol: key, rate: Number.parseFloat(value.toString()).toFixed(12)});
-        } else {
-          exchangeRates.push({ symbol: key, rate: Number.parseFloat(value.toString()).toFixed(2)});
-        }
+    if (!this.preferedExchangeCoinBalanceLoaded || this.coinGeckoLoading) {
+      return;
+    }
+    this.coinGeckoLoading = true;
+    const exchangeRates = [];
+    this.coinGeckoLoading = false;
+
+    for (const [key, value] of Object.entries(this.exchageRates[Object.keys(this.exchageRates)[0]])) {
+      exchangeRates.push({ symbol: key, rate: Number.parseFloat(value.toString())});
+
       }
-      this.dialogService.open(ExchangeDetailsComponent, {
-        header: 'Exchange Details',
-        data: {rates : exchangeRates, balance: this.confirmedBalance},
-        width: '540px',
-      });
+    this.dialogService.open(ExchangeDetailsComponent, {
+      header: 'Exchange Details',
+      data: { rates: exchangeRates, balance: this.confirmedBalance },
+      width: '620px',
     });
   }
 
@@ -277,6 +301,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.log.info('Balance changed', balanceResponse);
       this.updateWalletHistory();
     }
+    this.apiEvents.ManualTick(WorkerType.COINGECKO_EXCHANGE_RATES);
+
   }
 
   private updateHotBalanceDetails(hotBalanceResponse) {
@@ -415,6 +441,33 @@ export class DashboardComponent implements OnInit, OnDestroy {
     } else {
       this.isStopping = false;
     }
+  }
+
+  private updateExchangeRates(exchageRates) {
+    this.exchageRates = exchageRates;
+    const currencies = this.globalService.getCurrencies();
+
+    const fiatCurrencyEntry = currencies.find(l => l.abbreviation === this.settingsService.preferredFiatExchangeCurrency);
+    const cryptoCurrencyEntry = currencies.find(l => l.abbreviation === this.settingsService.preferredCryptoExchangeCurrency);
+
+    this.settingsService.preferedFiatCurrencyExchangeRate = exchageRates[Object.keys(exchageRates)[0]][this.settingsService.preferredFiatExchangeCurrency.toLowerCase()];
+    this.settingsService.preferedCryptoCurrencyExchangeRate = exchageRates[Object.keys(exchageRates)[0]][this.settingsService.preferredCryptoExchangeCurrency.toLowerCase()];
+
+    this.preferedExchangeCoinBalance = fiatCurrencyEntry.symbol + ' ' +
+      Number.parseFloat(this.globalService.transform(+this.settingsService.preferedFiatCurrencyExchangeRate * this.confirmedBalance).toString()).toFixed(fiatCurrencyEntry.decimals);
+
+    this.preferedCryptoExchangeCoinBalance = cryptoCurrencyEntry.symbol + ' ' +
+      Number.parseFloat(this.globalService.transform(+this.settingsService.preferedCryptoCurrencyExchangeRate * this.confirmedBalance).toString()).toFixed(cryptoCurrencyEntry.decimals);
+
+    this.preferedExchangeCoinColdUnconfirmedBalance = fiatCurrencyEntry.symbol + ' ' +
+      Number.parseFloat(this.globalService.transform(+this.settingsService.preferedFiatCurrencyExchangeRate * this.unconfirmedBalance).toString()).toFixed(fiatCurrencyEntry.decimals);
+
+    this.preferedCryptoExchangeCoinUnconfirmedBalance = cryptoCurrencyEntry.symbol + ' ' +
+      Number.parseFloat(this.globalService.transform(+this.settingsService.preferedCryptoCurrencyExchangeRate * this.unconfirmedBalance).toString()).toFixed(cryptoCurrencyEntry.decimals);
+
+
+    this.preferedExchangeCoinBalanceLoaded = true;
+
   }
 
   private secondsToString(seconds: number) {

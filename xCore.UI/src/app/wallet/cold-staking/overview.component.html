@@ -24,11 +24,11 @@
         </p-header>
         <div class="col-9 text-left" *ngIf="coldWalletAccountExists">
           <p class="lead">
-            <strong>{{ (confirmedColdBalance | coinNotation) || (0 | coinNotation) }}</strong>
-            <small class="text-uppercase"> {{ coinUnit }}</small>
+            <strong>{{ (confirmedColdBalance | coinNotation) || (0 | coinNotation) }} </strong>
+            <small class="text-uppercase"> {{ coinUnit }}</small> ≈ {{preferedExchangeCoinColdBalance}} / {{preferedCryptoExchangeCoinColdBalance}}
           </p>
           <ul class="list-unstyled">
-            <li><strong>{{ (unconfirmedColdBalance | coinNotation) || (0 | coinNotation) }}</strong><em> (unconfirmed)</em></li>
+            <li><strong>{{ (unconfirmedColdBalance | coinNotation) || (0 | coinNotation) }}</strong><em> (unconfirmed)</em> ≈ {{preferedExchangeCoinUnconfirmedColdBalance}} / {{preferedCryptoExchangeCoinUnconfirmedColdBalance}}</li>
           </ul>
         </div>
         <div class="col-12" *ngIf="!coldWalletAccountExists">

@@ -76,12 +76,36 @@ export class SettingsService {
         this.storage.setValue('Settings:Language', value);
     }
 
-    get currency(): string {
-        return this.storage.getValue('Settings:Currency');
+    get preferredFiatExchangeCurrency(): string {
+      return this.storage.getValue('Settings:PreferredFiatExchangeCurrency');
     }
 
-    set currency(value: string) {
-        this.storage.setValue('Settings:Currency', value);
+    set preferredFiatExchangeCurrency(value: string) {
+      this.storage.setValue('Settings:PreferredFiatExchangeCurrency', value);
+    }
+
+    get preferredCryptoExchangeCurrency(): string {
+      return this.storage.getValue('Settings:PreferredCryptoExchangeCurrency');
+    }
+
+    set preferredCryptoExchangeCurrency(value: string) {
+      this.storage.setValue('Settings:PreferredCryptoExchangeCurrency', value);
+    }
+
+    get preferedFiatCurrencyExchangeRate(): string {
+      return this.storage.getValue('Settings:PreferedFiatCurrencyExchangeRate');
+    }
+
+    set preferedFiatCurrencyExchangeRate(value: string) {
+      this.storage.setValue('Settings:PreferedFiatCurrencyExchangeRate', value);
+    }
+
+    get preferedCryptoCurrencyExchangeRate(): string {
+      return this.storage.getValue('Settings:PreferedCryptoCurrencyExchangeRate');
+    }
+
+    set preferedCryptoCurrencyExchangeRate(value: string) {
+      this.storage.setValue('Settings:PreferedCryptoCurrencyExchangeRate', value);
     }
 
     get showInTaskbar(): boolean {
@@ -121,4 +145,14 @@ export class SettingsService {
     set clearOnExit(value: boolean) {
         this.storage.setValue('Settings:ClearOnExit', value.toString());
     }
+
+    set setPreferedExhangeCurrency(value: string) {
+      this.storage.setValue('Settings:PreferedExhangeCurrency', value.toString());
+    }
+
+    get getPreferedExhangeCurrency(): string {
+      return this.storage.getValue('Settings:PreferedExhangeCurrency');
+    }
+
+
 }

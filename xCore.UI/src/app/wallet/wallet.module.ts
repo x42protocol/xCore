@@ -64,7 +64,7 @@ import { AccordionModule } from 'primeng/accordion';
 import { ToolbarModule } from 'primeng/toolbar';
 import { RatingModule } from 'primeng/rating';
 import { SliderModule } from 'primeng/slider';
-
+import { RadioButtonModule } from 'primeng/radiobutton';
 import { NgCircleProgressModule } from 'ng-circle-progress';
 import { ExchangeDetailsComponent } from './exchange-details/exchange-details.component';
 
@@ -101,6 +101,7 @@ import { ExchangeDetailsComponent } from './exchange-details/exchange-details.co
     ToolbarModule,
     RatingModule,
     SliderModule,
+    RadioButtonModule,
     NgCircleProgressModule.forRoot({})
   ],
   declarations: [

@@ -1,0 +1,191 @@
+[
+  {
+    "name": "درهم إماراتي",
+    "abbreviation": "AED",
+    "symbol": "د.إ",
+	"type" : "f",
+	"decimals" : 2
+  },
+  {
+    "name": "টাকা",
+    "abbreviation": "BDT",
+    "symbol": "৳",
+	"type" : "f",
+	"decimals" : 2
+  },
+  {
+    "name": "Real Brasileiro",
+    "abbreviation": "BRL",
+    "symbol": "R$",
+	"type" : "f",
+	"decimals" : 2
+  },
+  {
+    "name": "Schweizer Franken",
+    "abbreviation": "CHF",
+    "symbol": "CHF",
+	"type" : "f",
+	"decimals" : 2
+  },
+  {
+    "name": "koruna československá",
+    "abbreviation": "CZK",
+    "symbol": "Kč",
+	"type" : "f",
+	"decimals" : 2
+  },
+  {
+    "name": "Dansk Krone",
+    "abbreviation": "DKK",
+    "symbol": "kr",
+	"type" : "f",
+	"decimals" : 2
+  },
+  {
+    "name": "Euro",
+    "abbreviation": "EUR",
+    "symbol": "€",
+	"type" : "f",
+	"decimals" : 2
+  },
+  {
+    "name": "British Pound Sterling",
+    "abbreviation": "GBP",
+    "symbol": "£",
+	"type" : "f",
+	"decimals" : 2
+  },
+  {
+    "name": "港元",
+    "abbreviation": "HKD",
+    "symbol": "元",
+	"type" : "f",
+	"decimals" : 2
+  },
+  {
+    "name": "Magyar Forint",
+    "abbreviation": "HUF",
+    "symbol": "ft",
+	"type" : "f",
+	"decimals" : 2
+  },
+  {
+    "name": "שקל חדש",
+    "abbreviation": "ILS",
+    "symbol": "₪",
+	"type" : "f",
+	"decimals" : 2
+  },
+  {
+    "name": "Indian Rupee",
+    "abbreviation": "INR",
+    "symbol": "₹",
+	"type" : "f",
+	"decimals" : 2
+  },
+  {
+    "name": "ශ්‍රී ලංකා රුපියල්",
+    "abbreviation": "LKR",
+    "symbol": "Rs",
+	"type" : "f",
+	"decimals" : 2
+  },
+  {
+    "name": "Ringgit Malaysia",
+    "abbreviation": "MYR",
+    "symbol": "RM",
+	"type" : "f",
+	"decimals" : 2
+  },
+  {
+    "name": "Norsk Krone",
+    "abbreviation": "NOK",
+    "symbol": "kr",
+	"type" : "f",
+	"decimals" : 2
+  },
+  {
+    "name": "Piso ng Pilipinas",
+    "abbreviation": "PHP",
+    "symbol": "₱",
+	"type" : "f",
+	"decimals" : 2
+  },
+  {
+    "name": "روپیہ",
+    "abbreviation": "PKR",
+    "symbol": "Rs",
+	"type" : "f",
+	"decimals" : 2
+  },
+  {
+    "name": "Polski Złoty",
+    "abbreviation": "PLN",
+    "symbol": "zł",
+	"type" : "f",
+	"decimals" : 2
+  },
+  {
+    "name": "Svensk Krona",
+    "abbreviation": "SEK",
+    "symbol": "kr",
+	"type" : "f",
+	"decimals" : 2
+  },
+  {
+    "name": "บาทไทย",
+    "abbreviation": "THB",
+    "symbol": "฿",
+	"type" : "f",
+	"decimals" : 2
+  },
+  {
+    "name": "Türk Lirası",
+    "abbreviation": "TRY",
+    "symbol": "₺",
+	"type" : "f",
+	"decimals" : 2
+  },
+  {
+    "name": "українська гривня",
+    "abbreviation": "UAH",
+    "symbol": "₴",
+	"type" : "f",
+	"decimals" : 2
+  },
+  {
+    "name": "Đồng Việt Nam",
+    "abbreviation": "VND",
+    "symbol": "₫",
+	"type" : "f",
+	"decimals" : 2
+  },
+  {
+    "name": "South African Rand",
+    "abbreviation": "ZAR",
+    "symbol": "R",
+	"type" : "f",
+	"decimals" : 2
+  },
+  {
+    "name": "United States Dollar",
+    "abbreviation": "USD",
+    "symbol": "$",
+	"type" : "f",
+	"decimals" : 2
+  },
+  {
+    "name": "Bitcoin",
+    "abbreviation": "BTC",
+    "symbol": "฿",
+	"type" : "c",
+	"decimals" : 8
+  },
+  {
+    "name": "Ethereum",
+    "abbreviation": "ETH",
+    "symbol": "ETH",
+	"type" : "c",
+	"decimals" : 8
+  }
+]
