@@ -26,7 +26,6 @@ import { CoinNotationPipe } from '../../shared/pipes/coin-notation.pipe';
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   exchageRates: any;
-    fiatCurrencyEntrySymbol: any;
     preferedCryptoExchangeCoinBalance: string;
     confirmedFiatHotBalance: string;
     preferedExchangeCoinColdUnconfirmedBalance: string;
@@ -92,6 +91,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (!this.settingsService.preferredCryptoExchangeCurrency) {
       this.settingsService.preferredCryptoExchangeCurrency = 'BTC';
     }
+
+
 
     this.walletName = this.globalService.getWalletName();
     this.coinUnit = this.globalService.getCoinUnit();

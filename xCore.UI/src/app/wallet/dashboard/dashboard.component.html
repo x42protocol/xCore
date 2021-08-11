@@ -29,9 +29,9 @@
                     *ngIf="preferedExchangeCoinBalanceLoaded && preferedExchangeCoinBalance" (click)="openExchangeDetailDialog()">
                 ≈
                 <strong>
-                  {{ preferedExchangeCoinBalance || 0 }} {{settingsService.fiatCurrencyEntrySymbol}}
+                  {{ preferedExchangeCoinBalance || 0 }}
                   /
-                  {{ preferedCryptoExchangeCoinBalance || 0 }} {{settingsService.cryptoCurrencyEntrySymbol}}
+                  {{ preferedCryptoExchangeCoinBalance || 0 }}
                 </strong>
               </span>
 
@@ -53,9 +53,9 @@
                 <span class="ml-2 ui-message ui-widget ui-corner-all ui-message-text ng-star-inserted">
                   ≈
                   <strong>
-                    {{ preferedExchangeCoinColdUnconfirmedBalance || 0 }} {{settingsService.fiatCurrencyEntrySymbol}}
+                    {{ preferedExchangeCoinColdUnconfirmedBalance || 0 }}
                     /
-                    {{ preferedCryptoExchangeCoinUnconfirmedBalance || 0 }} {{settingsService.cryptoCurrencyEntrySymbol}}
+                    {{ preferedCryptoExchangeCoinUnconfirmedBalance || 0 }} 
                   </strong><em> (unconfirmed)</em>
                 </span>
               </div>
