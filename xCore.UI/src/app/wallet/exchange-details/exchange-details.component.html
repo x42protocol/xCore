@@ -1,40 +1,55 @@
 <!-- CONTENT -->
-<section class="col-12">
-    <div class="row" *ngIf="exchangeData">
-        <!-- Exchange Data -->
-        <p-table [responsive]="true" [value]="exchangeData" [style]="{'margin-top':'20px'}"
-            *ngIf="exchangeData.length>0" [paginator]="true" [rows]="10">
-            <ng-template pTemplate="caption">
-                Exchange Rates
-            </ng-template>
-            <ng-template pTemplate="header">
-                <tr>
-                    <th>Currency</th>
-                    <th class="text-right">Rate</th>
-                    <th class="text-right">Value</th>
-                </tr>
-            </ng-template>
-            <ng-template pTemplate="body" let-exchangeData>
-                <tr>
-                    <td class="text-uppercase text-left">
-                        <span class="ui-column-title">Currency</span>
-                        {{ exchangeData.symbol }}
-                    </td>
-                    <td class="text-right">
-                        <span class="ui-column-title">Rate</span>
-                        <!-- {{ transaction.transactionTimestamp * 1000 | date:'medium' }} -->
-                        {{ exchangeData.rate }}
 
-                    </td>
-                    <td class="text-right">
-                        <span class="ui-column-title">Value</span>
-                        <!-- {{ transaction.transactionTimestamp * 1000 | date:'medium' }} -->
-                        {{ exchangeData.total }}
+ 
+ 
 
-                    </td>
+   <section class="col-12">
+       <p-message severity="info"
+                  text="Please select your preferred exchange fiat and cryptocurrency"></p-message>
+       <div class="row" *ngIf="exchangeData">
+         <!-- Exchange Data -->
 
-                </tr>
-            </ng-template>
-        </p-table>
-    </div>
-</section>
+         <p-table #dt [responsive]="true" [value]="exchangeData" [style]="{'margin-top':'20px'}"
+                  *ngIf="exchangeData.length>0" [paginator]="true" [rows]="10" [globalFilterFields]="['currency','symbol']">
+
+           <ng-template pTemplate="caption">
+             <div style="text-align: right;">
+               <i class="pi pi-search" style="margin:4px 4px 0 0; position:absolute; right:20px;"></i>
+               <input type="text" pInputText size="50" placeholder="Search" (input)="dt.filterGlobal($event.target.value, 'contains')" style="width:100%;">
+             </div>
+
+           </ng-template>
+           <ng-template pTemplate="header">
+             <tr>
+               <th class="text-center" style="width:90px;">Preferred</th>
+               <th style="width:215px;">Currency</th>
+               <th class="text-right">Rate</th>
+               <th class="text-right">Value</th>
+
+             </tr>
+           </ng-template>
+           <ng-template pTemplate="body" let-exchangeData>
+             <tr>
+               <td class="text-center">
+                 <span class="ui-column-title">Value</span>
+                 <p-radioButton *ngIf="exchangeData.type === 'f'" name="f" value="{{ exchangeData.abbreviation}}" [(ngModel)]="preferredFiatExchangeCurrency" (onClick)="setPreferredExchangeCurrency(exchangeData)"></p-radioButton>
+                 <p-radioButton *ngIf="exchangeData.type === 'c'" name="c" value="{{ exchangeData.abbreviation}}" [(ngModel)]="preferredCryptoExchangeCurrency" (onClick)="setPreferredExchangeCurrency(exchangeData) "></p-radioButton>
+               </td>
+               <td class="text-left">
+                 <span class="ui-column-title">Currency</span>
+                 {{ exchangeData.currency }} ({{ exchangeData.abbreviation}})
+               </td>
+               <td class="text-right">
+                 <span class="ui-column-title">Rate</span>
+                 {{ exchangeData.rate }}
+               </td>
+               <td class="text-right">
+                 <span class="ui-column-title">Value</span>
+                 {{ exchangeData.total }}
+               </td>
+             </tr>
+           </ng-template>
+
+         </p-table>
+       </div>
+   </section>

@@ -15,6 +15,7 @@ import { ColdStakingCreateHotComponent } from './create-hot/create-hot.component
 import { TransactionDetailsComponent } from '../transaction-details/transaction-details.component';
 import { TransactionInfo } from '../../shared/models/transaction-info';
 import { Subscription } from 'rxjs';
+import { SettingsService } from '../../shared/services/settings.service';
 
 @Component({
   selector: 'app-staking-scene',
@@ -22,6 +23,10 @@ import { Subscription } from 'rxjs';
   styleUrls: ['./overview.component.css']
 })
 export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
+  preferedExchangeCoinColdBalance: string;
+    preferedExchangeCoinUnconfirmedColdBalance: string;
+    preferedCryptoExchangeCoinColdBalance: string;
+    preferedCryptoExchangeCoinUnconfirmedColdBalance: string;
   constructor(
     private apiService: ApiService,
     private globalService: GlobalService,
@@ -30,6 +35,7 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     public themeService: ThemeService,
     private apiEvents: ApiEvents,
+    private settingsService: SettingsService,
   ) {
     this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
   }
@@ -277,6 +283,24 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
   private updateColdBalanceDetails(balanceResponse) {
     this.confirmedColdBalance = balanceResponse.balances[0].amountConfirmed;
     this.unconfirmedColdBalance = balanceResponse.balances[0].amountUnconfirmed;
+
+    const currencies = this.globalService.getCurrencies();
+    const fiatCurrencyEntry = currencies.find(l => l.abbreviation === this.settingsService.preferredFiatExchangeCurrency);
+    const cryptoCurrencyEntry = currencies.find(l => l.abbreviation === this.settingsService.preferredCryptoExchangeCurrency);
+
+    this.preferedExchangeCoinColdBalance = fiatCurrencyEntry.symbol + '' +
+      Number.parseFloat(this.globalService.transform((+this.settingsService.preferedFiatCurrencyExchangeRate * this.confirmedColdBalance)).toString()).toFixed(fiatCurrencyEntry.decimals);
+
+    this.preferedExchangeCoinUnconfirmedColdBalance = fiatCurrencyEntry.symbol + '' +
+      Number.parseFloat(this.globalService.transform(+this.settingsService.preferedFiatCurrencyExchangeRate * this.unconfirmedColdBalance).toString()).toFixed(fiatCurrencyEntry.decimals);
+
+
+    this.preferedCryptoExchangeCoinColdBalance = cryptoCurrencyEntry.symbol + '' +
+      Number.parseFloat(this.globalService.transform((+this.settingsService.preferedCryptoCurrencyExchangeRate * this.confirmedColdBalance)).toString()).toFixed(cryptoCurrencyEntry.decimals);
+
+    this.preferedCryptoExchangeCoinUnconfirmedColdBalance = cryptoCurrencyEntry.symbol + '' +
+      Number.parseFloat(this.globalService.transform(+this.settingsService.preferedCryptoCurrencyExchangeRate * this.unconfirmedColdBalance).toString()).toFixed(cryptoCurrencyEntry.decimals);
+
     this.spendableColdBalance = balanceResponse.balances[0].spendableAmount;
     if ((this.confirmedColdBalance + this.unconfirmedColdBalance) > 0) {
       this.hasColdBalance = true;

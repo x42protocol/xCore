@@ -35,6 +35,8 @@ export class ApiEvents {
   public ColdHistory = this.coldHistorySubject.asObservable();
   private addressBookSubject = new BehaviorSubject(null);
   public AddressBook = this.addressBookSubject.asObservable();
+  private exchangeRatesSubject = new BehaviorSubject(null);
+  public ExchangeRates = this.exchangeRatesSubject.asObservable();
 
   private coldStakingAccount = 'coldStakingColdAddresses';
   private hotStakingAccount = 'coldStakingHotAddresses';
@@ -64,6 +66,8 @@ export class ApiEvents {
     this.Start(WorkerType.COLD_HISTORY);
     this.Start(WorkerType.TX_CONFIRMATION);
     this.Start(WorkerType.ADDRESS_BOOK);
+    this.Start(WorkerType.COINGECKO_EXCHANGE_RATES, 300);
+
   }
 
   public ManualTick(name: WorkerType): void {
@@ -147,6 +151,10 @@ export class ApiEvents {
         this.addressBook();
         break;
       }
+      case WorkerType.COINGECKO_EXCHANGE_RATES: {
+        this.getExhangeRates();
+        break;
+      }
       default: {
         console.log('Worker Type Not Set: ' + name);
         break;
@@ -169,6 +177,20 @@ export class ApiEvents {
     }
   }
 
+  private getExhangeRates() {
+    if (this.exchangeRatesSubject.observers.length > 0) {
+      this.Stop(WorkerType.COINGECKO_EXCHANGE_RATES);
+      this.apiService.getExchangeRates()
+        .pipe(finalize(() => {
+          this.Start(WorkerType.COINGECKO_EXCHANGE_RATES);
+        }))
+        .subscribe(
+          response => {
+            this.exchangeRatesSubject.next(response);
+          }
+        );
+    }
+  }
   private sendWalletStatus() {
     if (this.generalStatusSubject.observers.length > 0) {
       this.Stop(WorkerType.GENERAL_INFO);

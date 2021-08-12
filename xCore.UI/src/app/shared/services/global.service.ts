@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ElectronService } from 'ngx-electron';
 import { XServerStatus } from '../models/xserver-status';
+import * as data from './currencies.json';
 
 @Injectable({
   providedIn: 'root'
@@ -23,6 +24,7 @@ export class GlobalService {
   private blockHeight: number;
   private xServerStatus: XServerStatus;
   private profile: any;
+  private currencies: any = (data as any).default;
 
   quitApplication() {
     this.electronService.remote.app.quit();
@@ -97,6 +99,10 @@ export class GlobalService {
 
   getProfile() {
     return this.profile;
+  }
+
+  getCurrencies() {
+    return this.currencies;
   }
 
   public getSymbolCharacter(symbol: string): string {
@@ -184,6 +190,15 @@ export class GlobalService {
         result = symbol;
     }
     return result;
+  }
+
+  public getSymbolName(symbol: string): string {
+    const matchedSymbol = this.currencies.find(l => l.abbreviation === symbol);
+    if (!matchedSymbol) {
+      return 'Not Found';
+    } else {
+      return matchedSymbol.name;
+    }
   }
 
   transform(value: number) {
