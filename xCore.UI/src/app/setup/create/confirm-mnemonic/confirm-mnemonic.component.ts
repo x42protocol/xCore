@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, ElementRef, QueryList, ViewChildren } from '@angular/core';
 import { FormGroup, Validators, FormBuilder } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiService } from '../../../shared/services/api.service';
@@ -33,6 +33,8 @@ export class ConfirmMnemonicComponent implements OnInit {
   public matchError = '';
   public isCreating: boolean;
   public isDarkTheme = false;
+
+  @ViewChildren('words') focusableInputs: QueryList<ElementRef>;
 
   formErrors = {
     word1: '',
@@ -165,5 +167,21 @@ export class ConfirmMnemonicComponent implements OnInit {
           this.isCreating = false;
         }
       );
+  }
+
+  private focusNext(event: KeyboardEvent) {
+    const elemCount = this.focusableInputs.length;
+
+    this.focusableInputs.forEach((focusableInput: any, index: number) => {
+      if (focusableInput.nativeElement.id === (event.target as any).id) {
+
+        const nextElIndex = index < elemCount - 1 ? index + 1 : 0;
+        const focusableArray = this.focusableInputs.toArray();
+        focusableArray[nextElIndex].nativeElement.focus();
+      }
+    });
+
+    event.stopPropagation();
+    event.preventDefault();
   }
 }

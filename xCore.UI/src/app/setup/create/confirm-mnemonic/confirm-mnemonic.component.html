@@ -2,19 +2,19 @@
 	<form class="mx-auto d-flex align-content-center flex-wrap" [formGroup]="mnemonicForm">
 		<div class="form-group col-12">
 			<label for="word1">{{secretWordIndexGenerator.text1}}</label>
-			<input type="text" class="form-control" formControlName="word1" id="word1" [class.is-invalid]="formErrors.word1" [class.is-valid]="!formErrors.word1 && mnemonicForm.get('word1').valid" pInputText>
+			<input type="text" class="form-control" formControlName="word1" id="word1" #words appFocusable (keydown.tab)="focusNext($event)" [class.is-invalid]="formErrors.word1" [class.is-valid]="!formErrors.word1 && mnemonicForm.get('word1').valid" pInputText>
 			<div *ngIf="formErrors.word1" class="invalid-feedback">{{ formErrors.word1 }}</div>
 		</div>
 		<!-- /form-group -->
 		<div class="form-group col-12">
 			<label for="word2">{{secretWordIndexGenerator.text2}}</label>
-			<input type="text" class="form-control" formControlName="word2" id="word2" [class.is-invalid]="formErrors.word2" [class.is-valid]="!formErrors.word2 && mnemonicForm.get('word2').valid" pInputText>
+			<input type="text" class="form-control" formControlName="word2" id="word2" #words appFocusable (keydown.tab)="focusNext($event)" [class.is-invalid]="formErrors.word2" [class.is-valid]="!formErrors.word2 && mnemonicForm.get('word2').valid" pInputText>
 			<div *ngIf="formErrors.word2" class="invalid-feedback">{{ formErrors.word2 }}</div>
 		</div>
 		<!-- /form-group -->
 		<div class="form-group col-12">
 			<label for="word3">{{secretWordIndexGenerator.text3}}</label>
-			<input type="text" class="form-control" formControlName="word3" id="word3" [class.is-invalid]="formErrors.word3" [class.is-valid]="!formErrors.word3 && mnemonicForm.get('word3').valid" pInputText>
+			<input type="text" class="form-control" formControlName="word3" id="word3" #words appFocusable (keydown.tab)="focusNext($event)" [class.is-invalid]="formErrors.word3" [class.is-valid]="!formErrors.word3 && mnemonicForm.get('word3').valid" pInputText>
 			<div *ngIf="formErrors.word3" class="invalid-feedback">{{ formErrors.word3 }}</div>
 		</div>
 		<!-- /form-group -->
