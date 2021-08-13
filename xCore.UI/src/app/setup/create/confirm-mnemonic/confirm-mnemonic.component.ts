@@ -169,7 +169,7 @@ export class ConfirmMnemonicComponent implements OnInit {
       );
   }
 
-  private focusNext(event: KeyboardEvent) {
+  public focusNext(event: KeyboardEvent) {
     const elemCount = this.focusableInputs.length;
 
     this.focusableInputs.forEach((focusableInput: any, index: number) => {
