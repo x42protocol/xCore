@@ -109,9 +109,9 @@ export class StatusBarComponent implements OnInit, OnDestroy {
     ${this.connectedNodesTooltip}
 
     ${this.connectedXServerTooltip}
-    Tier 1 : ${this.connectedT1XServers}
-    Tier 2 : ${this.connectedT2XServers}
-    Tier 3 : ${this.connectedT3XServers}`;
+    Tier I : ${this.connectedT1XServers}
+    Tier II : ${this.connectedT2XServers}
+    Tier III : ${this.connectedT3XServers}`;
 
   }
 
