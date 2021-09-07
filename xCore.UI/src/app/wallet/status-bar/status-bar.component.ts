@@ -30,6 +30,9 @@ export class StatusBarComponent implements OnInit, OnDestroy {
   public connectionsTooltip = '';
   public connectedTooltip = '';
   public toolTip = '';
+  public connectedT1XServers = 0;
+  public connectedT2XServers = 0;
+  public connectedT3XServers = 0;
 
   @Input() public isUnLocked = false;
 
@@ -101,7 +104,15 @@ export class StatusBarComponent implements OnInit, OnDestroy {
   }
 
   private updateConnectionToolTip() {
-    this.connectionsTooltip = `Connections:\n${this.connectedNodesTooltip}\n${this.connectedXServerTooltip}`;
+    this.connectionsTooltip =
+    `Connections:
+    ${this.connectedNodesTooltip}
+
+    ${this.connectedXServerTooltip}
+    Tier 1 : ${this.connectedT1XServers}
+    Tier 2 : ${this.connectedT2XServers}
+    Tier 3 : ${this.connectedT3XServers}`;
+
   }
 
   private setDefaultConnectionToolTip() {
@@ -111,12 +122,17 @@ export class StatusBarComponent implements OnInit, OnDestroy {
   }
 
   private getGeneralxServerInfo(xServerInfoResponse: XServerStatus) {
+    console.log(xServerInfoResponse.nodes);
+    this.connectedT1XServers = xServerInfoResponse.nodes.filter(xServerInfo => xServerInfo.tier === 1).length;
+    this.connectedT2XServers = xServerInfoResponse.nodes.filter(xServerInfo => xServerInfo.tier === 2).length;
+    this.connectedT3XServers = xServerInfoResponse.nodes.filter(xServerInfo => xServerInfo.tier === 3).length;
+
     this.connectedXServers = xServerInfoResponse.connected;
     this.globalService.setxServerStatus(xServerInfoResponse);
     if (xServerInfoResponse.connected === 1) {
       this.connectedXServerTooltip = '1 xServer';
     } else if (xServerInfoResponse.connected >= 0) {
-      this.connectedXServerTooltip = `${xServerInfoResponse.connected} xServers`;
+      this.connectedXServerTooltip = `${xServerInfoResponse.connected} xServers Total`;
     }
     this.updateConnectionToolTip();
   }
