@@ -83,6 +83,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private stakingInfoSubscription: Subscription;
   private exchangeRatesSubscription: Subscription;
 
+
+  public stakedToday: any[] = [];
+  public stakedThisWeek: any[] = [];
+  public stakedThisMonth: any[] = [];
+  public stakedThisYear: any[] = [];
+  public todayTotal = 0;
+  public thisWeekTotal = 0;
+  public thisMonthTotal = 0;
+  public thisYearTotal = 0;
+
   ngOnInit() {
     if (!this.settingsService.preferredFiatExchangeCurrency) {
       this.settingsService.preferredFiatExchangeCurrency = 'USD';
@@ -387,6 +397,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.latestTransactions = this.latestTransactions.slice(0, 5);
       }
     }
+
+    this.getStakingSummary();
   }
 
   private makeLatestTxListSmall() {
@@ -417,6 +429,111 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.stakingForm.patchValue({ walletPassword: '' });
       }
     );
+  }
+
+
+  public getStakingSummary(){
+
+
+    const result = this.latestTransactions.filter(x => x.transactionType === 'staked').map((obj) => {
+      console.log(obj.transactionTimestamp);
+
+      return  {amount: obj.transactionAmount, date: new Date(obj.transactionTimestamp * 1000)};
+    });
+
+
+    const today = new Date();
+    const thisYear = today.getFullYear();
+    const thisMonth = today.getMonth();
+    const thisDay = today.getDate();
+    const thisDayOfWeek = today.getDay();
+    const firstDayOfThisWeek = today.getDate() - (thisDayOfWeek - 1);
+    const lastDayOfThisWeek = firstDayOfThisWeek + 6;
+
+    const firstDayOfThisMonth = new Date(thisYear, thisMonth, 1).getDate();
+    const lastDayOfThisMonth = new Date(thisYear, thisMonth + 1, 0).getDate();
+
+    let totalStakedToday = 0;
+
+    this.stakedToday = [];
+    for (let i = 0; i <= 23; i++){
+
+      const totalbyHour = result.reduce((acc, obj) => {
+        if (obj.date.getFullYear() === thisYear && obj.date.getMonth() === thisMonth && obj.date.getDate() === thisDay && obj.date.getHours() === i )  {
+          acc += obj.amount;
+        }
+        return acc;
+      }, 0);
+
+      totalStakedToday = totalStakedToday + totalbyHour;
+
+      let startHour = i.toString();
+      let endHour = (i + 1).toString();
+
+      if (startHour.length === 1){
+        startHour = '0' + startHour;
+      }
+      startHour = startHour + ':00';
+
+      if (endHour.length === 1){
+        endHour = '0' + endHour;
+      }
+      endHour = endHour + ':00';
+      this.stakedToday.push({time : startHour + '-' + endHour, staked : totalbyHour });
+    }
+
+    this.todayTotal =  totalStakedToday;
+    this.stakedThisWeek = [];
+    let totalStakedThisWeek = 0;
+
+    for (let i = firstDayOfThisWeek; i <= lastDayOfThisWeek; i++){
+      const totalbyDay = result.reduce((acc, obj) => {
+        if (obj.date.getFullYear() === thisYear && obj.date.getMonth() === thisMonth && obj.date.getDate() === i)  {
+          acc += obj.amount;
+        }
+        return acc;
+      }, 0);
+
+      this.stakedThisWeek.push({day :  new Date(thisYear, thisMonth, i).toString().slice(0, 15), staked : totalbyDay });
+      totalStakedThisWeek = totalStakedThisWeek + totalbyDay;
+    }
+
+    this.thisWeekTotal =  totalStakedThisWeek;
+    this.stakedThisMonth = [];
+    let totalStakedThisMonth = 0;
+
+    for (let i = firstDayOfThisMonth; i <= lastDayOfThisMonth; i++){
+      const totalbyDay = result.reduce((acc, obj) => {
+        if (obj.date.getFullYear() === thisYear && obj.date.getMonth() === thisMonth && obj.date.getDate() === i)  {
+          acc += obj.amount;
+        }
+        return acc;
+      }, 0);
+
+      this.stakedThisMonth.push({day :  new Date(thisYear, thisMonth, i).toString().slice(0, 15), staked : totalbyDay });
+      totalStakedThisMonth = totalStakedThisMonth + totalbyDay;
+    }
+
+    this.thisMonthTotal =  totalStakedThisMonth;
+
+    this.stakedThisYear = [];
+    let totalStakedThisYear = 0;
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+    for (let i = 0; i <= 11; i++){
+      const totalbyMonth = result.reduce((acc, obj) => {
+        if (obj.date.getFullYear() === thisYear && obj.date.getMonth() === i)  {
+          acc += obj.amount;
+        }
+        return acc;
+      }, 0);
+
+      this.stakedThisYear.push({month :  monthNames[i], staked : totalbyMonth });
+      totalStakedThisYear = totalStakedThisYear + totalbyMonth;
+    }
+
+    this.thisYearTotal =  totalStakedThisYear;
+
   }
 
   public stopStaking() {
