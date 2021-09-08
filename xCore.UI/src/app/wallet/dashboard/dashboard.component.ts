@@ -82,6 +82,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private hotBalanceSubscription: Subscription;
   private stakingInfoSubscription: Subscription;
   private exchangeRatesSubscription: Subscription;
+  private coldHistorySubscription: Subscription;
 
 
   public stakedToday: any[] = [];
@@ -92,6 +93,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public thisWeekTotal = 0;
   public thisMonthTotal = 0;
   public thisYearTotal = 0;
+  public coldHistoryTransactions: any[] = [];
 
   ngOnInit() {
     if (!this.settingsService.preferredFiatExchangeCurrency) {
@@ -153,10 +155,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.apiEvents.ManualTick(WorkerType.COINGECKO_EXCHANGE_RATES);
 
     this.updateWalletHistory();
+    this.startColdSubscriptions();
   }
 
   ngOnDestroy() {
     this.cancelSubscriptions();
+  }
+
+  startColdSubscriptions() {
+    this.coldHistorySubscription = this.apiEvents.ColdHistory.subscribe((result) => {
+      if (result !== null) {
+        this.coldHistoryTransactions = result.history[0].transactionsHistory;
+      }
+    });
+    this.apiEvents.ManualTick(WorkerType.COLD_HISTORY);
   }
 
   private cancelSubscriptions() {
@@ -169,8 +181,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (this.hotBalanceSubscription) {
       this.hotBalanceSubscription.unsubscribe();
     }
-    if (this.hotBalanceSubscription) {
+    if (this.exchangeRatesSubscription) {
       this.exchangeRatesSubscription.unsubscribe();
+    }
+    if (this.coldHistorySubscription) {
+      this.coldHistorySubscription.unsubscribe();
     }
   }
 
@@ -436,11 +451,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
 
     const result = this.latestTransactions.filter(x => x.transactionType === 'staked').map((obj) => {
-      console.log(obj.transactionTimestamp);
-
       return  {amount: obj.transactionAmount, date: new Date(obj.transactionTimestamp * 1000)};
     });
 
+    const coldResult = this.coldHistoryTransactions.filter(x => x.type === 'staked').map((obj) => {
+      return  {amount: obj.amount, date: new Date(obj.timestamp * 1000)};
+    });
+
+    result.push(...coldResult);
 
     const today = new Date();
     const thisYear = today.getFullYear();
