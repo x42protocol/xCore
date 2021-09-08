@@ -84,6 +84,13 @@ export class GenerateAddressesComponent implements OnInit {
       );
   }
 
+  public saveToFile(){
+    const textExport = document.createElement('a');
+    textExport.href = 'data:attachment/text,' + encodeURI(this.addresses.join('\n'));
+    textExport.target = '_blank';
+    textExport.download = 'addresses.txt';
+    textExport.click();
+  }
   public onBackClicked() {
     this.addresses = [''];
   }
