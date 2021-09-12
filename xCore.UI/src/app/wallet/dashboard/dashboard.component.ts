@@ -94,6 +94,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public thisMonthTotal = 0;
   public thisYearTotal = 0;
   public coldHistoryTransactions: any[] = [];
+  public hotHistoryTransactions: any[] = [];
 
   ngOnInit() {
     if (!this.settingsService.preferredFiatExchangeCurrency) {
@@ -347,7 +348,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private updateWalletHistory() {
     const walletInfo = new WalletInfo(this.globalService.getWalletName());
     let historyResponse;
-    this.apiService.getWalletHistory(walletInfo, 0, 10).subscribe(
+    this.apiService.getWalletHistory(walletInfo).subscribe(
       (response) => {
         // TODO - add account feature instead of using first entry in array
         if (
@@ -401,6 +402,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
       );
     }
 
+    this.hotHistoryTransactions = this.latestTransactions;
+
     if (
       this.latestTransactions !== undefined &&
       this.latestTransactions.length > 0
@@ -450,7 +453,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public getStakingSummary(){
 
 
-    const result = this.latestTransactions.filter(x => x.transactionType === 'staked').map((obj) => {
+    const result = this.hotHistoryTransactions.filter(x => x.transactionType === 'staked').map((obj) => {
       return  {amount: obj.transactionAmount, date: new Date(obj.transactionTimestamp * 1000)};
     });
 
