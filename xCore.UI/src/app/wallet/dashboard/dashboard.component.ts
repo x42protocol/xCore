@@ -95,6 +95,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public thisYearTotal = 0;
   public coldHistoryTransactions: any[] = [];
   public hotHistoryTransactions: any[] = [];
+  public hotStakingHistoryTransactions: any[] = [];
+
 
   ngOnInit() {
     if (!this.settingsService.preferredFiatExchangeCurrency) {
@@ -155,8 +157,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
     );
     this.apiEvents.ManualTick(WorkerType.COINGECKO_EXCHANGE_RATES);
 
-    this.updateWalletHistory();
     this.startColdSubscriptions();
+    this.updateWalletStakingHistory();
+    this.updateWalletHistory();
+
   }
 
   ngOnDestroy() {
@@ -326,7 +330,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.balanceLoaded = true;
     if (balanceChanged) {
       this.log.info('Balance changed', balanceResponse);
-      this.updateWalletHistory();
     }
     this.apiEvents.ManualTick(WorkerType.COINGECKO_EXCHANGE_RATES);
 
@@ -348,18 +351,42 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private updateWalletHistory() {
     const walletInfo = new WalletInfo(this.globalService.getWalletName());
     let historyResponse;
-    this.apiService.getWalletHistory(walletInfo).subscribe(
+    this.apiService.getX42WalletHistory(walletInfo,'').subscribe(
       (response) => {
         // TODO - add account feature instead of using first entry in array
         if (
-          !!response.history &&
-          response.history[0].transactionsHistory.length > 0
+          !!response.data &&
+          response.data.length > 0
         ) {
-          historyResponse = response.history[0].transactionsHistory;
+          historyResponse = response.data;
           this.getTransactionInfo(historyResponse);
         } else {
           this.hasTX = false;
         }
+
+      },
+      (error) => {
+        this.apiService.handleException(error);
+      }
+    );
+
+  }
+  private updateWalletStakingHistory() {
+    const walletInfo = new WalletInfo(this.globalService.getWalletName());
+    let historyResponse;
+    this.apiService.getX42WalletHistory(walletInfo, 'Staked').subscribe(
+      (response) => {
+        // TODO - add account feature instead of using first entry in array
+        if (
+          !!response.data &&
+          response.data.length > 0
+        ) {
+          historyResponse = response.data;
+          this.hotStakingHistoryTransactions = (historyResponse);
+        } else {
+          this.hasTX = false;
+        }
+        this.getStakingSummary();
       },
       (error) => {
         this.apiService.handleException(error);
@@ -416,7 +443,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       }
     }
 
-    this.getStakingSummary();
   }
 
   private makeLatestTxListSmall() {
@@ -452,9 +478,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   public getStakingSummary(){
 
-
-    const result = this.hotHistoryTransactions.filter(x => x.transactionType === 'staked').map((obj) => {
-      return  {amount: obj.transactionAmount, date: new Date(obj.transactionTimestamp * 1000)};
+    console.log(this.hotStakingHistoryTransactions);
+    const result = this.hotStakingHistoryTransactions.map((obj) => {
+      return { amount: obj.amount, date: new Date(obj.timestamp * 1000)};
     });
 
     const coldResult = this.coldHistoryTransactions.filter(x => x.type === 'staked').map((obj) => {

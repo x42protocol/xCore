@@ -438,6 +438,34 @@ export class ApiService {
   }
 
   /**
+   * Get a wallets transaction history info from the API.
+   * This uses the historyslim method.
+   */
+  getX42WalletHistory(data: WalletInfo, transactionType: string, skip: number = -1, take: number = -1): Observable<any> {
+    let params = new HttpParams()
+      .set('walletName', data.walletName)
+      .set('accountName', data.accountName);
+
+    if (transactionType) {
+      params = new HttpParams()
+        .set('walletName', data.walletName)
+        .set('accountName', data.accountName)
+        .set('transactionType', transactionType);
+    }
+
+
+    if (take > 0) {
+      params = params.set('Skip', skip.toString())
+        .set('Take', take.toString());
+    }
+
+    return this.http
+      .get(this.apiUrl + '/x42wallet/history', { params })
+      .pipe(catchError(err => this.handleInitialError(err)))
+      .pipe(map((response: Response) => response));
+  }
+
+  /**
    * Get an unused receive address for a certain wallet from the API.
    */
   getUnusedReceiveAddress(data: WalletInfo): Observable<any> {

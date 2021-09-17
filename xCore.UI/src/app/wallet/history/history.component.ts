@@ -8,6 +8,10 @@ import { WorkerType } from '../../shared/models/worker';
 import { TransactionInfo } from '../../shared/models/transaction-info';
 import { TransactionDetailsComponent } from '../transaction-details/transaction-details.component';
 import { Subscription } from 'rxjs';
+import { ApiService } from '../../shared/services/api.service';
+import { WalletInfo } from '../../shared/models/wallet-info';
+import { LazyLoadEvent } from 'primeng/api';
+import { setInterval } from 'timers';
 
 @Component({
   selector: 'app-history-component',
@@ -15,12 +19,15 @@ import { Subscription } from 'rxjs';
   styleUrls: ['./history.component.css'],
 })
 export class HistoryComponent implements OnInit, OnDestroy {
+  transactionType: string;
+
   constructor(
     private globalService: GlobalService,
     private router: Router,
     public dialogService: DialogService,
     public themeService: ThemeService,
     private apiEvents: ApiEvents,
+    private apiService: ApiService
   ) {
     this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
   }
@@ -32,19 +39,59 @@ export class HistoryComponent implements OnInit, OnDestroy {
   public pageNumber = 1;
   public hasTransaction = true;
   public isDarkTheme = false;
+  public totalRecords: number;
+  public loading: boolean;
+  public pageSize = 10;
+  public skip = 0;
+  public take = 10;
+
+  public transactionTypes = [{ label: 'All Transactions', value: null },
+  { label: 'Sent', value: 'Send' },
+  { label: 'Received', value: 'Received' },
+  { label: 'Staked', value: 'Staked' }];
 
   ngOnInit() {
-    this.historySubscription = this.apiEvents.History.subscribe((result) => {
-      if (result !== null) {
-        this.updateWalletHistory(result);
-      }
-    });
-    this.apiEvents.ManualTick(WorkerType.HISTORY);
+    this.loading = true;
+    this.getWalletHistory();
     this.coinUnit = this.globalService.getCoinUnit();
+
+    setInterval(() => {
+
+      this.getWalletHistory();
+
+    }, 15000);
   }
 
   ngOnDestroy() {
     this.cancelSubscriptions();
+  }
+
+  public transactionTypeChanged(transactionType: string) {
+    this.transactionType = transactionType;
+    this.skip = 0;
+    this.getWalletHistory();
+
+  }
+
+  public loadTransactions(event: LazyLoadEvent) {
+    this.skip = event.first;
+    this.take = event.rows;
+    this.getWalletHistory();
+
+    }
+
+  public getWalletHistory() {
+    this.loading = true;
+
+    this.apiService.getX42WalletHistory(new WalletInfo(this.globalService.getWalletName()), this.transactionType, this.skip, this.take).subscribe((result) => {
+
+      if (result !== null) {
+        this.updateWalletHistory(result);
+      }
+
+      this.loading = false;
+
+    });
   }
 
   private cancelSubscriptions() {
@@ -69,8 +116,9 @@ export class HistoryComponent implements OnInit, OnDestroy {
   private updateWalletHistory(response) {
     let historyResponse;
     // TODO - add account feature instead of using first entry in array
-    if (!!response.history && response.history[0].transactionsHistory.length > 0) {
-      historyResponse = response.history[0].transactionsHistory;
+    if (!!response.data && response.data.length > 0) {
+      this.totalRecords = response.totalCount;
+      historyResponse = response.data;
       this.getTransactionInfo(historyResponse);
     } else {
       this.hasTransaction = false;
@@ -105,6 +153,8 @@ export class HistoryComponent implements OnInit, OnDestroy {
     if (this.transactions === undefined || this.transactions.length === 0) {
       this.hasTransaction = false;
     }
+
+    this.loading = false;
   }
 
 }
