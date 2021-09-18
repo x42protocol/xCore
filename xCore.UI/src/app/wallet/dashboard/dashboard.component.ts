@@ -351,7 +351,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private updateWalletHistory() {
     const walletInfo = new WalletInfo(this.globalService.getWalletName());
     let historyResponse;
-    this.apiService.getX42WalletHistory(walletInfo,'').subscribe(
+    this.apiService.getX42WalletHistory(walletInfo, null).subscribe(
       (response) => {
         // TODO - add account feature instead of using first entry in array
         if (
