@@ -82,7 +82,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private hotBalanceSubscription: Subscription;
   private stakingInfoSubscription: Subscription;
   private exchangeRatesSubscription: Subscription;
-  private coldHistorySubscription: Subscription;
 
 
   public stakedToday: any[] = [];
@@ -157,7 +156,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     );
     this.apiEvents.ManualTick(WorkerType.COINGECKO_EXCHANGE_RATES);
 
-    this.startColdSubscriptions();
     this.updateWalletStakingHistory();
     this.updateWalletHistory();
 
@@ -167,14 +165,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.cancelSubscriptions();
   }
 
-  startColdSubscriptions() {
-    this.coldHistorySubscription = this.apiEvents.ColdHistory.subscribe((result) => {
-      if (result !== null) {
-        this.coldHistoryTransactions = result.history[0].transactionsHistory;
-      }
-    });
-    this.apiEvents.ManualTick(WorkerType.COLD_HISTORY);
-  }
 
   private cancelSubscriptions() {
     if (this.stakingInfoSubscription) {
@@ -188,9 +178,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
     if (this.exchangeRatesSubscription) {
       this.exchangeRatesSubscription.unsubscribe();
-    }
-    if (this.coldHistorySubscription) {
-      this.coldHistorySubscription.unsubscribe();
     }
   }
 
