@@ -37,6 +37,10 @@ export class ApiEvents {
   public AddressBook = this.addressBookSubject.asObservable();
   private exchangeRatesSubject = new BehaviorSubject(null);
   public ExchangeRates = this.exchangeRatesSubject.asObservable();
+  private x42StakingHistorySubject = new BehaviorSubject(null);
+  public x42StakingHistory = this.x42StakingHistorySubject.asObservable();
+  private x42HistorySubject = new BehaviorSubject(null);
+  public x42History = this.x42HistorySubject.asObservable();
 
   private coldStakingAccount = 'coldStakingColdAddresses';
   private hotStakingAccount = 'coldStakingHotAddresses';
@@ -66,7 +70,9 @@ export class ApiEvents {
     this.Start(WorkerType.COLD_HISTORY);
     this.Start(WorkerType.TX_CONFIRMATION);
     this.Start(WorkerType.ADDRESS_BOOK);
-    this.Start(WorkerType.COINGECKO_EXCHANGE_RATES, 300);
+    this.Start(WorkerType.COINGECKO_EXCHANGE_RATES, 30);
+    this.Start(WorkerType.X42_HISTORY, 30);
+    this.Start(WorkerType.X42_STAKING_HISTORY, 30);
 
   }
 
@@ -81,7 +87,7 @@ export class ApiEvents {
   private Start(name: WorkerType, seconds: number = 0): void {
     let tickSeconds = seconds;
     if (tickSeconds === undefined || tickSeconds === 0) {
-      tickSeconds = 5;
+      tickSeconds = 30;
     }
 
     const workers: string[] = this.simpleTimer.getTimer();
@@ -155,6 +161,14 @@ export class ApiEvents {
         this.getExhangeRates();
         break;
       }
+      case WorkerType.X42_STAKING_HISTORY: {
+        this.getX42StakingHistory();
+        break;
+      }
+      case WorkerType.X42_HISTORY: {
+        this.getX42History();
+        break;
+      }
       default: {
         console.log('Worker Type Not Set: ' + name);
         break;
@@ -187,6 +201,38 @@ export class ApiEvents {
         .subscribe(
           response => {
             this.exchangeRatesSubject.next(response);
+          }
+        );
+    }
+  }
+
+  private getX42StakingHistory() {
+    if (this.x42StakingHistorySubject.observers.length > 0) {
+      const walletInfo = new WalletInfo(this.globalService.getWalletName());
+      this.Stop(WorkerType.X42_STAKING_HISTORY);
+      this.apiService.getX42WalletHistory(walletInfo, 'Staked')
+        .pipe(finalize(() => {
+          this.Start(WorkerType.X42_STAKING_HISTORY);
+        }))
+        .subscribe(
+          response => {
+            this.x42StakingHistorySubject.next(response);
+          }
+        );
+    }
+  }
+
+  private getX42History() {
+    if (this.x42HistorySubject.observers.length > 0) {
+      const walletInfo = new WalletInfo(this.globalService.getWalletName());
+      this.Stop(WorkerType.X42_HISTORY);
+      this.apiService.getX42WalletHistory(walletInfo, null)
+        .pipe(finalize(() => {
+          this.Start(WorkerType.X42_HISTORY);
+        }))
+        .subscribe(
+          response => {
+            this.x42HistorySubject.next(response);
           }
         );
     }

@@ -7,11 +7,12 @@ import { ApiEvents } from '../../shared/services/api.events';
 import { WorkerType } from '../../shared/models/worker';
 import { TransactionInfo } from '../../shared/models/transaction-info';
 import { TransactionDetailsComponent } from '../transaction-details/transaction-details.component';
-import { Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription, timer } from 'rxjs';
 import { ApiService } from '../../shared/services/api.service';
 import { WalletInfo } from '../../shared/models/wallet-info';
 import { LazyLoadEvent } from 'primeng/api';
 import { setInterval } from 'timers';
+import { switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-history-component',
@@ -33,7 +34,8 @@ export class HistoryComponent implements OnInit, OnDestroy {
   }
 
   private historySubscription: Subscription;
-
+  private x42HistorySubject = new BehaviorSubject(null);
+  public x42History = this.x42HistorySubject.asObservable();
   public transactions: TransactionInfo[];
   public coinUnit: string;
   public pageNumber = 1;
@@ -52,14 +54,8 @@ export class HistoryComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loading = true;
-    this.getWalletHistory();
     this.coinUnit = this.globalService.getCoinUnit();
-
-    setInterval(() => {
-
-      this.getWalletHistory();
-
-    }, 15000);
+    this.getWalletHistory();
   }
 
   ngOnDestroy() {
@@ -69,28 +65,28 @@ export class HistoryComponent implements OnInit, OnDestroy {
   public transactionTypeChanged(transactionType: string) {
     this.transactionType = transactionType;
     this.skip = 0;
-    this.getWalletHistory();
+    this.cancelSubscriptions();
 
   }
 
   public loadTransactions(event: LazyLoadEvent) {
     this.skip = event.first;
     this.take = event.rows;
+    this.cancelSubscriptions();
     this.getWalletHistory();
 
-    }
+  }
 
   public getWalletHistory() {
     this.loading = true;
 
-    this.apiService.getX42WalletHistory(new WalletInfo(this.globalService.getWalletName()), this.transactionType, this.skip, this.take).subscribe((result) => {
-
+    this.historySubscription = timer(0, 10000).pipe(
+      switchMap(() => this.apiService.getX42WalletHistory(new WalletInfo(this.globalService.getWalletName()), this.transactionType, this.skip, this.take))
+    ).subscribe((result) => {
       if (result !== null) {
         this.updateWalletHistory(result);
       }
-
       this.loading = false;
-
     });
   }
 
