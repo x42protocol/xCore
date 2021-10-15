@@ -719,7 +719,7 @@ export class ApiService {
 
     const params = new HttpParams()
       .set('ids', 'x42-protocol')
-      .set('vs_currencies', 'AED,BDT,BRL,CHF,CZK,DKK,EUR,GBP,HKD,HUF,ILS,INR,LKR,MYR,NOK,PHP,PKR,PLN,SEK,THB,TRY,UAH,VND,ZAR,USD,BTC,ETH');
+      .set('vs_currencies', 'AED,BDT,BRL,CHF,CZK,DKK,EUR,GBP,HKD,HUF,ILS,INR,LKR,MYR,NOK,PHP,PKR,PLN,SEK,THB,TRY,UAH,VND,ZAR,USD,CAD,BTC,ETH');
 
     return this.http
       .get(this.coinGeckoApiUrl + '/price', { params })
