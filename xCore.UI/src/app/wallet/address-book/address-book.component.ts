@@ -97,4 +97,14 @@ export class AddressBookComponent implements OnInit, OnDestroy {
       width: '500px',
     });
   }
+
+  public saveToFile() {
+
+    const addressExportObject = { addresses: this.addresses };
+    const textExport = document.createElement('a');
+    textExport.href = 'data:attachment/text,' + JSON.stringify(addressExportObject);
+    textExport.target = '_blank';
+    textExport.download = 'addressbook.json';
+    textExport.click();
+  }
 }

@@ -1,12 +1,10 @@
 <!-- CONTENT -->
 <section class="col-12">
 
-  <div class="row" *ngIf="transactions">
-    <div style="margin:10px;"><div style="vertical-align: top;">Filter : <p-dropdown [options]="transactionTypes"   (onChange)="transactionTypeChanged($event.value)"></p-dropdown></div></div>
-
-    <!-- TRANSACTIONS -->
-    <p-table
-             [totalRecords]="totalRecords"
+  <div class="row" *ngIf="transactions && showTransactions">
+    <div style="margin:10px;"><div style="vertical-align: top;">Filter : <p-dropdown [options]="transactionTypes" (onChange)="transactionTypeChanged($event.value)"></p-dropdown></div></div>
+     <!-- TRANSACTIONS -->
+    <p-table [totalRecords]="totalRecords"
              [loading]="loading"
              [responsive]="true"
              [value]="transactions"
@@ -21,7 +19,9 @@
              scrollHeight="360px">
       <ng-template pTemplate="caption">
         Transaction History
-
+        <div class="text-right">
+          <p-button icon="pi pi-file-excel" label="Export to Excel" (click)="exportToExcel()"></p-button>
+        </div>
       </ng-template>
 
       <ng-template pTemplate="header">

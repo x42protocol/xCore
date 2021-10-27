@@ -22,7 +22,7 @@
         <p-table [value]="addresses" [paginator]="true" [rows]="5">
           <ng-template pTemplate="caption">
             <div class="text-right">
-              <p-button icon="pi pi-save" (click)="saveToFile()"></p-button>
+              <p-button icon="pi pi-save" label="Save Generated Addresses" (click)="saveToFile()"></p-button>
             </div>
           </ng-template>
           <ng-template pTemplate="body" let-address>
