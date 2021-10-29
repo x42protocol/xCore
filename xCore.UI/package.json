@@ -1,7 +1,7 @@
 {
   "name": "xCore",
   "description": "xCore is the main application for everything on x42.",
-  "version": "5.0.10",
+  "version": "5.0.11",
   "bc_version": "1.1.31",
   "license": "MIT",
   "author": {
@@ -122,8 +122,8 @@
     "codelyzer": "^6.0.1",
     "core-js": "3.7.0",
     "dexie": "3.0.2",
-    "electron": "11.2.3",
-    "electron-builder": "22.10.4",
+    "electron": ">=11.5.0",
+    "electron-builder": "22.14.5",
     "electron-reload": "1.5.0",
     "enhanced-resolve": "5.3.1",
     "hammerjs": "2.0.8",
