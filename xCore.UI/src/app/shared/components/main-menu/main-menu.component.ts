@@ -154,9 +154,7 @@ export class MainMenuComponent implements OnInit, OnDestroy {
       this.setDefaultMenuItems();
     }
 
-    setTimeout(() => {
-      this.checkForUpdates();
-    }, 20000);
+    this.checkForUpdates();
 
     const walletName = this.globalService.getWalletName();
     if (walletName !== '') {
@@ -184,6 +182,16 @@ export class MainMenuComponent implements OnInit, OnDestroy {
       this.isDelegated = this.appState.delegated;
       this.setUnlockedMenuItems();
     }
+  }
+
+  releaseDateFormatted() {
+    const updatedTime = new Date(this.updateService.info.releaseDate);
+    return updatedTime.toLocaleDateString();
+  }
+
+  lastCheckDateFormatted() {
+    const lastCheckedTime = new Date(this.updateService.LastUpdateCheck);
+    return lastCheckedTime.toLocaleString();
   }
 
   changeMode() {

@@ -90,10 +90,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public stakedThisWeek: any[] = [];
   public stakedThisMonth: any[] = [];
   public stakedThisYear: any[] = [];
+  public stakedLastYear: any[] = [];
   public todayTotal = 0;
   public thisWeekTotal = 0;
   public thisMonthTotal = 0;
   public thisYearTotal = 0;
+  public lastYearTotal = 0;
   public coldHistoryTransactions: any[] = [];
   public hotHistoryTransactions: any[] = [];
   public hotStakingHistoryTransactions: any[] = [];
@@ -514,7 +516,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
         endHour = '0' + endHour;
       }
       endHour = endHour + ':00';
-      this.stakedToday.push({time : startHour + '-' + endHour, staked : totalbyHour });
+      if (totalbyHour > 0) {
+        this.stakedToday.push({ time: startHour + '-' + endHour, staked: totalbyHour });
+      }
     }
 
     this.todayTotal =  totalStakedToday;
@@ -528,8 +532,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
         }
         return acc;
       }, 0);
-
-      this.stakedThisWeek.push({day :  new Date(thisYear, thisMonth, i).toString().slice(0, 15), staked : totalbyDay });
+      if (totalbyDay > 0) {
+        this.stakedThisWeek.push({ day: new Date(thisYear, thisMonth, i).toString().slice(0, 15), staked: totalbyDay });
+      }
       totalStakedThisWeek = totalStakedThisWeek + totalbyDay;
     }
 
@@ -544,8 +549,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
         }
         return acc;
       }, 0);
-
-      this.stakedThisMonth.push({day :  new Date(thisYear, thisMonth, i).toString().slice(0, 15), staked : totalbyDay });
+      if (totalbyDay > 0) {
+        this.stakedThisMonth.push({ day: new Date(thisYear, thisMonth, i).toString().slice(0, 15), staked: totalbyDay });
+      }
       totalStakedThisMonth = totalStakedThisMonth + totalbyDay;
     }
 
@@ -562,12 +568,32 @@ export class DashboardComponent implements OnInit, OnDestroy {
         }
         return acc;
       }, 0);
-
-      this.stakedThisYear.push({month :  monthNames[i], staked : totalbyMonth });
+      if (totalbyMonth > 0) {
+        this.stakedThisYear.push({ month: monthNames[i], staked: totalbyMonth });
+      }
       totalStakedThisYear = totalStakedThisYear + totalbyMonth;
     }
 
-    this.thisYearTotal =  totalStakedThisYear;
+    this.thisYearTotal = totalStakedThisYear;
+
+    this.stakedLastYear = [];
+    let totalStakedLastYear = 0;
+
+    for (let i = 0; i <= 11; i++) {
+      const totalbyMonth = result.reduce((acc, obj) => {
+        if (obj.date.getFullYear() === (thisYear - 1) && obj.date.getMonth() === i) {
+          acc += obj.amount;
+        }
+        return acc;
+      }, 0);
+
+      if (totalbyMonth > 0) {
+        this.stakedLastYear.push({ month: monthNames[i], staked: totalbyMonth });
+      }
+      totalStakedLastYear = totalStakedLastYear + totalbyMonth;
+    }
+
+    this.lastYearTotal = totalStakedLastYear;
 
   }
 
