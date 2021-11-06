@@ -22,6 +22,9 @@
     "paths": {
       "@models/*": [
         "./src/app/shared/models/*"
+      ],
+      "exceljs": [
+        "node_modules/exceljs/dist/exceljs.min"
       ]
     }
   },

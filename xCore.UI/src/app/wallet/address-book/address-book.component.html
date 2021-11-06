@@ -19,6 +19,8 @@
         </div>
         <div class="text-right" style="flex: 1;">
           <button type="button" pButton (click)="addNewAddressClicked()" label="Add New Address" class="mb-2 pr-0" icon="pi pi-plus"></button>
+          <p-button icon="pi pi-save" class="save-addresses" label="Save Address Book" (click)="saveToFile()"></p-button>
+
         </div>
       </div>
     </ng-template>
