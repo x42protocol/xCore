@@ -111,6 +111,7 @@ export class HistoryComponent implements OnInit, OnDestroy {
     this.transactionType = transactionType;
     this.skip = 0;
     this.cancelSubscriptions();
+    this.getWalletHistory();
 
   }
 

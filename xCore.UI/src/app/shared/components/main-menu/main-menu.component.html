@@ -40,4 +40,73 @@
       <span style="margin-left:.25em">{{group.label}}</span>
     </ng-template>
   </p-dropdown>
+
+  <br />
+  <br /><br />
+  <h3 style="font-weight:normal">About</h3>
+
+  <div class="row">
+    <div class='col-8 blockLabel'>
+      Wallet version:
+    </div>
+    <div class='col blockText'>
+      {{ appState.version }}
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-8 blockLabel">
+      Fullnode version:
+    </div>
+    <div class="col blockText">
+      {{ appState.fullNodeVersion }}
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-8 blockLabel">
+      Protocol version:
+    </div>
+    <div class="col blockText">
+      {{ appState.protocolVersion }}
+    </div>
+  </div>
+  <br /><br /><br />
+
+  <div *ngIf="updateService.info && updateService.available" class="update-card">
+    <div class="h5"><span class="pi pi-exclamation-triangle text-danger"></span> {{updateService.info.releaseName}} Update Available</div>
+    <div>
+      <div><strong>Version: {{updateService.info.version}} ({{releaseDateFormatted()}})</strong></div>
+    </div>
+    <div>
+      <p [innerHTML]="updateService.info.releaseNotes"></p>
+      <p class="mt-2" *ngIf="updateService.progress && updateService.progress.percent !== 100">
+        <p-progressBar [value]="updateService.progress.percent | number:'1.2-2'"></p-progressBar>
+        <br>({{updateService.progress.transferred | sizeUnit}}/{{updateService.progress.total | sizeUnit}})
+        <br>{{updateService.progress.bytesPerSecond | sizeUnit: 0}}/sec.
+      </p>
+      <p class="mt-2 h5 text-center" *ngIf="updateService.progress && updateService.progress.percent === 100">
+        <i class="pi pi-thumbs-up text-success"></i> Download completed!
+      </p>
+    </div>
+    <div class="mt-4">
+      <div *ngIf="updateService.downloading && !updateService.downloaded && !updateService.progress"><i class="pi pi-spin pi-spinner" style="font-size: 1.5em"></i> Initializing... Please wait...</div>
+      <button type="button" class="btn-block" *ngIf="!updateService.downloaded && !updateService.downloading" (click)="updateService.downloadUpdate()" label="Download Update" pButton></button>
+      <button type="button" class="btn-block" *ngIf="updateService.downloaded" (click)="updateService.installUpdate()" label="Install Update" pButton></button>
+    </div>
+  </div>
+
+  <div *ngIf="updateService.info && !updateService.available" class="update-card">
+    <div class="h5"><span class="pi pi-check-circle text-success"></span> You are running the latest version.</div>
+    <div>
+      <div>Installed {{updateService.info.releaseName}}</div>
+      <div>Version: {{updateService.info.version}} ({{releaseDateFormatted()}}) <span class="text-info">Last Checked: {{lastCheckDateFormatted()}}</span></div>
+    </div>
+    <div>
+      <p [innerHTML]="updateService.info.releaseNotes"></p>
+    </div>
+    <div>
+      <button type="button" class="btn-block" (click)="updateService.checkForUpdate()" label="Check for update" [disabled]="updateService.IsChecking" pButton></button>
+    </div>
+  </div>
+
+
 </p-sidebar>
