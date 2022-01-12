@@ -468,6 +468,10 @@ function launchDaemon(apiPath: string, chain: Chain) {
 
   commandLineArguments.push('--chain=X42');
 
+  if (os.platform() === 'win32' || os.platform() === 'linux') {
+    commandLineArguments.push('-dbtype=leveldb');
+  }
+
   if (chain.mode === 'local') {
     if (!apiPath || apiPath.length < 3 || !chain.datafolder || chain.datafolder.length < 3) {
       contents.send('daemon-error', `CRITICAL: Cannot launch daemon, missing either daemon path or data folder path.`);
