@@ -4,6 +4,7 @@ var electron_1 = require("electron");
 var path = require("path");
 var url = require("url");
 var os = require("os");
+var pjson = require('./package.json');
 var log = require('electron-log');
 var autoUpdater = require('electron-updater').autoUpdater;
 var fs = require('fs');
@@ -73,8 +74,10 @@ electron_1.ipcMain.on('start-daemon', function (event, arg) {
         event.returnValue = 'OK';
         return;
     }
+    if (pjson.upgradedbonversion) {
+        arg.upgradedbonversion = pjson.version;
+    }
     daemonState = DaemonState.Starting;
-    console.log(arg);
     // The "chain" object is supplied over the IPC channel and we should consider
     // it potentially "hostile", if anyone can inject anything in the app and perform
     // a call to the node backend here. Since we are launching a process here,
@@ -374,6 +377,10 @@ function launchDaemon(apiPath, chain) {
     var spawnDaemon = require('child_process').spawn;
     var commandLineArguments = [];
     commandLineArguments.push('--chain=X42');
+    commandLineArguments.push('--upgradedbonversion=' + chain.upgradedbonversion);
+    if (os.platform() === 'win32' || os.platform() === 'linux') {
+        commandLineArguments.push('-dbtype=leveldb');
+    }
     if (chain.mode === 'local') {
         if (!apiPath || apiPath.length < 3 || !chain.datafolder || chain.datafolder.length < 3) {
             contents.send('daemon-error', "CRITICAL: Cannot launch daemon, missing either daemon path or data folder path.");

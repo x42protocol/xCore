@@ -2,6 +2,7 @@ import { app, BrowserWindow, ipcMain, Menu, nativeImage, screen, Tray, shell, di
 import * as path from 'path';
 import * as url from 'url';
 import * as os from 'os';
+var pjson = require('./package.json');
 
 const log = require('electron-log');
 const { autoUpdater } = require('electron-updater');
@@ -66,6 +67,7 @@ interface Chain {
   genesisDate?: Date;
   path?: string;
   datafolder?: string;
+  upgradedbonversion: string;
 }
 
 interface Settings {
@@ -105,9 +107,13 @@ ipcMain.on('start-daemon', (event, arg: Chain) => {
     return;
   }
 
+ 
+  if (pjson.upgradedbonversion) {
+    arg.upgradedbonversion = pjson.version;
+  }
+
   daemonState = DaemonState.Starting;
 
-  console.log(arg);
 
   // The "chain" object is supplied over the IPC channel and we should consider
   // it potentially "hostile", if anyone can inject anything in the app and perform
@@ -467,6 +473,10 @@ function launchDaemon(apiPath: string, chain: Chain) {
   const commandLineArguments = [];
 
   commandLineArguments.push('--chain=X42');
+
+  commandLineArguments.push('--upgradedbonversion='+chain.upgradedbonversion);
+
+  
 
   if (os.platform() === 'win32' || os.platform() === 'linux') {
     commandLineArguments.push('-dbtype=leveldb');
