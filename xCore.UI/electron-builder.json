@@ -73,6 +73,8 @@
   "extraResources": [
     "daemon/**/*",
     "src/assets/images/icons/32x32.png",
+    "src/assets/images/wordpress-logo.png",
+    "src/assets/images/SugarCRM-Stacked-Full-Color.jpg",
     "src/assets/images/license_en.txt",
     "src/assets/themes/**/*"
   ]
