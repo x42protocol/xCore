@@ -1,0 +1,136 @@
+<div class="p-4">
+
+    <p-panel header="xServer Provisioning">
+      <div style="min-height:200px;">
+        <div *ngIf="!connected && !provisioning && !provisioned">
+          <div class="form-group">
+            <div class='col-12 blockLabel'>
+              Server IP Address:
+            </div>
+            <div class='col blockText'>
+              <input type="text" class="form-control" [(ngModel)]="serverIP" placeholder="Server IP Address"
+                     pInputText>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class='col-12 blockLabel'>
+              SSH User:
+            </div>
+            <div class='col blockText'>
+              <input type="text" class="form-control" [(ngModel)]="sshUser" placeholder="SSH User" pInputText>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="col-12 blockLabel">
+              SSH Password:
+            </div>
+            <div class="col blockText">
+              <input type="password" class="form-control" [(ngModel)]="sshPassword" placeholder="SSH Password"
+                     pInputText>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="col-12 blockLabel">
+              Confirm SSH Password:
+            </div>
+            <div class="col blockText">
+              <input type="password" class="form-control" [(ngModel)]="confirmSshPassword"
+                     placeholder="Confirm SSH Password" pInputText>
+            </div>
+          </div>
+          <div class="form-group">
+            <button type="submit" class="btn-block" (click)="onTestCredentialsClick()"
+                    (disabled)="!testingCredentials" pButton label="Test Credentials"></button>
+          </div>
+          <div class="form-group" *ngIf="errorMessage !== ''">
+            {{errorMessage}}
+          </div>
+        </div>
+        <div *ngIf="connected && !provisioning && !provisioned">
+
+          <div class="form-group">
+            <div class='blockLabel col-12'>
+              Email Address:
+            </div>
+            <div class="col blockText">
+              <input type="text" class="form-control" [(ngModel)]="email" placeholder="Email Address"
+                     pInputText>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="col-12 blockLabel">
+              Client Certificate Password:
+            </div>
+            <div class="col blockText">
+              <input type="password" class="form-control" [(ngModel)]="certificatePassword"
+                     placeholder="Client Certificate Password" pInputText>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="col-12 blockLabel">
+              Confirm Client Certificate Password:
+            </div>
+            <div class="col blockText">
+              <input type="password" class="form-control" [(ngModel)]="confirmCertificatePassword"
+                     placeholder="Confirm Client Certificate Password" pInputText>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="col-12 blockLabel">
+              Database Password:
+            </div>
+            <div class="col blockText">
+              <input type="password" class="form-control" [(ngModel)]="databasePassword"
+                     placeholder="Database Password" pInputText>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="col-12 blockLabel">
+              Confirm Database Password:
+            </div>
+            <div class="col blockText">
+              <input type="password" class="form-control" [(ngModel)]="confirmDatabasePassword"
+                     placeholder="Confirm Database Password" pInputText>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <button type="submit" class="btn-block" (click)="ProvisionxServer()" pButton
+                    label="Provision xServer"></button>
+          </div>
+        </div>
+        <div *ngIf="provisioning">
+          <p #scrollMe
+             style="background-color: black; color: white; height: 500px; width: 100%; overflow-y: scroll; padding: 10px;"
+             [innerText]="multiLineText"></p>
+
+        </div>
+
+        <div *ngIf="provisioned">
+          <div class="row">
+            <div class="col-12"><h5>Your xServer has been provisioned!</h5></div>
+          </div>
+          <div class="row">
+            <div class="col-3" style="padding-top:15px">xServer Url : </div>
+            <div class="col-9" style="padding-top:15px"><a href="https://xserverui-{{profile | lowercase}}.xserver.network" target="_blank">https://xserverui-{{profile | lowercase}}.xserver.network</a></div>
+          </div>
+          <div class="row">
+            <div class="col-12" style="padding-top:15px">Client Certificate : </div>
+          </div>
+          <div class="row">
+            <div class="col-3" style="padding-top:15px">
+             </div>
+            <div class="col-4" style="padding-top:15px">
+              <button type="submit" class="btn-block" pButton
+                      label="Install Certificate" (click)="installCertificate()"></button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </p-panel>
+</div>

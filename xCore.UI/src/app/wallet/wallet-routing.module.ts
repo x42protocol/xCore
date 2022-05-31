@@ -13,6 +13,8 @@ import { GenerateAddressesComponent } from './advanced/components/generate-addre
 import { ResyncComponent } from './advanced/components/resync/resync.component';
 import { XServerComponent } from './advanced/components/xserver/xserver.component';
 import { AddressBookComponent } from './address-book/address-book.component';
+import { XserverProvisionerComponent } from './advanced/components/xserver-provisioner/xserver-provisioner.component';
+import { DappStoreComponent } from './dapp-store/dapp-store.component';
 
 const routes: Routes = [
   {
@@ -21,6 +23,7 @@ const routes: Routes = [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'history', component: HistoryComponent },
       { path: 'coldstaking', component: ColdStakingOverviewComponent },
+      { path: 'dapp-store', component: DappStoreComponent },
       {
         path: 'advanced', component: AdvancedComponent,
         children: [
@@ -31,7 +34,9 @@ const routes: Routes = [
           { path: 'extpubkey', component: ExtPubkeyComponent },
           { path: 'generate-addresses', component: GenerateAddressesComponent },
           { path: 'resync', component: ResyncComponent },
-          { path: 'xserver', component: XServerComponent }
+          { path: 'xserver', component: XServerComponent },
+          { path: 'xserverProvisioner', component: XserverProvisionerComponent },
+
         ]
       },
       { path: 'address-book', component: AddressBookComponent }

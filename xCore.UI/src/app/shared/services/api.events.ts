@@ -87,7 +87,7 @@ export class ApiEvents {
   private Start(name: WorkerType, seconds: number = 0): void {
     let tickSeconds = seconds;
     if (tickSeconds === undefined || tickSeconds === 0) {
-      tickSeconds = 30;
+      tickSeconds = 15;
     }
 
     const workers: string[] = this.simpleTimer.getTimer();

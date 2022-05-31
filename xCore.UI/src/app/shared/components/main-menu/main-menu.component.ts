@@ -291,7 +291,14 @@ export class MainMenuComponent implements OnInit, OnDestroy {
             command: (event: Event) => { this.openHistory(); }
           }
         ]
-      }
+      },
+      {
+        label: 'DApp Store',
+        icon: 'pi pi-fw pi-list',
+        command: (event: Event) => {
+          this.openDappStore();
+        },
+      },
     ];
   }
 
@@ -344,6 +351,10 @@ export class MainMenuComponent implements OnInit, OnDestroy {
 
   openHistory() {
     this.router.navigate(['/wallet/history']);
+  }
+
+  openDappStore() {
+    this.router.navigate(['/wallet/dapp-store']);
   }
 
   public onCreateClicked() {

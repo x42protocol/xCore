@@ -33,6 +33,10 @@ import { ChainService } from './chain.service';
 import { ApplicationStateService } from './application-state.service';
 import { ElectronService } from 'ngx-electron';
 import { NotificationService } from './notification.service';
+import { TestSshConnection } from '@models/test-ssh-credential-model';
+import { WordPressReserveRequest } from '../models/xserver-wordpress-reserve-request';
+import { WordPressProvisionRequest } from '../models/xserver-wordpress-provision-request';
+import { XserverProvisioningRequest } from '../models/xserver-provisioning-request';
 
 @Injectable({
   providedIn: 'root'
@@ -208,6 +212,17 @@ export class ApiService {
       .pipe(map((response: Response) => response));
   }
 
+/**
+ * Get a price lock
+ */
+  getWordpressPreviewDomains(): Observable<any> {
+
+    return this.http
+      .get(this.apiUrl + '/xServer/wordpresspreviewdomains')
+      .pipe(catchError(err => this.handleInitialError(err)))
+      .pipe(map((response: Response) => response));
+  }
+
   /**
    * Reserve a profile.
    */
@@ -218,6 +233,24 @@ export class ApiService {
       .pipe(map((response: Response) => response));
   }
 
+/**
+ * Reserve a WordPress Preview Domain.
+ */
+  reserveWordpressDomain(profileReserveRequest: WordPressReserveRequest): Observable<any> {
+    return this.http
+      .post(this.apiUrl + '/xServer/reservewordpresspreviewdomain', JSON.stringify(profileReserveRequest))
+      .pipe(catchError(err => this.handleInitialError(err)))
+      .pipe(map((response: Response) => response));
+  }
+  /**
+   * Reserve a WordPress Preview Domain.
+   */
+  provisionWordPress(request: WordPressProvisionRequest): Observable<any> {
+    return this.http
+      .post(this.apiUrl + '/xServer/provisionWordPress', JSON.stringify(request))
+      .pipe(catchError(err => this.handleInitialError(err)))
+      .pipe(map((response: Response) => response));
+  }
   /**
    * Search for xServer by Profile Name
    */
@@ -726,6 +759,26 @@ export class ApiService {
       .pipe(catchError(err => this.handleInitialError(err)))
       .pipe(map((response: Response) => response));
   }
+  /*
+  *  Test xServer SSH Connection.
+  */
+  testSshConnection(data: TestSshConnection): Observable<any> {
+    return this.http
+      .post(this.apiUrl + '/xServer/testSshCredentials', JSON.stringify(data))
+      .pipe(catchError(err => this.handleError(err)))
+      .pipe(map((response: Response) => response));
+  }
+
+  /*
+*  Provision Xserver.
+*/
+  provisionXserver(data: XserverProvisioningRequest): Observable<any> {
+    return this.http
+      .post(this.apiUrl + '/xServer/setUpxServer', JSON.stringify(data))
+      .pipe(catchError(err => this.handleError(err)))
+      .pipe(map((response: Response) => response));
+  }
+
 
   /** Use this to handle error in the initial startup (wallet/files) of xCore. */
   handleInitialError(error: HttpErrorResponse | any) {

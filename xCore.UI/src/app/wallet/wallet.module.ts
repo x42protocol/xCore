@@ -67,6 +67,10 @@ import { SliderModule } from 'primeng/slider';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { NgCircleProgressModule } from 'ng-circle-progress';
 import { ExchangeDetailsComponent } from './exchange-details/exchange-details.component';
+import { XserverProvisionerComponent } from './advanced/components/xserver-provisioner/xserver-provisioner.component';
+import { DappStoreComponent } from './dapp-store/dapp-store.component';
+import { DeployWordpressComponent } from './dapp-store/deploy-wordpress/deploy-wordpress.component';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 @NgModule({
   imports: [
@@ -102,6 +106,7 @@ import { ExchangeDetailsComponent } from './exchange-details/exchange-details.co
     RatingModule,
     SliderModule,
     RadioButtonModule,
+    ProgressSpinnerModule,
     NgCircleProgressModule.forRoot({})
   ],
   declarations: [
@@ -133,6 +138,9 @@ import { ExchangeDetailsComponent } from './exchange-details/exchange-details.co
     ColdStakingCreateHotComponent,
     CreateProfileComponent,
     ExchangeDetailsComponent,
+    XserverProvisionerComponent,
+    DappStoreComponent,
+    DeployWordpressComponent,
   ],
   providers: [
     MessageService,

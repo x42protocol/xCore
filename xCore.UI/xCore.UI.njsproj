@@ -57,6 +57,8 @@
     <Content Include="src\app\shared\components\main-menu\main-menu.component.css" />
     <Content Include="src\app\shared\components\main-menu\main-menu.component.html" />
     <Content Include="src\app\shared\services\currencies.json" />
+    <Content Include="src\app\wallet\advanced\components\xserver-provisioner\xserver-provisioner.component.css" />
+    <Content Include="src\app\wallet\advanced\components\xserver-provisioner\xserver-provisioner.component.html" />
     <Content Include="src\app\wallet\advanced\components\xserver\register\register.component.css" />
     <Content Include="src\app\wallet\advanced\components\xserver\register\register.component.html" />
     <Content Include="src\app\wallet\advanced\components\xserver\xserver.component.css" />
@@ -104,6 +106,9 @@
     <Content Include="src\app\wallet\advanced\components\generate-addresses\generate-addresses.component.html" />
     <Content Include="src\app\wallet\advanced\components\resync\resync.component.css" />
     <Content Include="src\app\wallet\advanced\components\resync\resync.component.html" />
+    <Content Include="src\app\wallet\dapp-store\dapp-store.component.html" />
+    <Content Include="src\app\wallet\dapp-store\deploy-wordpress\deploy-wordpress.component.css" />
+    <Content Include="src\app\wallet\dapp-store\deploy-wordpress\deploy-wordpress.component.html" />
     <Content Include="src\app\wallet\dashboard\dashboard.component.css" />
     <Content Include="src\app\wallet\dashboard\dashboard.component.html" />
     <Content Include="src\app\wallet\exchange-details\exchange-details.component.css" />
@@ -126,6 +131,7 @@
     <Content Include="src\app\wallet\transaction-details\transaction-details.component.html" />
     <Content Include="src\app\wallet\wallet.component.css" />
     <Content Include="src\app\wallet\wallet.component.html" />
+    <Content Include="src\app\wallet\dapp-store\dapp-store.component.css" />
     <Content Include="src\assets\.gitkeep" />
     <Content Include="src\assets\fonts\Linearicons-Free.eot" />
     <Content Include="src\assets\fonts\Linearicons-Free.svg" />
@@ -150,8 +156,10 @@
     <Content Include="src\assets\images\logo_white.png" />
     <Content Include="src\assets\images\logo_white.svg" />
     <Content Include="src\assets\images\notransactions.svg" />
+    <Content Include="src\assets\images\SugarCRM-Stacked-Full-Color.jpg" />
     <Content Include="src\assets\images\Tick_Mark-16.png" />
     <Content Include="src\assets\images\white background.png" />
+    <Content Include="src\assets\images\wordpress-logo.png" />
     <Content Include="src\assets\js\jdenticon.min.js" />
     <Content Include="src\assets\js\jdenticon.min.js.map" />
     <Content Include="src\assets\themes\bootstrap\theme.css" />
@@ -456,6 +464,7 @@
     <TypeScriptCompile Include="src\app\shared\models\coldstakingcreateaddressresponse.ts" />
     <TypeScriptCompile Include="src\app\shared\models\general-info.ts" />
     <TypeScriptCompile Include="src\app\shared\models\pricelockutil.ts" />
+    <TypeScriptCompile Include="src\app\shared\models\test-ssh-credential-model.ts" />
     <TypeScriptCompile Include="src\app\shared\models\update-info.ts" />
     <TypeScriptCompile Include="src\app\shared\models\xserver-profile-reserve-request.ts" />
     <TypeScriptCompile Include="src\app\shared\models\xserver-submit-payment-request.ts" />
@@ -483,6 +492,9 @@
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\app\shared\models\wallet-signmessagerequest.ts" />
     <TypeScriptCompile Include="src\app\shared\models\wallet-verifyrequest.ts" />
+    <TypeScriptCompile Include="src\app\shared\models\xserver-provisioning-request.ts" />
+    <TypeScriptCompile Include="src\app\shared\models\xserver-wordpress-provision-request.ts" />
+    <TypeScriptCompile Include="src\app\shared\models\xserver-wordpress-reserve-request.ts" />
     <TypeScriptCompile Include="src\app\shared\pipes\price-unit.pipe.ts" />
     <TypeScriptCompile Include="src\app\shared\pipes\size-unit.pipe.ts" />
     <TypeScriptCompile Include="src\app\shared\pipes\sort-by.pipe.ts" />
@@ -498,6 +510,8 @@
     <TypeScriptCompile Include="src\app\shared\services\storage.service.ts" />
     <TypeScriptCompile Include="src\app\shared\services\title.service.ts" />
     <TypeScriptCompile Include="src\app\shared\services\update.service.ts" />
+    <TypeScriptCompile Include="src\app\wallet\advanced\components\xserver-provisioner\xserver-provisioner.component.spec.ts" />
+    <TypeScriptCompile Include="src\app\wallet\advanced\components\xserver-provisioner\xserver-provisioner.component.ts" />
     <TypeScriptCompile Include="src\app\wallet\advanced\components\xserver\register\register.component.ts" />
     <TypeScriptCompile Include="src\app\wallet\advanced\components\xserver\xserver.component.ts" />
     <TypeScriptCompile Include="src\app\wallet\advanced\components\settings\settings.component.ts" />
@@ -550,6 +564,10 @@
     <TypeScriptCompile Include="src\app\wallet\advanced\components\ext-pubkey\ext-pubkey.component.ts" />
     <TypeScriptCompile Include="src\app\wallet\advanced\components\generate-addresses\generate-addresses.component.ts" />
     <TypeScriptCompile Include="src\app\wallet\advanced\components\resync\resync.component.ts" />
+    <TypeScriptCompile Include="src\app\wallet\dapp-store\dapp-store.component.spec.ts" />
+    <TypeScriptCompile Include="src\app\wallet\dapp-store\dapp-store.component.ts" />
+    <TypeScriptCompile Include="src\app\wallet\dapp-store\deploy-wordpress\deploy-wordpress.component.spec.ts" />
+    <TypeScriptCompile Include="src\app\wallet\dapp-store\deploy-wordpress\deploy-wordpress.component.ts" />
     <TypeScriptCompile Include="src\app\wallet\dashboard\dashboard.component.ts" />
     <TypeScriptCompile Include="src\app\wallet\exchange-details\exchange-details.component.ts" />
     <TypeScriptCompile Include="src\app\wallet\history\history.component.ts" />
@@ -588,6 +606,7 @@
     <Folder Include="src\app\setup\create\confirm-mnemonic\" />
     <Folder Include="src\app\shared\components\shutdown\" />
     <Folder Include="src\app\shared\components\main-menu\" />
+    <Folder Include="src\app\wallet\advanced\components\xserver-provisioner\" />
     <Folder Include="src\app\wallet\advanced\components\xserver\" />
     <Folder Include="src\app\wallet\advanced\components\settings\" />
     <Folder Include="src\app\wallet\advanced\components\sign-verify\" />
@@ -621,6 +640,8 @@
     <Folder Include="src\app\wallet\advanced\components\ext-pubkey\" />
     <Folder Include="src\app\wallet\advanced\components\generate-addresses\" />
     <Folder Include="src\app\wallet\advanced\components\resync\" />
+    <Folder Include="src\app\wallet\dapp-store\" />
+    <Folder Include="src\app\wallet\dapp-store\deploy-wordpress\" />
     <Folder Include="src\app\wallet\dashboard\" />
     <Folder Include="src\app\wallet\exchange-details\" />
     <Folder Include="src\app\wallet\history\" />
