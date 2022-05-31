@@ -11,12 +11,10 @@ import { debounceTime } from 'rxjs/operators';
 import { DynamicDialogRef, DynamicDialogConfig, DialogService } from 'primeng/dynamicdialog';
 import { SubmitPaymentRequest } from '../../../shared/models/xserver-submit-payment-request';
 import { SignMessageRequest } from '../../../shared/models/wallet-signmessagerequest';
-import { ProfileReserveRequest } from '../../../shared/models/xserver-profile-reserve-request';
 import { Subscription } from 'rxjs';
 import { AddressType } from '../../../shared/models/address-type';
 import { WordPressReserveRequest } from '../../../shared/models/xserver-wordpress-reserve-request';
 import { WordPressProvisionRequest } from '../../../shared/models/xserver-wordpress-provision-request';
-import { clearInterval, setInterval } from 'timers';
 
 interface TxDetails {
   transactionFee?: number;

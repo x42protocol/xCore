@@ -2,7 +2,7 @@
   "name": "xCore",
   "description": "xCore is the main application for everything on x42.",
   "version": "5.0.17",
-  "upgradedbonversion": "true",
+  "upgradedbonversion": "false",
   "bc_version": "1.1.36",
   "license": "MIT",
   "author": {

@@ -161,7 +161,8 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
     RegisterComponent,
     CreateProfileComponent,
     AddNewAddressComponent,
-    ExchangeDetailsComponent
+    ExchangeDetailsComponent,
+    DeployWordpressComponent
   ]
 })
 
