@@ -66,6 +66,13 @@ export class AdvancedComponent implements OnInit, OnDestroy {
           command: (event: Event) => {
             this.router.navigate(['/wallet/advanced/xserver']);
           }
+        },
+        {
+          label: 'xServer Provisioning',
+          icon: 'pi pi-cloud-upload',
+          command: (event: Event) => {
+            this.router.navigate(['/wallet/advanced/xserverProvisioner']);
+          }
         }
       ]
     }];

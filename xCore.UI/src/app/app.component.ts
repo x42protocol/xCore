@@ -40,7 +40,7 @@ export class AppComponent implements OnInit, OnDestroy {
   nodeStarted = false;
   nodeFailed = false;
 
-  private readonly TryDelayMilliseconds = 3000;
+  private readonly TryDelayMilliseconds = 1000;
   private readonly MaxRetryCount = 50;
   private failedAttempts = 0;
 
@@ -192,7 +192,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.zone.run(() => {
       setTimeout(() => {
         this.delayed = true;
-      }, 60000); // 60000 Make sure it is fairly high, we don't want users to immediatly perform advanced reset options when they don't need to.
+      }, 30000); // 60000 Make sure it is fairly high, we don't want users to immediatly perform advanced reset options when they don't need to.
     });
 
     this.tryStart();
@@ -273,15 +273,15 @@ export class AppComponent implements OnInit, OnDestroy {
 
   simpleWalletConnect() {
     this.connection = new signalR.HubConnectionBuilder()
-      .withUrl('http://localhost:4337/node')
+      .withUrl('http://localhost:42220/ws')
       .build();
 
     this.connection.on('BlockConnected', (block) => {
       console.log('BlockConnected:' + block);
     });
 
-    this.connection.on('TransactionReceived', (trx) => {
-      console.log('TransactionReceived:' + trx);
+    this.connection.on('xServerProvisioning', (trx) => {
+      console.log('xServerProvisioning:' + trx);
     });
 
     this.connection.on('txs', (transactions) => {
