@@ -185,17 +185,20 @@
 <section *ngIf="paymentSuccess">
   <!-- MODAL SEND -->
   <div class="modal-body ModalSend pt-0">
-    
+
     <div class="form-group clearfix mb-0">
       <div>
-        Provisioning https://{{domainName}}<br /><br />
-        Please wait...<br /><br />
+ 
         <div *ngIf="provisioningWordpress" style="width: 100%; height: 190px; text-align: center; vertical-align:middle">
+          Provisioning https://{{domainName}}<br /><br />
+          Please wait...<br /><br />
           <p-progressBar [value]="progress"></p-progressBar>
         </div>
         <div *ngIf="provisioningWordpressComplete" style="width: 100%; height: 190px; text-align: center; vertical-align:middle">
-          Your site has been provisioned. <br/>
-                                          <a href="https://{{domainName}}/wp-admin/install.php" target="_blank">https://{{domainName}}</a>
+          Your site has been sucessfully provisioned. <br /><br />
+          <a href="https://{{domainName}}/wp-admin/install.php" target="_blank">https://{{domainName}}</a><br /><br />
+          Please proceed to setting up your WordPress site and remember to write down your url and save your login details somewhere safe.
+          <button type="button" class="btn-block mt-5" (click)="ref.close('Close click')" label="Close" pButton></button>
         </div>
       </div>
     </div>
