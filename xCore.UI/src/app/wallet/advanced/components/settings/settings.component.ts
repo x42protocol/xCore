@@ -55,7 +55,7 @@ export class SettingsComponent implements OnInit {
 
     this.addressTypeOptions = [
       { label: 'Classic', value: AddressTypes.Classic, icon: 'fa fa-address-card-o' },
-      { label: 'Segwit', value: AddressTypes.Segwit, icon: 'fa fa-address-card' }
+      // { label: 'Segwit', value: AddressTypes.Segwit, icon: 'fa fa-address-card' }
     ];
 
     this.coldWalletTypeOptions = [
