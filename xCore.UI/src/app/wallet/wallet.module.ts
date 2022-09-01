@@ -71,6 +71,11 @@ import { XserverProvisionerComponent } from './advanced/components/xserver-provi
 import { DappStoreComponent } from './dapp-store/dapp-store.component';
 import { DeployWordpressComponent } from './dapp-store/deploy-wordpress/deploy-wordpress.component';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { XserverNetworkComponent } from './xserver-network/xserver-network.component';
+import { DnsManagementComponent } from './dns-management/dns-management.component';
+import { AddZoneDialogComponent } from './dns-management/add-zone-dialog/add-zone-dialog.component';
+import { AddEditDnsRecordDialogComponent } from './dns-management/add-edit-dns-record-dialog/add-edit-dns-record-dialog.component';
+import { DeleteDnsRecordDialogComponent } from './dns-management/delete-dns-record-dialog/delete-dns-record-dialog.component';
 
 @NgModule({
   imports: [
@@ -141,6 +146,11 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
     XserverProvisionerComponent,
     DappStoreComponent,
     DeployWordpressComponent,
+    XserverNetworkComponent,
+    DnsManagementComponent,
+    AddZoneDialogComponent,
+    AddEditDnsRecordDialogComponent,
+    DeleteDnsRecordDialogComponent,
   ],
   providers: [
     MessageService,

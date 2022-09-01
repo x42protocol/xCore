@@ -47,7 +47,8 @@ export class SettingsComponent implements OnInit {
           { label: 'Amber', value: 'Luna-amber' },
           { label: 'Blue', value: 'Luna-blue' },
           { label: 'Green', value: 'Luna-green' },
-          { label: 'Pink', value: 'Luna-pink' }
+          { label: 'Pink', value: 'Luna-pink' },
+          { label: 'x42Dark', value: 'x42Dark' }
         ]
       }
     ];

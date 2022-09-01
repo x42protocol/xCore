@@ -1,0 +1,68 @@
+
+<div style="padding:20px;"><p-table [responsive]="true" [value]="peers" [style]="{'margin-top':'20px'}">
+  <ng-template pTemplate="caption">
+    xServer Network
+  </ng-template>
+  <ng-template pTemplate="header">
+    <tr>
+      <th style="width:200px;" [pSortableColumn]="'name'">Name</th>
+      <th style="width:80px;" [pSortableColumn]="'tier'">Tier</th>
+      <th style="width:80px;" [pSortableColumn]="'networkProtocol'">Protocol</th>
+      <th [pSortableColumn]="'networkAddress'">Address</th>
+      <th style="width:80px;" [pSortableColumn]="'networkPort'">Port</th>
+      <th style="width:80px;" [pSortableColumn]="'version'">Version</th>
+      <th style="width:80px;" [pSortableColumn]="'responseTime'">Ping</th>
+
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-peer>
+    <tr>
+      <td class="text-left">
+        {{peer.name}}
+      </td>
+      <td class="text-left">
+        <span class="ui-column-title">Tier</span>
+        {{peer.tier}}
+
+      </td>
+      <td class="text-left">
+        <span class="ui-column-title">Protocol</span>
+
+        {{peer.networkProtocol}}
+
+      </td>
+
+
+      <td class="text-left">
+        <span class="ui-column-title">Address</span>
+        {{peer.networkAddress}}
+
+      </td>
+
+      <td class="text-left">
+        <span class="ui-column-title">Port</span>
+        {{peer.networkPort}}
+
+      </td>
+      <td class="text-left">
+        <span class="ui-column-title">Version</span>
+        {{peer.version}}
+
+      </td>
+      <td class="text-left">
+        <span class="ui-column-title">Ping</span>
+        {{peer.responseTime}}
+
+      </td>
+
+
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="summary">
+    <!--<div class="text-center">
+      <button type="button" (click)="goToHistory()" icon="pi pi-table" label="View all history"
+              pButton></button>
+    </div>-->
+  </ng-template>
+</p-table></div>
+

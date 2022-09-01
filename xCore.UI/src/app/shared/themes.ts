@@ -25,6 +25,7 @@ export class Themes {
     themeArray.push(new Theme('Luna-blue', basePath + 'luna-blue' + endPath, '#dedede', '#3f3f3f !important', 'dark'));
     themeArray.push(new Theme('Luna-green', basePath + 'luna-green' + endPath, '#dedede', '#3f3f3f !important', 'dark'));
     themeArray.push(new Theme('Luna-pink', basePath + 'luna-pink' + endPath, '#dedede', '#3f3f3f !important', 'dark'));
+    themeArray.push(new Theme('x42Dark', basePath + 'x42Dark' + endPath, '#dedede', '#1E1E1E !important', 'dark'));
 
     return themeArray;
   }

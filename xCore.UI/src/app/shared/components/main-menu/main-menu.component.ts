@@ -299,6 +299,20 @@ export class MainMenuComponent implements OnInit, OnDestroy {
           this.openDappStore();
         },
       },
+      {
+        label: 'xServer Network',
+        icon: 'pi pi-fw pi-sitemap',
+        command: (event: Event) => {
+          this.openxServerNetwork();
+        }
+      },
+      {
+        label: 'DNS',
+        icon: 'pi pi-fw pi-table',
+        command: (event: Event) => {
+          this.openDnsManagement();
+        },
+      },
     ];
   }
 
@@ -355,6 +369,14 @@ export class MainMenuComponent implements OnInit, OnDestroy {
 
   openDappStore() {
     this.router.navigate(['/wallet/dapp-store']);
+  }
+
+  openxServerNetwork() {
+    this.router.navigate(['/wallet/xserver-network']);
+  }
+
+  openDnsManagement() {
+    this.router.navigate(['/wallet/dns-management']);
   }
 
   public onCreateClicked() {
