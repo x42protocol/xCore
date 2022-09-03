@@ -13,6 +13,7 @@ export class DnsManagementComponent implements OnInit {
   constructor(public dialogService: DialogService) { }
 
   zones = [];
+  featureEnabled = false;
   loadingZones = true;
   zoneRecords = [];
   zoneData = [

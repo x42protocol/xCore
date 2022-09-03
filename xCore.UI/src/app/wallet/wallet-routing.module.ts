@@ -17,6 +17,7 @@ import { XserverProvisionerComponent } from './advanced/components/xserver-provi
 import { DappStoreComponent } from './dapp-store/dapp-store.component';
 import { XserverNetworkComponent } from './xserver-network/xserver-network.component';
 import { DnsManagementComponent } from './dns-management/dns-management.component';
+import { StorageManagementComponent } from './storage-management/storage-management.component';
 
 const routes: Routes = [
   {
@@ -28,7 +29,7 @@ const routes: Routes = [
       { path: 'dapp-store', component: DappStoreComponent },
       { path: 'xserver-network', component: XserverNetworkComponent },
       { path: 'dns-management', component: DnsManagementComponent },
-
+      { path: 'storage-management', component: StorageManagementComponent},
       {
         path: 'advanced', component: AdvancedComponent,
         children: [

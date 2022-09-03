@@ -76,6 +76,7 @@ import { DnsManagementComponent } from './dns-management/dns-management.componen
 import { AddZoneDialogComponent } from './dns-management/add-zone-dialog/add-zone-dialog.component';
 import { AddEditDnsRecordDialogComponent } from './dns-management/add-edit-dns-record-dialog/add-edit-dns-record-dialog.component';
 import { DeleteDnsRecordDialogComponent } from './dns-management/delete-dns-record-dialog/delete-dns-record-dialog.component';
+import { StorageManagementComponent } from './storage-management/storage-management.component';
 
 @NgModule({
   imports: [
@@ -151,6 +152,7 @@ import { DeleteDnsRecordDialogComponent } from './dns-management/delete-dns-reco
     AddZoneDialogComponent,
     AddEditDnsRecordDialogComponent,
     DeleteDnsRecordDialogComponent,
+    StorageManagementComponent,
   ],
   providers: [
     MessageService,
@@ -172,7 +174,9 @@ import { DeleteDnsRecordDialogComponent } from './dns-management/delete-dns-reco
     CreateProfileComponent,
     AddNewAddressComponent,
     ExchangeDetailsComponent,
-    DeployWordpressComponent
+    DeployWordpressComponent,
+    AddEditDnsRecordDialogComponent,
+    AddZoneDialogComponent
   ]
 })
 

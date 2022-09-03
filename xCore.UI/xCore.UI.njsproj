@@ -115,6 +115,8 @@
     <Content Include="src\app\wallet\dns-management\add-zone-dialog\add-zone-dialog.component.html" />
     <Content Include="src\app\wallet\dns-management\dns-management.component.css" />
     <Content Include="src\app\wallet\dns-management\dns-management.component.html" />
+    <Content Include="src\app\wallet\storage-management\storage-management.component.css" />
+    <Content Include="src\app\wallet\storage-management\storage-management.component.html" />
     <Content Include="src\app\wallet\xserver-network\xserver-network.component.html" />
     <Content Include="src\app\wallet\xserver-network\xserver-network.component.ts" />
     <Content Include="src\app\wallet\xserver-network\xserver-network.component.spec.ts" />
@@ -167,6 +169,7 @@
     <Content Include="src\assets\images\logo_white.svg" />
     <Content Include="src\assets\images\notransactions.svg" />
     <Content Include="src\assets\images\powerdns.png" />
+    <Content Include="src\assets\images\storjlogo.jpg" />
     <Content Include="src\assets\images\SugarCRM-Stacked-Full-Color.jpg" />
     <Content Include="src\assets\images\Tick_Mark-16.png" />
     <Content Include="src\assets\images\white background.png" />
@@ -610,6 +613,8 @@
     <TypeScriptCompile Include="src\app\wallet\receive\receive.component.ts" />
     <TypeScriptCompile Include="src\app\wallet\send\send.component.ts" />
     <TypeScriptCompile Include="src\app\wallet\status-bar\status-bar.component.ts" />
+    <TypeScriptCompile Include="src\app\wallet\storage-management\storage-management.component.spec.ts" />
+    <TypeScriptCompile Include="src\app\wallet\storage-management\storage-management.component.ts" />
     <TypeScriptCompile Include="src\app\wallet\transaction-details\transaction-details.component.ts" />
     <TypeScriptCompile Include="src\app\wallet\wallet-routing.module.ts" />
     <TypeScriptCompile Include="src\app\wallet\wallet.component.ts" />
@@ -688,6 +693,7 @@
     <Folder Include="src\app\wallet\receive\" />
     <Folder Include="src\app\wallet\send\" />
     <Folder Include="src\app\wallet\status-bar\" />
+    <Folder Include="src\app\wallet\storage-management\" />
     <Folder Include="src\app\wallet\transaction-details\" />
     <Folder Include="src\app\wallet\xserver-network\" />
     <Folder Include="src\assets\" />

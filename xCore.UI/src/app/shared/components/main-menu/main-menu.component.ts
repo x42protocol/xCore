@@ -313,6 +313,13 @@ export class MainMenuComponent implements OnInit, OnDestroy {
           this.openDnsManagement();
         },
       },
+      {
+        label: 'Storage',
+        icon: 'pi pi-fw pi-file',
+        command: (event: Event) => {
+          this.openStorageManagement();
+        },
+      },
     ];
   }
 
@@ -378,6 +385,11 @@ export class MainMenuComponent implements OnInit, OnDestroy {
   openDnsManagement() {
     this.router.navigate(['/wallet/dns-management']);
   }
+
+  openStorageManagement() {
+    this.router.navigate(['/wallet/storage-management']);
+  }
+
 
   public onCreateClicked() {
     this.dialogService.open(CreateComponent, {

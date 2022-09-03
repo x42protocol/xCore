@@ -9,13 +9,13 @@
 
       </div>
       <div class="col-6" style="text-align: right;">
-        Powered By <img src="../../../assets/images/powerdns.png" style="width:150px;" />
+        Powered By : <img src="../../../assets/images/powerdns.png" style="width:150px;" />
       </div>
     </div>
     <div class="row">
       <div class="col-6">
 
-    &nbsp;
+        &nbsp;
 
       </div>
       <div class="col-6" style="text-align: right;">
@@ -23,99 +23,109 @@
 
       </div>
     </div>
-    <div class="row">
-      <div class="col-6">
-        <div *ngIf="!loadingZones">
-          Filter :
-          <p-dropdown [options]="zones" (onChange)="zoneChanged($event.value)"></p-dropdown>
-        </div>
-        <div *ngIf="loadingZones">
-          Loading Zones
+    <div *ngIf="!featureEnabled">
+      <div class="row">
+        <div class="col-12">
+          <h1>Coming Soon...</h1>
         </div>
       </div>
-      <div class="col-6" style="text-align: right;">
-        <button type="button" pButton label="Add New Zone" (click)="openAddNewRecordDialog()"></button>
-      </div>
     </div>
-    <div class="row">
-      <div class="col-6">
-        &nbsp;
+    <div *ngIf="featureEnabled">
+      <div class="row">
+        <div class="col-6">
+          <div *ngIf="!loadingZones">
+            Filter :
+            <p-dropdown [options]="zones" (onChange)="zoneChanged($event.value)"></p-dropdown>
+          </div>
+          <div *ngIf="loadingZones">
+            Loading Zones
+          </div>
+        </div>
+        <div class="col-6" style="text-align: right;">
+          <button type="button" pButton label="Add New Zone" (click)="openAddNewRecordDialog()"></button>
+        </div>
       </div>
-      <div class="col-6">
-        &nbsp;
+      <div class="row">
+        <div class="col-6">
+          &nbsp;
+        </div>
+        <div class="col-6">
+          &nbsp;
+        </div>
       </div>
-    </div>
-    <div class="row">
-      <div class="col-6">
-        <h2>
-          DNS Records
-        </h2>
-        
-      </div>
-      <div class="col-6" style="text-align: right;">
-        <button type="button" icon="pi pi-plus" pButton label="Add New Record" (click)="openAddRecordDialog()"></button>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-12">
-        <p-table [totalRecords]="totalRecords"
-                 [loading]="loadingZones"
-                 [responsive]="true"
-                 [value]="zoneRecords"
-                 [style]="{'margin-top':'20px'}"
-                 [scrollable]="true"
-                 scrollHeight="360px">
+      <div class="row">
+        <div class="col-6">
+          <h2>
+            DNS Records
+          </h2>
 
-          <ng-template pTemplate="header">
-            <tr>
-              <th>
-                Name
-              </th>
-              <th>
-                Type
-              </th>
-              <th>
-                Status
-              </th>
-              <th>
-                Ttl
-              </th>
-              <th>
-                Data
-              </th>
-              <th>
-                Details
-              </th>
-            </tr>
-          </ng-template>
-          <ng-template pTemplate="body" let-zoneRecord>
-            <tr>
-              <td>
-                {{ zoneRecord.name }}
-              </td>
-              <td class="text-left">
-                {{ zoneRecord.type }}
-              </td>
-              <td class="text-left">
-                {{ zoneRecord.status }}
-              </td>
-              <td class="text-left">
-                {{ zoneRecord.ttl }}
-              </td>
-              <td class="text-left">
-                {{ zoneRecord.data }}
-              </td>
-              <td class="text-left">
-                <a href="" class="link">Edit</a> &nbsp;
-                <a href="" class="link">Delete</a>
+        </div>
+        <div class="col-6" style="text-align: right;">
+          <button type="button" icon="pi pi-plus" pButton label="Add New Record" (click)="openAddRecordDialog()"></button>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          <p-table [totalRecords]="totalRecords"
+                   [loading]="loadingZones"
+                   [responsive]="true"
+                   [value]="zoneRecords"
+                   [style]="{'margin-top':'20px'}"
+                   [scrollable]="true"
+                   scrollHeight="360px">
 
-              </td>
-            </tr>
-          </ng-template>
-        </p-table>
+            <ng-template pTemplate="header">
+              <tr>
+                <th>
+                  Name
+                </th>
+                <th>
+                  Type
+                </th>
+                <th>
+                  Status
+                </th>
+                <th>
+                  Ttl
+                </th>
+                <th>
+                  Data
+                </th>
+                <th>
+                  Details
+                </th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-zoneRecord>
+              <tr>
+                <td>
+                  {{ zoneRecord.name }}
+                </td>
+                <td class="text-left">
+                  {{ zoneRecord.type }}
+                </td>
+                <td class="text-left">
+                  {{ zoneRecord.status }}
+                </td>
+                <td class="text-left">
+                  {{ zoneRecord.ttl }}
+                </td>
+                <td class="text-left">
+                  {{ zoneRecord.data }}
+                </td>
+                <td class="text-left">
+                  <a href="" class="link">Edit</a> &nbsp;
+                  <a href="" class="link">Delete</a>
 
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+
+        </div>
       </div>
     </div>
+
   </div>
 </div>
 
