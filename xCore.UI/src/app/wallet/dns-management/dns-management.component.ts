@@ -16,6 +16,7 @@ export class DnsManagementComponent implements OnInit {
   featureEnabled = false;
   loadingZones = true;
   zoneRecords = [];
+  totalRecords = 0;
   zoneData = [
     {
       zone: 'jimmy.com',
