@@ -15,6 +15,9 @@ import { XServerComponent } from './advanced/components/xserver/xserver.componen
 import { AddressBookComponent } from './address-book/address-book.component';
 import { XserverProvisionerComponent } from './advanced/components/xserver-provisioner/xserver-provisioner.component';
 import { DappStoreComponent } from './dapp-store/dapp-store.component';
+import { XserverNetworkComponent } from './xserver-network/xserver-network.component';
+import { DnsManagementComponent } from './dns-management/dns-management.component';
+import { StorageManagementComponent } from './storage-management/storage-management.component';
 
 const routes: Routes = [
   {
@@ -24,6 +27,9 @@ const routes: Routes = [
       { path: 'history', component: HistoryComponent },
       { path: 'coldstaking', component: ColdStakingOverviewComponent },
       { path: 'dapp-store', component: DappStoreComponent },
+      { path: 'xserver-network', component: XserverNetworkComponent },
+      { path: 'dns-management', component: DnsManagementComponent },
+      { path: 'storage-management', component: StorageManagementComponent},
       {
         path: 'advanced', component: AdvancedComponent,
         children: [

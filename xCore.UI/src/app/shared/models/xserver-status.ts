@@ -7,7 +7,7 @@ export class XServerStatus {
   public nodes: XServerPeer[];
 }
 
-class XServerPeer {
+export class XServerPeer {
   public name: string;
 
   public networkProtocol: number;

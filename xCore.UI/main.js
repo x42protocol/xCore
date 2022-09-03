@@ -394,6 +394,7 @@ function launchDaemon(apiPath, chain) {
     commandLineArguments.push('-rpcport=' + chain.rpcPort);
     commandLineArguments.push('-apiport=' + chain.apiPort);
     commandLineArguments.push('-wsport=' + chain.wsPort);
+    commandLineArguments.push('-enableWS=' + "true");
     if (chain.datafolder) {
         commandLineArguments.push('-datadir=' + chain.datafolder);
     }
