@@ -169,7 +169,7 @@
     <Content Include="src\assets\images\logo_white.svg" />
     <Content Include="src\assets\images\notransactions.svg" />
     <Content Include="src\assets\images\powerdns.png" />
-    <Content Include="src\assets\images\storjlogo.jpg" />
+    <Content Include="src\assets\images\storjlogo.png" />
     <Content Include="src\assets\images\SugarCRM-Stacked-Full-Color.jpg" />
     <Content Include="src\assets\images\Tick_Mark-16.png" />
     <Content Include="src\assets\images\white background.png" />
