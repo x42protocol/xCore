@@ -1,6 +1,11 @@
 
 <div style="padding:20px;">
-  <p-table [responsive]="true" [value]="peers" [style]="{'margin-top':'20px'}">
+  <p-table [responsive]="true"
+           [value]="peers"
+           [style]="{'margin-top':'20px'}"
+           [paginator]="true"
+           [rows]="10"
+           [rowsPerPageOptions]="[10,25,50]">
     <ng-template pTemplate="caption">
       xServer Network
     </ng-template>
@@ -71,7 +76,7 @@
 <div>
   <div class="row">
     <div class="col-12" style="text-align:center">
-      <h3>Want to spin us your own xServer?</h3>
+      <h3>Want to spin up your own xServer?</h3>
       <a href="https://www.tkqlhce.com/click-100638521-13796470" target="_blank">Sign Up Here</a>
     </div>
   </div>
