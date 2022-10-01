@@ -18,6 +18,7 @@
         <th style="width:80px;" [pSortableColumn]="'networkPort'">Port</th>
         <th style="width:80px;" [pSortableColumn]="'version'">Version</th>
         <th style="width:80px;" [pSortableColumn]="'responseTime'">Ping</th>
+        <th style="width:100px;" [pSortableColumn]="'responseTime'">Details</th>
 
       </tr>
     </ng-template>
@@ -60,7 +61,10 @@
           {{peer.responseTime}}
 
         </td>
-
+        <td class="text-left">
+          <span class="ui-column-title">Details</span>
+          <a class="link" (click)="openDetailDialog(peer)">Details <i class="pi pi-arrow-circle-right"></i></a>
+        </td>
 
       </tr>
     </ng-template>

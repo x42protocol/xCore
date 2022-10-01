@@ -37,6 +37,7 @@ import { TestSshConnection } from '@models/test-ssh-credential-model';
 import { WordPressReserveRequest } from '../models/xserver-wordpress-reserve-request';
 import { WordPressProvisionRequest } from '../models/xserver-wordpress-provision-request';
 import { XserverProvisioningRequest } from '../models/xserver-provisioning-request';
+import { XserverUpdateRequest } from '../models/xserver-update-request';
 
 @Injectable({
   providedIn: 'root'
@@ -776,6 +777,28 @@ export class ApiService {
     return this.http
       .post(this.apiUrl + '/xServer/setUpxServer', JSON.stringify(data))
       .pipe(catchError(err => this.handleError(err)))
+      .pipe(map((response: Response) => response));
+  }
+
+/*
+*  Update Xserver.
+*/
+  updateXserver(data: XserverUpdateRequest): Observable<any> {
+    return this.http
+      .post(this.apiUrl + '/xServer/updatexServer', JSON.stringify(data))
+      .pipe(catchError(err => this.handleError(err)))
+      .pipe(map((response: Response) => response));
+  }
+
+
+/*
+*  Get xServerDetails API once.
+*/
+  getxServerDetails(address: string): Observable<any> {
+
+    return this.http
+      .get('http://ip-api.com/json/' + address)
+      .pipe(catchError(err => this.handleInitialError(err)))
       .pipe(map((response: Response) => response));
   }
 

@@ -57,6 +57,8 @@
     <Content Include="src\app\shared\components\main-menu\main-menu.component.css" />
     <Content Include="src\app\shared\components\main-menu\main-menu.component.html" />
     <Content Include="src\app\shared\services\currencies.json" />
+    <Content Include="src\app\wallet\advanced\components\x-server-updater\x-server-updater.component.css" />
+    <Content Include="src\app\wallet\advanced\components\x-server-updater\x-server-updater.component.html" />
     <Content Include="src\app\wallet\advanced\components\xserver-provisioner\xserver-provisioner.component.css" />
     <Content Include="src\app\wallet\advanced\components\xserver-provisioner\xserver-provisioner.component.html" />
     <Content Include="src\app\wallet\advanced\components\xserver\register\register.component.css" />
@@ -117,6 +119,8 @@
     <Content Include="src\app\wallet\dns-management\dns-management.component.html" />
     <Content Include="src\app\wallet\storage-management\storage-management.component.css" />
     <Content Include="src\app\wallet\storage-management\storage-management.component.html" />
+    <Content Include="src\app\wallet\xserver-network\x-server-details\x-server-details.component.css" />
+    <Content Include="src\app\wallet\xserver-network\x-server-details\x-server-details.component.html" />
     <Content Include="src\app\wallet\xserver-network\xserver-network.component.html" />
     <Content Include="src\app\wallet\xserver-network\xserver-network.component.ts" />
     <Content Include="src\app\wallet\xserver-network\xserver-network.component.spec.ts" />
@@ -523,6 +527,9 @@
     <TypeScriptCompile Include="src\app\shared\models\wallet-signmessagerequest.ts" />
     <TypeScriptCompile Include="src\app\shared\models\wallet-verifyrequest.ts" />
     <TypeScriptCompile Include="src\app\shared\models\xserver-provisioning-request.ts" />
+    <TypeScriptCompile Include="src\app\shared\models\xserver-update-request.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\app\shared\models\xserver-wordpress-provision-request.ts" />
     <TypeScriptCompile Include="src\app\shared\models\xserver-wordpress-reserve-request.ts" />
     <TypeScriptCompile Include="src\app\shared\pipes\price-unit.pipe.ts" />
@@ -540,6 +547,8 @@
     <TypeScriptCompile Include="src\app\shared\services\storage.service.ts" />
     <TypeScriptCompile Include="src\app\shared\services\title.service.ts" />
     <TypeScriptCompile Include="src\app\shared\services\update.service.ts" />
+    <TypeScriptCompile Include="src\app\wallet\advanced\components\x-server-updater\x-server-updater.component.spec.ts" />
+    <TypeScriptCompile Include="src\app\wallet\advanced\components\x-server-updater\x-server-updater.component.ts" />
     <TypeScriptCompile Include="src\app\wallet\advanced\components\xserver-provisioner\xserver-provisioner.component.spec.ts" />
     <TypeScriptCompile Include="src\app\wallet\advanced\components\xserver-provisioner\xserver-provisioner.component.ts" />
     <TypeScriptCompile Include="src\app\wallet\advanced\components\xserver\register\register.component.ts" />
@@ -619,6 +628,8 @@
     <TypeScriptCompile Include="src\app\wallet\wallet-routing.module.ts" />
     <TypeScriptCompile Include="src\app\wallet\wallet.component.ts" />
     <TypeScriptCompile Include="src\app\wallet\wallet.module.ts" />
+    <TypeScriptCompile Include="src\app\wallet\xserver-network\x-server-details\x-server-details.component.spec.ts" />
+    <TypeScriptCompile Include="src\app\wallet\xserver-network\x-server-details\x-server-details.component.ts" />
     <TypeScriptCompile Include="src\environments\environment.dev.ts" />
     <TypeScriptCompile Include="src\environments\environment.prod.ts" />
     <TypeScriptCompile Include="src\environments\environment.ts" />
@@ -644,6 +655,7 @@
     <Folder Include="src\app\setup\create\confirm-mnemonic\" />
     <Folder Include="src\app\shared\components\shutdown\" />
     <Folder Include="src\app\shared\components\main-menu\" />
+    <Folder Include="src\app\wallet\advanced\components\x-server-updater\" />
     <Folder Include="src\app\wallet\advanced\components\xserver-provisioner\" />
     <Folder Include="src\app\wallet\advanced\components\xserver\" />
     <Folder Include="src\app\wallet\advanced\components\settings\" />
@@ -696,6 +708,7 @@
     <Folder Include="src\app\wallet\storage-management\" />
     <Folder Include="src\app\wallet\transaction-details\" />
     <Folder Include="src\app\wallet\xserver-network\" />
+    <Folder Include="src\app\wallet\xserver-network\x-server-details\" />
     <Folder Include="src\assets\" />
     <Folder Include="src\assets\fonts\" />
     <Folder Include="src\assets\images\" />
