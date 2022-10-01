@@ -1,0 +1,51 @@
+<div class="modal-body details">
+  <ul class="list-inline row">
+    <li class="list-inline-item col blockLabel">Name : </li>
+    <li class="list-inline-item col-10 blockText">{{ xServer.name}}</li>
+  </ul>
+  <ul class="list-inline row">
+    <li class="list-inline-item col blockLabel">Tier : </li>
+    <li class="list-inline-item col-10 blockText">{{xServer.tier }}</li>
+  </ul>
+  <ul class="list-inline row">
+    <li class="list-inline-item col blockLabel">Protocol :</li>
+    <li class="list-inline-item col-10 blockText">{{xServer.networkProtocol }}</li>
+  </ul>
+  <ul class="list-inline row">
+    <li class="list-inline-item col blockLabel">Address :</li>
+    <li class="list-inline-item col-10 blockText">{{xServer.networkAddress }}</li>
+  </ul>
+  <ul class="list-inline row">
+    <li class="list-inline-item col blockLabel">Port :</li>
+    <li class="list-inline-item col-10 blockText">{{xServer.networkPort }}</li>
+  </ul>
+  <ul class="list-inline row">
+    <li class="list-inline-item col blockLabel">Version :</li>
+    <li class="list-inline-item col-10 blockText">{{xServer.version }}</li>
+  </ul>
+  <ul class="list-inline row">
+    <li class="list-inline-item col blockLabel">Ping :</li>
+    <li class="list-inline-item col-10 blockText">{{xServer.responseTime }}</li>
+  </ul>
+  <ul class="list-inline row">
+    <li class="list-inline-item col blockLabel">Public Key :</li>
+    <li class="list-inline-item col-10 blockText">{{xServer.publicKey }}</li>
+  </ul>
+  <ul class="list-inline row">
+    <li class="list-inline-item col blockLabel">IP :</li>
+    <li class="list-inline-item col-10 blockText">{{ipApiData.query }}</li>
+  </ul>
+  <ul class="list-inline row">
+    <li class="list-inline-item col blockLabel">Country :</li>
+    <li class="list-inline-item col-10 blockText">{{ipApiData.country }}</li>
+  </ul>
+  <ul class="list-inline row">
+    <li class="list-inline-item col blockLabel">City :</li>
+    <li class="list-inline-item col-10 blockText">{{ipApiData.city }}</li>
+  </ul>
+  <ul class="list-inline row">
+    <li class="list-inline-item col blockLabel">ISP :</li>
+    <li *ngIf="!loadingGeolocation" class="list-inline-item col-10 blockText">{{ipApiData.isp }}</li>
+  </ul>
+</div>
+

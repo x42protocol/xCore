@@ -1,8 +1,10 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { DialogService } from 'primeng/dynamicdialog';
 import { Subscription } from 'rxjs';
 import { WorkerType } from '../../shared/models/worker';
 import { XServerPeer, XServerStatus } from '../../shared/models/xserver-status';
 import { ApiEvents } from '../../shared/services/api.events';
+import { XServerDetailsComponent } from './x-server-details/x-server-details.component';
 
 @Component({
   selector: 'app-xserver-network',
@@ -11,8 +13,10 @@ import { ApiEvents } from '../../shared/services/api.events';
 })
 export class XserverNetworkComponent implements OnInit, OnDestroy {
   private xServerInfoSubscription: Subscription;
+
   peers: XServerPeer[] = [];
-  constructor(private apiEvents: ApiEvents) { }
+  constructor(private apiEvents: ApiEvents, public dialogService: DialogService,
+) { }
 
   cols = [
     { field: 'name', header: 'name' },
@@ -26,6 +30,16 @@ export class XserverNetworkComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.startSubscriptions();
+  }
+
+  public openDetailDialog(details: any) {
+    const modalData = { details };
+
+    this.dialogService.open(XServerDetailsComponent, {
+      header: 'xServer Details',
+      data: modalData,
+      width: '750px'
+    });
   }
 
 

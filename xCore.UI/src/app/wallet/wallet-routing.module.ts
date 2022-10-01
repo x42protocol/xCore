@@ -18,6 +18,7 @@ import { DappStoreComponent } from './dapp-store/dapp-store.component';
 import { XserverNetworkComponent } from './xserver-network/xserver-network.component';
 import { DnsManagementComponent } from './dns-management/dns-management.component';
 import { StorageManagementComponent } from './storage-management/storage-management.component';
+import { XServerUpdaterComponent } from './advanced/components/x-server-updater/x-server-updater.component';
 
 const routes: Routes = [
   {
@@ -42,6 +43,7 @@ const routes: Routes = [
           { path: 'resync', component: ResyncComponent },
           { path: 'xserver', component: XServerComponent },
           { path: 'xserverProvisioner', component: XserverProvisionerComponent },
+          { path: 'xserverUpdater', component: XServerUpdaterComponent },
 
         ]
       },

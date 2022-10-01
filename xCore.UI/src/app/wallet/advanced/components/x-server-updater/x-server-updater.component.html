@@ -1,0 +1,66 @@
+<div class="p-4">
+
+  <p-panel header="xServer Updater (Current Version : {{currentxServerVersion}})">
+    <div style="min-height:200px;">
+      <div *ngIf="!connected && !updating && !updated">
+        <div class="form-group">
+          <div class='col-12 blockLabel'>
+            Server IP Address:
+          </div>
+          <div class='col blockText'>
+            <input type="text" class="form-control" [(ngModel)]="serverIP" placeholder="Server IP Address"
+                   pInputText>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class='col-12 blockLabel'>
+            SSH User:
+          </div>
+          <div class='col blockText'>
+            <input type="text" class="form-control" [(ngModel)]="sshUser" placeholder="SSH User" pInputText>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="col-12 blockLabel">
+            SSH Password:
+          </div>
+          <div class="col blockText">
+            <input type="password" class="form-control" [(ngModel)]="sshPassword" placeholder="SSH Password"
+                   pInputText>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="col-12 blockLabel">
+            Confirm SSH Password:
+          </div>
+          <div class="col blockText">
+            <input type="password" class="form-control" [(ngModel)]="confirmSshPassword"
+                   placeholder="Confirm SSH Password" pInputText>
+          </div>
+        </div>
+        <div class="form-group">
+          <button type="submit" class="btn-block" (click)="onTestCredentialsClick()"
+                  (disabled)="!testingCredentials" pButton label="Update xServer"></button>
+        </div>
+        <div class="form-group" *ngIf="errorMessage !== ''">
+          {{errorMessage}}
+        </div>
+      </div>
+      
+      <div *ngIf="updating">
+        <p #scrollMe
+           style="background-color: black; color: white; height: 500px; width: 100%; overflow-y: scroll; padding: 10px;"
+           [innerText]="multiLineText"></p>
+
+      </div>
+
+      <div *ngIf="updated">
+        <div class="row">
+          <div class="col-12"><h5>Your xServer has been updated!</h5></div>
+        </div>
+
+      </div>
+    </div>
+  </p-panel>
+</div>
