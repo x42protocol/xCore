@@ -133,7 +133,7 @@ export class XServerComponent implements OnInit, OnDestroy {
           this.xServerInfo = response;
           console.log(this.xServerInfo);
           if (this.xServerInfo.id > 0) {
-            this.xServerCheck = 2;
+            this.xServerCheck = 3;
             this.apiService.receivedByAddress(this.xServerInfo.feeAddress).subscribe(
               receivedByAddressResult => {
                 this.feeAddressChecked = true;
