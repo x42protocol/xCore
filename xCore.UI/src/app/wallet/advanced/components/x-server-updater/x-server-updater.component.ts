@@ -59,7 +59,7 @@ export class XServerUpdaterComponent implements OnInit, OnDestroy {
     this.xServerInfoSubscription = this.apiEvents.XServerInfo.subscribe((result: XServerStatus) => {
       if (result !== null) {
         this.peers = result.nodes.sort(l => l.responseTime);
-        const myXserver = this.peers.find(l => l.name == this.profile);
+        const myXserver = this.peers.find(l => l.name === this.profile);
 
         if (myXserver) {
           this.currentxServerVersion = myXserver.version;
