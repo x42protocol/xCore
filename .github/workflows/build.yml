@@ -98,9 +98,9 @@ jobs:
         cd ${{ env.UI_PATH }}
         npm install
 
-    - name: Publish (npm)
-      run: |
-        cd ${{ env.UI_PATH }}
-        npm run publish:${{ matrix.platform }}
+#    - name: Publish (npm)
+#      run: |
+#        cd ${{ env.UI_PATH }}
+#        npm run publish:${{ matrix.platform }}
 #      env:
 #        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
