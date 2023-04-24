@@ -102,5 +102,5 @@ jobs:
       run: |
         cd ${{ env.UI_PATH }}
         npm run publish:${{ matrix.platform }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#      env:
+#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
