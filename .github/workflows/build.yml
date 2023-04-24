@@ -25,7 +25,8 @@ jobs:
             extension: ".dmg"
             bc_extension: ".zip"
             platform: "mac"
-        node_version: [14.x]
+        node_version: [16.18.0]
+        npm_version: [8.19.2]
         dotnet_version: ['3.1.412']
       fail-fast: false
 
@@ -102,5 +103,5 @@ jobs:
       run: |
         cd ${{ env.UI_PATH }}
         npm run publish:${{ matrix.platform }}
-#      env:
-#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
