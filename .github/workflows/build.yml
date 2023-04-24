@@ -25,7 +25,7 @@ jobs:
             extension: ".dmg"
             bc_extension: ".zip"
             platform: "mac"
-        node_version: [14.x]
+        node_version: [16.x]
         dotnet_version: ['3.1.412']
       fail-fast: false
 
