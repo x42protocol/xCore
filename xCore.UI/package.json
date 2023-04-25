@@ -125,7 +125,7 @@
     "core-js": "3.7.0",
     "dexie": "3.0.2",
     "electron": "11.4.12",
-    "electron-builder": "22.14.5",
+    "electron-builder": "22.14.13",
     "electron-reload": "1.5.0",
     "enhanced-resolve": "5.3.1",
     "hammerjs": "2.0.8",
