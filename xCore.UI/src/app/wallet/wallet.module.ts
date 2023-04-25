@@ -65,7 +65,6 @@ import { ToolbarModule } from 'primeng/toolbar';
 import { RatingModule } from 'primeng/rating';
 import { SliderModule } from 'primeng/slider';
 import { RadioButtonModule } from 'primeng/radiobutton';
-import { NgCircleProgressModule } from 'ng-circle-progress';
 import { ExchangeDetailsComponent } from './exchange-details/exchange-details.component';
 import { XserverProvisionerComponent } from './advanced/components/xserver-provisioner/xserver-provisioner.component';
 import { DappStoreComponent } from './dapp-store/dapp-store.component';
@@ -114,8 +113,7 @@ import { XServerUpdaterComponent } from './advanced/components/x-server-updater/
     RatingModule,
     SliderModule,
     RadioButtonModule,
-    ProgressSpinnerModule,
-    NgCircleProgressModule.forRoot({})
+    ProgressSpinnerModule
   ],
   declarations: [
     WalletComponent,
