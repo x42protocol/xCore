@@ -93,25 +93,6 @@
               </div>
             </div>
             <div class="col-6 text-center">
-              <circle-progress *ngIf="!paymentSuccess"
-                               [percent]=percentageLeft
-                               [radius]="75"
-                               [outerStrokeWidth]="10"
-                               [innerStrokeWidth]="4"
-                               [outerStrokeColor]=outerColor
-                               [innerStrokeColor]=innerColor
-                               [animation]="true"
-                               [animationDuration]="500"
-                               [title]=remainingTitle
-                               [subtitle]=remainingSubTitle
-                               [clockwise]="false"
-                               [titleFontSize]="10"
-                               [showUnits]="false"
-                               [backgroundColor]="'#F1F1F1'"
-                               [backgroundPadding]="-20"
-                               [backgroundOpacity]="0.8"
-                               [subtitleColor]="'#000000'">
-              </circle-progress>
               <div *ngIf="paymentSuccess" class="text-center checkmark">
                 <svg height="80px" width="80px" version="1.1" id="checkmark" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
                      viewBox="0 0 98.5 98.5" enable-background="new 0 0 98.5 98.5" xml:space="preserve">
