@@ -65,7 +65,7 @@
     "@angular/localize": "^10.2.3",
     "@blockcore/message": "^1.0.0",
     "@techiediaries/ngx-qrcode": "^9.1.0",
-    "@types/yargs":"21.0.0",
+    "@types/yargs":"17.0.13",
     "yargs":"15.4.1",
     "graceful-fs":"4.2.11",
     "angular2-uuid": "^1.1.1",
