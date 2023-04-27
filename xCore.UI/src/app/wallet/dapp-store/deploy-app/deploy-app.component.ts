@@ -44,7 +44,7 @@ export class DeployAppComponent implements OnInit, OnDestroy {
   loadingZones = false;
   keyAddress: string;
   selectNode = false;
-
+  selectedRecord ='';
   form = new FormGroup({});
   model = {};
   fields = [{
