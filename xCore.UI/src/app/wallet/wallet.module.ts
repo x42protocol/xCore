@@ -68,7 +68,7 @@ import { RadioButtonModule } from 'primeng/radiobutton';
 import { ExchangeDetailsComponent } from './exchange-details/exchange-details.component';
 import { XserverProvisionerComponent } from './advanced/components/xserver-provisioner/xserver-provisioner.component';
 import { DappStoreComponent } from './dapp-store/dapp-store.component';
-import { DeployWordpressComponent } from './dapp-store/deploy-wordpress/deploy-wordpress.component';
+import { DeployAppComponent } from './dapp-store/deploy-app/deploy-app.component';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { XserverNetworkComponent } from './xserver-network/xserver-network.component';
 import { DnsManagementComponent } from './dns-management/dns-management.component';
@@ -78,6 +78,9 @@ import { DeleteDnsRecordDialogComponent } from './dns-management/delete-dns-reco
 import { StorageManagementComponent } from './storage-management/storage-management.component';
 import { XServerDetailsComponent } from './xserver-network/x-server-details/x-server-details.component';
 import { XServerUpdaterComponent } from './advanced/components/x-server-updater/x-server-updater.component';
+import { FormlyBootstrapModule } from '@ngx-formly/bootstrap';
+import { ReactiveFormsModule } from '@angular/forms';
+
 
 @NgModule({
   imports: [
@@ -146,7 +149,7 @@ import { XServerUpdaterComponent } from './advanced/components/x-server-updater/
     ExchangeDetailsComponent,
     XserverProvisionerComponent,
     DappStoreComponent,
-    DeployWordpressComponent,
+    DeployAppComponent,
     XserverNetworkComponent,
     DnsManagementComponent,
     AddZoneDialogComponent,
@@ -154,7 +157,7 @@ import { XServerUpdaterComponent } from './advanced/components/x-server-updater/
     DeleteDnsRecordDialogComponent,
     StorageManagementComponent,
     XServerDetailsComponent,
-    XServerUpdaterComponent,
+    XServerUpdaterComponent
   ],
   providers: [
     MessageService,
@@ -176,7 +179,7 @@ import { XServerUpdaterComponent } from './advanced/components/x-server-updater/
     CreateProfileComponent,
     AddNewAddressComponent,
     ExchangeDetailsComponent,
-    DeployWordpressComponent,
+    DeployAppComponent,
     AddEditDnsRecordDialogComponent,
     AddZoneDialogComponent,
     XServerDetailsComponent

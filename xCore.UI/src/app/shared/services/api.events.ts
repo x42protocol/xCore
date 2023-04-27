@@ -70,8 +70,7 @@ export class ApiEvents {
     this.Start(WorkerType.COLD_HISTORY);
     this.Start(WorkerType.TX_CONFIRMATION);
     this.Start(WorkerType.ADDRESS_BOOK);
-    this.Start(WorkerType.COINGECKO_EXCHANGE_RATES, 30);
-    this.Start(WorkerType.X42_HISTORY, 30);
+    this.Start(WorkerType.X42_HISTORY, 10);
     this.Start(WorkerType.X42_STAKING_HISTORY, 30);
 
   }
@@ -86,9 +85,13 @@ export class ApiEvents {
 
   private Start(name: WorkerType, seconds: number = 0): void {
     let tickSeconds = seconds;
-    if (tickSeconds === undefined || tickSeconds === 0) {
-      tickSeconds = 5;
+    if (WorkerType.X42_HISTORY === name) {
+      console.log('X42_HISTORY:', tickSeconds);
     }
+    if (tickSeconds === 0) {
+      tickSeconds = 20;
+    }
+
 
     const workers: string[] = this.simpleTimer.getTimer();
     const thisWorkerName = workers.find(i => i === name.toString());
@@ -192,18 +195,18 @@ export class ApiEvents {
   }
 
   private getExhangeRates() {
-    if (this.exchangeRatesSubject.observers.length > 0) {
-      this.Stop(WorkerType.COINGECKO_EXCHANGE_RATES);
-      this.apiService.getExchangeRates()
-        .pipe(finalize(() => {
-          this.Start(WorkerType.COINGECKO_EXCHANGE_RATES);
-        }))
-        .subscribe(
-          response => {
-            this.exchangeRatesSubject.next(response);
-          }
-        );
-    }
+    // if (this.exchangeRatesSubject.observers.length > 0) {
+    //   //this.Stop(WorkerType.COINGECKO_EXCHANGE_RATES);
+    //   this.apiService.getExchangeRates()
+    //     .pipe(finalize(() => {
+    //       // this.Start(WorkerType.COINGECKO_EXCHANGE_RATES);
+    //     }))
+    //     .subscribe(
+    //       response => {
+    //         this.exchangeRatesSubject.next(response);
+    //       }
+    //     );
+    // }
   }
 
   private getX42StakingHistory() {

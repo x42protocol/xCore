@@ -15,6 +15,8 @@ import { Subscription } from 'rxjs';
 import { AddressType } from '../../../shared/models/address-type';
 import { WordPressReserveRequest } from '../../../shared/models/xserver-wordpress-reserve-request';
 import { WordPressProvisionRequest } from '../../../shared/models/xserver-wordpress-provision-request';
+import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
+import { XServerStatus } from '../../../shared/models/xserver-status';
 
 interface TxDetails {
   transactionFee?: number;
@@ -25,15 +27,63 @@ interface TxDetails {
 }
 
 @Component({
-  selector: 'app-deploy-wordpress',
-  templateUrl: './deploy-wordpress.component.html',
-  styleUrls: ['./deploy-wordpress.component.css']
+  selector: 'app-deploy-app',
+  templateUrl: './deploy-app.component.html',
+  styleUrls: ['./deploy-app.component.css']
 })
-export class DeployWordpressComponent implements OnInit, OnDestroy {
+export class DeployAppComponent implements OnInit, OnDestroy {
   domains: string[];
-    domainsLoading: boolean;
-    provisioningWordpress: boolean;
-    provisioningWordpressComplete: boolean;
+  domainsLoading: boolean;
+  provisioningWordpress: boolean;
+  provisioningWordpressComplete: boolean;
+  appName: any;
+  appPrice: any;
+  zones: { label: string; value: string; }[];
+  appImage: any;
+  zoneRecords: { name: string; type: string; status: string; ttl: string; data: string; }[];
+  loadingZones = false;
+  keyAddress: string;
+  selectNode = false;
+
+  form = new FormGroup({});
+  model = {};
+  fields = [{
+    type: 'flex-layout',
+    templateOptions: {
+      fxLayout: 'row',
+    },
+    fieldGroup: [
+      {
+        type: 'input',
+        key: 'firstname',
+        className: 'sec1',
+        templateOptions: {
+          placeholder: 'First name',
+        }
+      },
+      {
+        type: 'input',
+        key: 'lastname',
+        className: 'sec2',
+        templateOptions: {
+          placeholder: 'last name',
+        }
+      },
+      {
+        type: 'input',
+        key: 'age',
+        className: 'sec3',
+        templateOptions: {
+          type: 'number',
+          placeholder: 'Age',
+        }
+      },
+    ]
+  }
+  ];
+    selectedZone: string;
+    xServerInfoSubscription: Subscription;
+    peers: any[];
   constructor(
     private apiService: ApiService,
     private globalService: GlobalService,
@@ -83,8 +133,8 @@ export class DeployWordpressComponent implements OnInit, OnDestroy {
   public paymentSeverity: string;
 
   public profileSearching: boolean;
-  public profileReserving: boolean;
-  public domainName = '';
+  public appDeploying: boolean;
+  public domainName = 'mystore.xserver.network';
   public profileStatus = -1;
   public profile: any;
   public profileReserveExpireBlock: number;
@@ -101,7 +151,7 @@ export class DeployWordpressComponent implements OnInit, OnDestroy {
   public progress = 0;
   public progresstimer: any;
 
-   paymentFormErrors = {
+  paymentFormErrors = {
     paymentPassword: ''
   };
 
@@ -111,22 +161,106 @@ export class DeployWordpressComponent implements OnInit, OnDestroy {
     }
   };
 
+  totalRecords = 0;
+  zoneData = [];
+  options: FormlyFormOptions = {};
+
+  private setKeyAddress() {
+    this.keyAddress = this.globalService.getWalletKeyAddress();
+  }
+
+  getZoneRecords(zone: string) {
+    this.loadingZones = true;
+
+    this.apiService.getZoneRecords(zone).subscribe(results => {
+
+      this.loadingZones = false;
+
+      console.log(results);
+    });
+
+  }
+
 
   ngOnInit() {
+    this.setKeyAddress();
+
+    this.startSubscriptions();
+
+
+
+
+    this.loadingZones = true;
+
+    this.apiService.getZonesByKeyAddress(this.keyAddress).subscribe(results => {
+      this.loadingZones = false;
+
+      this.zoneData = [
+        {
+          zone: 'dimit3.org',
+          records: [
+            {
+              name: 'myweb',
+              type: 'A',
+              status: 'Active',
+              ttl: '300',
+              data: 'xServer Network'
+            },
+            {
+              name: 'mystore',
+              type: 'A',
+              status: 'Active',
+              ttl: '300',
+              data: 'xServer Network'
+            }
+          ]
+        },
+      ];
+
+      this.zoneRecords = this.zoneData[0].records;
+      this.zones = results.map(result => {
+        return { label: result, value: result };
+      });
+
+      this.selectedZone = this.zones[0].value;
+      this.getZoneRecords(this.zones[0].value);
+    });
 
     this.coinUnit = this.globalService.getCoinUnit();
     this.getWordpressPreviewDomains();
+    this.appPrice = this.config.data.price;
+    this.appImage = this.config.data.image;
+
     if (this.config.data !== undefined && this.config.data.priceLockId !== '') {
       this.priceLockId = this.config.data.priceLockId;
+      this.appName = this.config.data.selectedApp;
+      this.appPrice = this.config.data.price;
+
       this.getPriceLock(this.priceLockId);
     } else {
       this.startMethods();
     }
   }
+  ngOnDestroy() {
+  }
+  startSubscriptions() {
+
+    this.xServerInfoSubscription = this.apiEvents.XServerInfo.subscribe((result: XServerStatus) => {
+      if (result !== null) {
+        this.peers = result.nodes.sort(l => l.responseTime).map((peer) => {
+
+          return { label: peer.name, value: peer.name };
+
+        });
+      }
+    });
+    this.apiEvents.ManualTick(WorkerType.XSERVER_INFO);
+  }
+
+
 
   getWordpressPreviewDomains() {
     this.domainsLoading = true;
-
     this.apiService.getWordpressPreviewDomains().subscribe((result: string[]) => {
       this.domains = result;
       this.domainsLoading = false;
@@ -143,13 +277,14 @@ export class DeployWordpressComponent implements OnInit, OnDestroy {
     this.apiEvents.ManualTick(WorkerType.ACCOUNT_BALANCE);
   }
 
-  ngOnDestroy() {
-    this.cancelSubscriptions();
-  }
+
 
   private cancelSubscriptions() {
     if (this.accountBalanceSubscription) {
       this.accountBalanceSubscription.unsubscribe();
+    }
+    if (this.xServerInfoSubscription) {
+      this.xServerInfoSubscription.unsubscribe();
     }
   }
 
@@ -188,18 +323,18 @@ export class DeployWordpressComponent implements OnInit, OnDestroy {
     }
   }
 
-  startWordpressReservation() {
-    this.profileReserving = true;
+  startAppDeployment() {
+    this.appDeploying = true;
     const walletInfo = new WalletInfo(this.globalService.getWalletName());
     this.apiService.getUnusedReceiveAddress(walletInfo)
       .subscribe(
         unusedAddress => {
-          this.signWordpressReservationRequest(unusedAddress);
+          this.signAppDeploymentRequest(unusedAddress);
         }
       );
   }
 
-  signWordpressReservationRequest(returnAddress: string) {
+  signAppDeploymentRequest(returnAddress: string) {
     const walletName = this.globalService.getWalletName();
     const serverKey = `${this.domainName}${returnAddress}`;
     const keyAddress = this.globalService.getWalletKeyAddress();
@@ -216,13 +351,15 @@ export class DeployWordpressComponent implements OnInit, OnDestroy {
             returnAddress,
             response.signature
           );
-          this.reserveWordPress(profileRequest);
+
+          this.deployApp(profileRequest);
+
         }
       );
   }
 
-  reserveWordPress(wordPressReserveRequest: WordPressReserveRequest) {
-    this.apiService.reserveWordpressDomain(wordPressReserveRequest)
+  deployApp(wordPressReserveRequest: WordPressReserveRequest) {
+     this.apiService.reserveWordpressDomain(wordPressReserveRequest)
       .subscribe(
         response => {
           if (response.success) {
@@ -237,22 +374,27 @@ export class DeployWordpressComponent implements OnInit, OnDestroy {
               this.globalService.setProfile(null); // Reset profile.
               this.getPriceLock(response.priceLockId);
             } else {
-              this.profileReserving = false;
+              this.appDeploying = false;
               this.apiError = response.resultMessage;
               this.profileStatus = -1;
             }
           } else {
             this.profileStatus = -1;
           }
-          this.profileReserving = false;
+          this.appDeploying = false;
         },
         error => {
           this.apiError = error.error.errors[0].message;
-          this.profileReserving = false;
+          this.appDeploying = false;
           this.profileStatus = -1;
         }
       );
+
   }
+
+
+
+
 
   getPriceLock(priceLockId: string) {
     this.priceLockId = priceLockId;
@@ -265,13 +407,13 @@ export class DeployWordpressComponent implements OnInit, OnDestroy {
             this.getPairs(response);
           } else {
             this.apiError = response.resultMessage;
-            this.profileReserving = false;
+            this.appDeploying = false;
             this.isPayment = true;
           }
         },
         error => {
           this.apiError = error.error.errors[0].message;
-          this.profileReserving = false;
+          this.appDeploying = false;
           this.isLookingUpPriceLock = false;
           this.isPayment = true;
         }
@@ -497,7 +639,7 @@ export class DeployWordpressComponent implements OnInit, OnDestroy {
   startProgressTimer() {
 
     this.progresstimer = setInterval(() => {
-      this.progress += 0.25;
+      this.progress += 0.5;
       if (this.progress >= 100) {
         if (this.progresstimer) {
           clearInterval(this.progresstimer);
@@ -505,7 +647,7 @@ export class DeployWordpressComponent implements OnInit, OnDestroy {
           this.provisioningWordpress = false;
         }
       }
-    }, 400);
+    }, 200);
   }
   provisionWordPress() {
 

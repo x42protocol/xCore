@@ -109,8 +109,8 @@
     <Content Include="src\app\wallet\advanced\components\resync\resync.component.css" />
     <Content Include="src\app\wallet\advanced\components\resync\resync.component.html" />
     <Content Include="src\app\wallet\dapp-store\dapp-store.component.html" />
-    <Content Include="src\app\wallet\dapp-store\deploy-wordpress\deploy-wordpress.component.css" />
-    <Content Include="src\app\wallet\dapp-store\deploy-wordpress\deploy-wordpress.component.html" />
+    <Content Include="src\app\wallet\dapp-store\deploy-app\deploy-app.component.css" />
+    <Content Include="src\app\wallet\dapp-store\deploy-app\deploy-app.component.html" />
     <Content Include="src\app\wallet\dns-management\add-edit-dns-record-dialog\add-edit-dns-record-dialog.component.css" />
     <Content Include="src\app\wallet\dns-management\add-edit-dns-record-dialog\add-edit-dns-record-dialog.component.html" />
     <Content Include="src\app\wallet\dns-management\add-zone-dialog\add-zone-dialog.component.css" />
@@ -171,8 +171,12 @@
     <Content Include="src\assets\images\logo_pink.png" />
     <Content Include="src\assets\images\logo_white.png" />
     <Content Include="src\assets\images\logo_white.svg" />
+    <Content Include="src\assets\images\Magento.png" />
+    <Content Include="src\assets\images\MariaDB.png" />
     <Content Include="src\assets\images\notransactions.svg" />
+    <Content Include="src\assets\images\OpenProject.png" />
     <Content Include="src\assets\images\powerdns.png" />
+    <Content Include="src\assets\images\Prestashop.png" />
     <Content Include="src\assets\images\storjlogo.png" />
     <Content Include="src\assets\images\SugarCRM-Stacked-Full-Color.jpg" />
     <Content Include="src\assets\images\Tick_Mark-16.png" />
@@ -605,8 +609,8 @@
     <TypeScriptCompile Include="src\app\wallet\advanced\components\resync\resync.component.ts" />
     <TypeScriptCompile Include="src\app\wallet\dapp-store\dapp-store.component.spec.ts" />
     <TypeScriptCompile Include="src\app\wallet\dapp-store\dapp-store.component.ts" />
-    <TypeScriptCompile Include="src\app\wallet\dapp-store\deploy-wordpress\deploy-wordpress.component.spec.ts" />
-    <TypeScriptCompile Include="src\app\wallet\dapp-store\deploy-wordpress\deploy-wordpress.component.ts" />
+    <TypeScriptCompile Include="src\app\wallet\dapp-store\deploy-app\deploy-app.component.spec.ts" />
+    <TypeScriptCompile Include="src\app\wallet\dapp-store\deploy-app\deploy-app.component.ts" />
     <TypeScriptCompile Include="src\app\wallet\dashboard\dashboard.component.ts" />
     <TypeScriptCompile Include="src\app\wallet\dns-management\add-edit-dns-record-dialog\add-edit-dns-record-dialog.component.spec.ts" />
     <TypeScriptCompile Include="src\app\wallet\dns-management\add-edit-dns-record-dialog\add-edit-dns-record-dialog.component.ts" />
@@ -691,7 +695,7 @@
     <Folder Include="src\app\wallet\advanced\components\generate-addresses\" />
     <Folder Include="src\app\wallet\advanced\components\resync\" />
     <Folder Include="src\app\wallet\dapp-store\" />
-    <Folder Include="src\app\wallet\dapp-store\deploy-wordpress\" />
+    <Folder Include="src\app\wallet\dapp-store\deploy-app\" />
     <Folder Include="src\app\wallet\dashboard\" />
     <Folder Include="src\app\wallet\dns-management\" />
     <Folder Include="src\app\wallet\dns-management\add-edit-dns-record-dialog\" />

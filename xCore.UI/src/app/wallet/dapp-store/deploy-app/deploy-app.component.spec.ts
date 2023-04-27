@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { DeployWordpressComponent } from './deploy-wordpress.component';
+import { DeployAppComponent } from './deploy-app.component';
 
-describe('DeployWordpressComponent', () => {
-  let component: DeployWordpressComponent;
-  let fixture: ComponentFixture<DeployWordpressComponent>;
+describe('DeployAppComponent', () => {
+  let component: DeployAppComponent;
+  let fixture: ComponentFixture<DeployAppComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ DeployWordpressComponent ]
+      declarations: [ DeployAppComponent ]
     })
     .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(DeployWordpressComponent);
+    fixture = TestBed.createComponent(DeployAppComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

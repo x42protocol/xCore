@@ -65,7 +65,7 @@ export class XServerComponent implements OnInit, OnDestroy {
   public feeAddress: string;
   public profileName = '';
   public networkAddress: string;
-  public networkPort = '4242';
+  public networkPort = '443';
   public serverId: string;
   public selectedTier: string;
   public walletPassword: string;
@@ -89,12 +89,12 @@ export class XServerComponent implements OnInit, OnDestroy {
       { label: 'Copy', value: 'Copy', icon: 'pi pi-copy' }
     ];
     if (this.appState.network !== 'x42main') {
-      this.networkPort = '4243';
+      this.networkPort = '433';
     }
     this.setKeyAddress();
     this.copied = false;
     this.selectedTier = '1000';
-    this.selectedProtocol = this.protocols[0];
+    this.selectedProtocol = this.protocols[1];
     this.applicationVersion = this.appState.version;
     this.isElectron = this.electron.isElectronApp;
     this.startSubscriptions();
@@ -121,7 +121,8 @@ export class XServerComponent implements OnInit, OnDestroy {
     const profile = this.globalService.getProfile();
     if (profile != null && profile.status === 2) {
       this.profileName = profile.name;
-      this.xServerCheck = 1;
+      this.networkAddress = 'xserverpub-' + this.profileName.toLowerCase() + '.xserver.network';
+      this.xServerCheck = 2;
       this.checkForXServer();
     }
   }
@@ -133,7 +134,7 @@ export class XServerComponent implements OnInit, OnDestroy {
           this.xServerInfo = response;
           console.log(this.xServerInfo);
           if (this.xServerInfo.id > 0) {
-            this.xServerCheck = 3;
+            this.xServerCheck = 2;
             this.apiService.receivedByAddress(this.xServerInfo.feeAddress).subscribe(
               receivedByAddressResult => {
                 this.feeAddressChecked = true;

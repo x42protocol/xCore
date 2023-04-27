@@ -71,7 +71,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
     ProgressBarModule,
     ToolbarModule,
     ShutdownModule,
-    ProgressSpinnerModule
+    ProgressSpinnerModule,
   ],
   declarations: [
     AppComponent,
