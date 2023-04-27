@@ -36,7 +36,7 @@ export class AddZoneDialogComponent implements OnInit, OnDestroy {
   selectedPeers = [];
   reserving = false;
   reservinglabel = 'Reserve';
-
+  paymentForm = null;
   ngOnInit(): void {
     this.startSubscriptions();
   }
