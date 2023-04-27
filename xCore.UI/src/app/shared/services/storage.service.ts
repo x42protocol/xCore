@@ -73,7 +73,20 @@ export class StorageService {
         }
 
         localStorage.setItem(key, JSON.stringify(value));
-    }
+  }
+
+  getStorjSettings() {
+
+    const value = localStorage.getItem('storj');
+    return JSON.parse(value);
+
+  }
+  setStorjSettings(value: any) {
+
+    localStorage.setItem('storj', JSON.stringify(value));
+
+  }
+
 }
 
 export class DatabaseStorageService extends Dexie {

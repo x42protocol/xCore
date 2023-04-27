@@ -13,10 +13,8 @@
       <tr>
         <th style="width:200px;" [pSortableColumn]="'name'">Name</th>
         <th style="width:80px;" [pSortableColumn]="'tier'">Tier</th>
-        <th style="width:80px;" [pSortableColumn]="'networkProtocol'">Protocol</th>
-        <th [pSortableColumn]="'networkAddress'">Address</th>
-        <th style="width:80px;" [pSortableColumn]="'networkPort'">Port</th>
-        <th style="width:80px;" [pSortableColumn]="'version'">Version</th>
+         <th [pSortableColumn]="'networkAddress'">Address</th>
+         <th style="width:80px;" [pSortableColumn]="'version'">Version</th>
         <th style="width:80px;" [pSortableColumn]="'responseTime'">Ping</th>
         <th style="width:100px;" [pSortableColumn]="'responseTime'">Details</th>
 
@@ -27,30 +25,43 @@
         <td class="text-left">
           {{peer.name}}
         </td>
-        <td class="text-left">
+        <td class="text-left" *ngIf="peer.tier === 0">
           <span class="ui-column-title">Tier</span>
-          {{peer.tier}}
+          Offline
 
         </td>
-        <td class="text-left">
-          <span class="ui-column-title">Protocol</span>
+        <td class="text-left" *ngIf="peer.tier === 1">
+          <span class="ui-column-title">Tier</span>
+          I
 
-          {{peer.networkProtocol}}
+        </td>
+        <td class="text-left" *ngIf="peer.tier === 2">
+          <span class="ui-column-title">Tier</span>
+          II
+
+        </td>
+        <td class="text-left" *ngIf="peer.tier === 3">
+          <span class="ui-column-title">Tier</span>
+          III
 
         </td>
 
-
-        <td class="text-left">
+        <td class="text-left" *ngIf="peer.networkProtocol === 1">
           <span class="ui-column-title">Address</span>
-          {{peer.networkAddress}}
+          http://{{peer.networkAddress}}:{{peer.networkPort}}
+
+        </td>
+        <td class="text-left" *ngIf="peer.networkProtocol === 2">
+          <span class="ui-column-title">Address</span>
+          https://{{peer.networkAddress}}
+
+        </td>
+        <td class="text-left" *ngIf="peer.networkProtocol === 0">
+          <span class="ui-column-title">Address</span>
+          https://{{peer.networkAddress}}
 
         </td>
 
-        <td class="text-left">
-          <span class="ui-column-title">Port</span>
-          {{peer.networkPort}}
-
-        </td>
         <td class="text-left">
           <span class="ui-column-title">Version</span>
           {{peer.version}}

@@ -1,0 +1,39 @@
+.checkmark {
+  stroke: #28a745 !important;
+  stroke-dashoffset: 745.74853515625;
+  stroke-dasharray: 745.74853515625;
+  animation: dash 4s ease-out forwards;
+}
+
+.bounds .sec1 {
+  background: red;
+  color: white;
+  text-transform: uppercase;
+  width: 100%;
+}
+
+.bounds .ui-inputtext {
+  width: 100% !important;
+}
+
+.sec2 {
+  background: yellow;
+  color: blue;
+}
+
+.sec3 {
+  background: blue;
+  color: white;
+  text-transform: uppercase
+}
+
+.sec1, .sec2, .sec3 {
+  padding-top: 20px;
+  text-align: center;
+  padding: 10px;
+}
+
+.content {
+  min-width: 300px;
+  /*height: 400px;*/
+}

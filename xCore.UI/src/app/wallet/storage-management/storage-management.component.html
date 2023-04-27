@@ -12,31 +12,63 @@
         Powered By : <img src="./assets/images/storjlogo.png" style="width:90px;" />
       </div>
     </div>
+
     <div class="row">
       <div class="col-6">
+        <p-panel>
+          <p-header>
+            Storj Settings
+          </p-header>
+          <div>
+            <div class="row">
+              <div class="col-md-12" style="display: block;">
+                <div class="form-group" style="position: static;">
+                  <label for="input-text-1">Satellite Address</label>
+                  <input type="email" class="form-control" id="satelliteAddress" [(ngModel)]="storjSettings.satelliteAddress" placeholder="Enter your satellite address">
+                </div>
+                <div class="form-group">
+                  <label for="input-id-2">API Key</label>
+                  <input type="text" class="form-control" id="apiKey" [(ngModel)]="storjSettings.apiKey" placeholder="Enter your API key">
+                </div>
+                <div class="form-group" style="">
+                  <label for="input-id-3">Secret</label>
+                  <input type="email" class="form-control" id="secret" [(ngModel)]="storjSettings.secret" placeholder="Enter your secret">
+                </div>
+                <div class="form-group" style="position: static;">
+                  <label for="input-id-4">Bucket Name</label>
+                  <input type="email" class="form-control" id="bucketName" [(ngModel)]="storjSettings.bucketName" placeholder="Enter you bucket name">
+                </div>
+                <div class="form-group" style="position: static;">
+                </div>
+              </div>
+              <div class="col-md-12">
 
-        &nbsp;
+                <button type="button"  class="btn-block mt-5"  label="Save" (click)="saveStorjSettings()" pButton></button>
 
+
+              </div>
+            </div>             
+
+          </div>
+          <p-footer>
+ 
+          </p-footer>
+        </p-panel>
       </div>
-      <div class="col-6" style="text-align: right;">
-        &nbsp;
+      <div class="col-6">
+        <br />
+        <h3>Get 150GB Decentralized storage from Storj.IO</h3>
+        <a href="https://eu1.storj.io/signup" target="_blank">Sign Up Here</a>
 
       </div>
     </div>
     <div>
-      <div class="row">
-        <div class="col-12">
-          <h1>Coming Soon...</h1>
-        </div>
-      </div>
+
     </div>
     <div>
-      <div class="row">
-        <div class="col-12">
-          <h3>Get 150GB Decentralized storage from Storj.IO</h3>
-          <a href="https://eu1.storj.io/signup" target="_blank">Sign Up Here</a>
-        </div>
-      </div>
+
+
+
     </div>
 
   </div>

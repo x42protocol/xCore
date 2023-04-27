@@ -1,25 +1,71 @@
+<div class="modal-body ModalSend pt-0">
 
-<div class="row">
-  <div class="col-12">
+  <div *ngIf="!reserved && !reserving">
 
-    <div class="header">Add Zone</div>
+    <div class="row">
+      <div class="col-12">
+
+        <h2>Add Zone</h2>
+
+      </div>
+    </div>
+
+
+    <div class="row">
+      <div class="col-12">
+
+        Prefered Name Servers
+        <br>     <br>
+
+      </div>
+
+      <div class="col-9">
+
+        <div *ngFor="let peer of peers" class="field-checkbox">
+          <p-checkbox name="group2" value="peer" [value]="peer" [(ngModel)]="selectedPeers" [inputId]="peer.name"></p-checkbox>
+          <label style="margin-left:10px;" [for]="peer.name"> {{peer.nameserver}} ({{peer.name}})</label>
+        </div>
+      </div>
+
+      <div class="col-3">
+        <h2>
+          $     {{selectedPeers.length * 0.5}}
+        </h2>
+
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <form [formGroup]="paymentForm">
+          <input type="text" class="form-control" placeholder="Please enter your zone." pInputText>
+          <br />
+          <input type="password" class="form-control" placeholder="Please enter your wallet password." pInputText>
+          <button style="margin-top:10px;" type="button" class="btn-block" [disabled]="reserving" label="{{reservinglabel}}" (click)="reserveZone()" pButton></button>
+        </form>
+
+
+
+      </div>
+    </div>
 
   </div>
+
+
+  <div *ngIf="reserving" style="text-align:center">
+    Reserving, please wait...
 </div>
+    <div *ngIf="reserved">
+      <div class="row">
+        <div class="col-12" style="text-align:center">
 
+           Your request has been sent to the network. Your new zone will appear once active. 
 
-<div class="row">
-  <div class="col-12">
+        </div>
+      </div>
 
-    Prefered Name Servers
-
+    </div>
   </div>
-</div>
-
-<div class="row">
-  <div class="col-12">
-
-    <input type="text"  />
-
-  </div>
-</div>

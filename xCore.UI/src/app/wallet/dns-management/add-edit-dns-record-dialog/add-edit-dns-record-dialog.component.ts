@@ -8,6 +8,10 @@ import { Component, OnInit } from '@angular/core';
 export class AddEditDnsRecordDialogComponent implements OnInit {
 
   constructor() { }
+  reserved = false;
+  reserving = false;
+  selectedPeers = [];
+  paymentForm = null;
 
   ngOnInit(): void {
   }

@@ -1,1 +1,55 @@
-<p>add-edit-dns-record-dialog works!</p>
+<div class="modal-body ModalSend pt-0">
+
+  <div *ngIf="!reserved && !reserving">
+
+    <div class="row">
+      <div class="col-12">
+
+        <h3>Add Zone</h3>
+
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+
+        Prefered Name Servers
+        <br>     <br>
+
+      </div>
+
+      <div class="col-9">
+
+         
+      </div>
+
+      <div class="col-3">
+        <h2>
+          $     {{selectedPeers.length * 0.5}}
+        </h2>
+
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <form [formGroup]="paymentForm">
+          <input type="text" class="form-control" placeholder="Please enter your zone." pInputText>
+          <br />
+          <input type="password" class="form-control" placeholder="Please enter your wallet password." pInputText>
+          <button style="margin-top:10px;" type="button" class="btn-block" label="Save" pButton></button>
+        </form>
+
+
+
+      </div>
+    </div>
+
+  </div>
+
+
+  
+  
+</div>

@@ -30,7 +30,10 @@
         </div>
       </div>
     </div>
-    <div *ngIf="featureEnabled">
+    <div *ngIf="loadingZones">
+      Retrieving zones from the xServer network...
+    </div>
+    <div *ngIf="featureEnabled && !loadingZones">
       <div class="row">
         <div class="col-6">
           <div *ngIf="!loadingZones">
@@ -38,7 +41,7 @@
             <p-dropdown [options]="zones" (onChange)="zoneChanged($event.value)"></p-dropdown>
           </div>
           <div *ngIf="loadingZones">
-            Loading Zones
+            Loading Zones...
           </div>
         </div>
         <div class="col-6" style="text-align: right;">

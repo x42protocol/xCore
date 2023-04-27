@@ -1,9 +1,10 @@
 {
     "extends": "./tsconfig.json",
-    "compilerOptions": {
-        "outDir": "./out-tsc/app",
-        "types": []
-    },
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "outDir": "./out-tsc/app",
+    "types": []
+  },
     "include": [
         "src/**/*.ts"
     ],
