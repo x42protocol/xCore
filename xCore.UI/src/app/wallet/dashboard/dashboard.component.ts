@@ -16,7 +16,8 @@ import { Subject, Subscription } from 'rxjs';
 import { WorkerType } from '../../shared/models/worker';
 import { ExchangeDetailsComponent } from '../exchange-details/exchange-details.component';
 import { SettingsService } from '../../shared/services/settings.service';
-import { finalize, takeUntil } from 'rxjs/operators';
+import { CoinNotationPipe } from '../../shared/pipes/coin-notation.pipe';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-dashboard-component',
@@ -100,10 +101,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public hotStakingHistoryTransactions: any[] = [];
   private destroy$ = new Subject<void>();
 
-
   ngOnInit() {
 
     this.coinGeckoLoading = true;
+
+    setTimeout(() => {
+      this.getExchangeRates();
+
+    }, 3000);
+
 
     if (!this.settingsService.preferredFiatExchangeCurrency) {
       this.settingsService.preferredFiatExchangeCurrency = 'USD';
@@ -154,11 +160,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.apiEvents.ManualTick(WorkerType.HOT_BALANCE);
     }
 
-    this.getExchangeRates();
 
 
     setInterval(() => {
-      console.log('Gettting exchange rates');
+
       this.getExchangeRates();
     }, 60000);
 
@@ -175,17 +180,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
 
+
   private getExchangeRates() {
     this.apiService.getExchangeRates()
     .pipe(takeUntil(this.destroy$))
     .subscribe(
       response => {
-        this.preferedExchangeCoinBalanceLoaded = true;
         this.coinGeckoLoading = false;
+        this.preferedExchangeCoinBalanceLoaded = true;
+
         this.updateExchangeRates(response);
       }
     );
   }
+
 
   private cancelSubscriptions() {
     if (this.stakingInfoSubscription) {
@@ -662,7 +670,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       Number.parseFloat(this.globalService.transform(+this.settingsService.preferedCryptoCurrencyExchangeRate * this.unconfirmedBalance).toString()).toFixed(cryptoCurrencyEntry.decimals);
 
 
-    this.preferedExchangeCoinBalanceLoaded = false;
     this.coinGeckoLoading = false;
 
   }
