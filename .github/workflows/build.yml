@@ -22,7 +22,7 @@ jobs:
             extension: ".deb"
             bc_extension: ".tar.gz"
             platform: "linux"
-          - os: macos-latest
+          - os: macos-11
             extension: ".dmg"
             bc_extension: ".zip"
             platform: "mac"
@@ -82,7 +82,7 @@ jobs:
         7z x daemon${{ matrix.bc_extension }} -odaemon
 
     - name: Unpack (Mac)
-      if: matrix.os == 'macos-latest'
+      if: matrix.os == 'macos-11'
       run: |
         cd ${{ env.UI_PATH }}
         unzip -a daemon${{ matrix.bc_extension }} -d daemon
