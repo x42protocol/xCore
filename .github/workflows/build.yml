@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - master
-      - mac_os_build
 
 jobs:
   
