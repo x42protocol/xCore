@@ -22,11 +22,10 @@ import { DynamicDialogModule, DialogService } from 'primeng/dynamicdialog';
 const SHARED_DIRECTIVES = [RouterLinkBack, PasswordValidationDirective, DisableControlDirective, CoinNotationPipe, SizeUnitPipe, PriceUnitPipe, YesNoPipe, SortByPipe];
 
 @NgModule({
-  imports: [CommonModule, ButtonModule, DynamicDialogModule],
-  declarations: [CoinNotationPipe, AutoFocusDirective, PasswordValidationDirective, DisableControlDirective, GenericModalComponent, SHARED_DIRECTIVES],
-  exports: [CommonModule, ReactiveFormsModule, FormsModule, NgxElectronModule, NgxQRCodeModule, ClipboardModule, GenericModalComponent, AutoFocusDirective, SHARED_DIRECTIVES],
-  entryComponents: [GenericModalComponent],
-  providers: [DialogService]
+    imports: [CommonModule, ButtonModule, DynamicDialogModule],
+    declarations: [CoinNotationPipe, AutoFocusDirective, PasswordValidationDirective, DisableControlDirective, GenericModalComponent, SHARED_DIRECTIVES],
+    exports: [CommonModule, ReactiveFormsModule, FormsModule, NgxElectronModule, NgxQRCodeModule, ClipboardModule, GenericModalComponent, AutoFocusDirective, SHARED_DIRECTIVES],
+    providers: [DialogService]
 })
 
 export class SharedModule { }
