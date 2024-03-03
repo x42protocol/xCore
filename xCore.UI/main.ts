@@ -107,7 +107,7 @@ ipcMain.on('start-daemon', (event, arg: Chain) => {
     return;
   }
 
- 
+
   if (pjson.upgradedbonversion) {
     arg.upgradedbonversion = pjson.version;
   }
@@ -295,7 +295,7 @@ function createWindow() {
     minWidth: 1080,
     minHeight: 400,
     title: 'xCore',
-    webPreferences: { webSecurity: false, nodeIntegration: true, enableRemoteModule: true }
+    webPreferences: { webSecurity: false, nodeIntegration: true }
   });
 
   contents = mainWindow.webContents;
@@ -476,7 +476,7 @@ function launchDaemon(apiPath: string, chain: Chain) {
 
   commandLineArguments.push('--upgradedbonversion='+chain.upgradedbonversion);
 
-  
+
 
   if (os.platform() === 'win32' || os.platform() === 'linux') {
     commandLineArguments.push('-dbtype=leveldb');
@@ -550,7 +550,7 @@ function launchDaemon(apiPath: string, chain: Chain) {
     } else if (daemonState === DaemonState.Started) {
       contents.send('daemon-error', `x42 Node process exited manually or crashed, with code ${code} and signal ${signal}.`);
     } else {
-      // This is a normal shutdown scenario, but we'll show error dialog if the exit code was not 0 (OK).   
+      // This is a normal shutdown scenario, but we'll show error dialog if the exit code was not 0 (OK).
       if (code !== 0) {
         contents.send('daemon-error', `x42 Node shutdown completed, but resulted in exit code ${code} and signal ${signal}.`);
       } else {

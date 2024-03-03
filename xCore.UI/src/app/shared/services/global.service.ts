@@ -27,7 +27,7 @@ export class GlobalService {
   private currencies: any = (data as any).default;
 
   quitApplication() {
-    this.electronService.remote.app.quit();
+    this.electronService.remote.quit();
   }
   getWalletPath() {
     return this.walletPath;

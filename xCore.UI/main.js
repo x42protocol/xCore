@@ -1,5 +1,5 @@
 "use strict";
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 var electron_1 = require("electron");
 var path = require("path");
 var url = require("url");
@@ -226,7 +226,7 @@ function createWindow() {
         minWidth: 1080,
         minHeight: 400,
         title: 'xCore',
-        webPreferences: { webSecurity: false, nodeIntegration: true, enableRemoteModule: true }
+        webPreferences: { webSecurity: false, nodeIntegration: true }
     });
     contents = mainWindow.webContents;
     mainWindow.setMenu(null);
@@ -238,7 +238,7 @@ function createWindow() {
     if (serve) {
         mainWindow.webContents.openDevTools();
         require('electron-reload')(__dirname, {
-            electron: require(__dirname + "/node_modules/electron")
+            electron: require("".concat(__dirname, "/node_modules/electron"))
         });
         writeLog('Creating Window and loading: http://localhost:4200?coin=' + coin.identity);
         mainWindow.loadURL('http://localhost:4200?coin=' + coin.identity);
@@ -253,7 +253,7 @@ function createWindow() {
     }
     // Emitted when the window is going to close.
     mainWindow.on('close', function (event) {
-        writeLog("close event on mainWindow was triggered. Calling shutdown method. Daemon state is: " + daemonState + ".");
+        writeLog("close event on mainWindow was triggered. Calling shutdown method. Daemon state is: ".concat(daemonState, "."));
         // If daemon stopping has not been triggered, it means it likely never started and user clicked Exit on the error dialog. Exit immediately.
         // Additionally if it was never started, it is already stopped.
         if (daemonState === DaemonState.Stopping || daemonState === DaemonState.Stopped) {
@@ -424,26 +424,26 @@ function launchDaemon(apiPath, chain) {
         });
     }
     daemonProcess.stdout.on('data', function (data) {
-        writeDebug("x42: " + data);
+        writeDebug("x42: ".concat(data));
     });
     /** Exit is triggered when the process exits. */
     daemonProcess.on('exit', function (code, signal) {
-        writeLog("x42 Node process exited with code " + code + " and signal " + signal + " when the state was " + daemonState + ".");
+        writeLog("x42 Node process exited with code ".concat(code, " and signal ").concat(signal, " when the state was ").concat(daemonState, "."));
         // There are many reasons why the daemon process can exit, we'll show details
         // in those cases we get an unexpected shutdown code and signal.
         if (daemonState === DaemonState.Changing) {
             writeLog('Daemon exit was expected, the user is changing the network mode.');
         }
         else if (daemonState === DaemonState.Starting) {
-            contents.send('daemon-error', "CRITICAL: x42 Node process exited during startup with code " + code + " and signal " + signal + ".");
+            contents.send('daemon-error', "CRITICAL: x42 Node process exited during startup with code ".concat(code, " and signal ").concat(signal, "."));
         }
         else if (daemonState === DaemonState.Started) {
-            contents.send('daemon-error', "x42 Node process exited manually or crashed, with code " + code + " and signal " + signal + ".");
+            contents.send('daemon-error', "x42 Node process exited manually or crashed, with code ".concat(code, " and signal ").concat(signal, "."));
         }
         else {
-            // This is a normal shutdown scenario, but we'll show error dialog if the exit code was not 0 (OK).   
+            // This is a normal shutdown scenario, but we'll show error dialog if the exit code was not 0 (OK).
             if (code !== 0) {
-                contents.send('daemon-error', "x42 Node shutdown completed, but resulted in exit code " + code + " and signal " + signal + ".");
+                contents.send('daemon-error', "x42 Node shutdown completed, but resulted in exit code ".concat(code, " and signal ").concat(signal, "."));
             }
             else {
                 // Check is stopping of daemon has been requested. If so, we'll notify the UI that it has completed the exit.
@@ -453,7 +453,7 @@ function launchDaemon(apiPath, chain) {
         daemonState = DaemonState.Stopped;
     });
     daemonProcess.on('error', function (code, signal) {
-        writeError("x42 Node process failed to start. Code " + code + " and signal " + signal + ".");
+        writeError("x42 Node process failed to start. Code ".concat(code, " and signal ").concat(signal, "."));
     });
 }
 function shutdownDaemon(callback) {

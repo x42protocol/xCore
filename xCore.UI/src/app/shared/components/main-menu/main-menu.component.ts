@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, Input, NgZone } from '@angular/core';
 import { UntypedFormGroup, UntypedFormBuilder } from '@angular/forms';
 import { ThemeService } from '../../services/theme.service';
-import { SelectItemGroup, MenuItem, SelectItem } from 'primeng/api';
+import { SelectItemGroup, MenuItem, SelectItem, MenuItemCommandEvent } from 'primeng/api';
 import { DialogService } from 'primeng/dynamicdialog';
 import { Router } from '@angular/router';
 import { ElectronService } from 'ngx-electron';
@@ -93,7 +93,7 @@ export class MainMenuComponent implements OnInit, OnDestroy {
 
     if (this.electronService.ipcRenderer) {
       if (this.electronService.remote) {
-        const applicationVersion = this.electronService.remote.app.getVersion();
+        const applicationVersion = this.electronService.remote.getVersion();
 
         this.appState.setVersion(applicationVersion);
         this.log.info('Version: ' + applicationVersion);
@@ -234,7 +234,7 @@ export class MainMenuComponent implements OnInit, OnDestroy {
           {
             label: 'Dashboard',
             icon: 'pi pi-fw pi-home',
-            command: (event: Event) => {
+            command: (event: MenuItemCommandEvent) => {
               this.openDashBoard();
             }
           },
@@ -242,13 +242,13 @@ export class MainMenuComponent implements OnInit, OnDestroy {
           {
             label: 'Lock',
             icon: 'pi pi-fw pi-sign-out',
-            command: (event: Event) => { this.lockClicked(); }
+            command: (event: MenuItemCommandEvent) => { this.lockClicked(); }
           },
           { separator: true },
           {
             label: 'Quit',
             icon: 'pi pi-fw pi-times',
-            command: (event: Event) => { this.quit(); }
+            command: (event: MenuItemCommandEvent) => { this.quit(); }
           }
         ]
       },
@@ -258,14 +258,14 @@ export class MainMenuComponent implements OnInit, OnDestroy {
           {
             label: 'Receive',
             icon: 'pi pi-fw pi-arrow-circle-down',
-            command: (event: Event) => {
+            command: (event: MenuItemCommandEvent) => {
               this.openReceiveDialog();
             }
           },
           {
             label: 'Send',
             icon: 'pi pi-fw pi-arrow-circle-up',
-            command: (event: Event) => {
+            command: (event: MenuItemCommandEvent) => {
               this.openSendDialog();
             }
           },
@@ -273,7 +273,7 @@ export class MainMenuComponent implements OnInit, OnDestroy {
           {
             label: `${coldStakeType} Staking`,
             icon: 'pi pi-fw pi-ticket',
-            command: (event: Event) => {
+            command: (event: MenuItemCommandEvent) => {
               this.openColdStaking();
             }
           },
@@ -281,42 +281,42 @@ export class MainMenuComponent implements OnInit, OnDestroy {
           {
             label: 'Address Book',
             icon: 'pi pi-fw pi-list',
-            command: (event: Event) => {
+            command: (event: MenuItemCommandEvent) => {
               this.openAddressBook();
             }
           },
           {
             label: 'History',
             icon: 'pi pi-fw pi-clock',
-            command: (event: Event) => { this.openHistory(); }
+            command: (event: MenuItemCommandEvent) => { this.openHistory(); }
           }
         ]
       },
       {
         label: 'DApp Store',
         icon: 'pi pi-fw pi-list',
-        command: (event: Event) => {
+        command: (event: MenuItemCommandEvent) => {
           this.openDappStore();
         },
       },
       {
         label: 'xServer Network',
         icon: 'pi pi-fw pi-sitemap',
-        command: (event: Event) => {
+        command: (event: MenuItemCommandEvent) => {
           this.openxServerNetwork();
         }
       },
       {
         label: 'DNS',
         icon: 'pi pi-fw pi-table',
-        command: (event: Event) => {
+        command: (event: MenuItemCommandEvent) => {
           this.openDnsManagement();
         },
       },
       {
         label: 'Storage',
         icon: 'pi pi-fw pi-file',
-        command: (event: Event) => {
+        command: (event: MenuItemCommandEvent) => {
           this.openStorageManagement();
         },
       },
@@ -331,7 +331,7 @@ export class MainMenuComponent implements OnInit, OnDestroy {
           {
             label: 'Quit',
             icon: 'pi pi-fw pi-times',
-            command: (event: Event) => { this.quit(); }
+            command: (event: MenuItemCommandEvent) => { this.quit(); }
           }
         ]
       },
@@ -339,12 +339,12 @@ export class MainMenuComponent implements OnInit, OnDestroy {
       {
         label: 'Create New Wallet',
         icon: 'pi pi-fw pi-plus',
-        command: (event: Event) => { this.onCreateClicked(); }
+        command: (event: MenuItemCommandEvent) => { this.onCreateClicked(); }
       },
       {
         label: 'Restore Wallet',
         icon: 'fa fa-refresh',
-        command: (event: Event) => { this.onRestoreClicked(); }
+        command: (event: MenuItemCommandEvent) => { this.onRestoreClicked(); }
       }
     ];
   }

@@ -77,7 +77,7 @@ export class XserverProvisionerComponent implements OnInit {
     }
 }
   installCertificate() {
-    const certPath = this.electronService.remote.app.getPath('userData').replace('xCore', 'Blockcore') + '\\x42\\x42Main\\certificates';
+    const certPath = this.electronService.remote.getPath('userData').replace('xCore', 'Blockcore') + '\\x42\\x42Main\\certificates';
     this.electronService.shell.openPath(certPath + '\\' + this.profile + '.p12');
   }
 
