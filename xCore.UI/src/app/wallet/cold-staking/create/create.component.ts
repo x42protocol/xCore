@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { DynamicDialogRef, DialogService } from 'primeng/dynamicdialog';
-import { FormGroup, Validators, FormBuilder, AbstractControl } from '@angular/forms';
+import { UntypedFormGroup, Validators, UntypedFormBuilder, AbstractControl } from '@angular/forms';
 import { GlobalService } from '../../../shared/services/global.service';
 import { CoinNotationPipe } from '../../../shared/pipes/coin-notation.pipe';
 import { ApiService } from '../../../shared/services/api.service';
@@ -31,7 +31,7 @@ export class ColdStakingCreateComponent implements OnInit, OnDestroy {
     private stakingService: ColdStakingService,
     public activeModal: DynamicDialogRef,
     public dialogService: DialogService,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     public themeService: ThemeService,
     private apiEvents: ApiEvents,
   ) {
@@ -43,7 +43,7 @@ export class ColdStakingCreateComponent implements OnInit, OnDestroy {
   private accountMaxBalanceSubscription: Subscription;
 
   public balanceLoaded: boolean;
-  public sendForm: FormGroup;
+  public sendForm: UntypedFormGroup;
   public coinUnit: string;
   public apiError: string;
   public totalBalance = 0;

@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, Input, NgZone } from '@angular/core';
-import { FormGroup, FormBuilder } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder } from '@angular/forms';
 import { ThemeService } from '../../services/theme.service';
 import { SelectItemGroup, MenuItem, SelectItem } from 'primeng/api';
 import { DialogService } from 'primeng/dynamicdialog';
@@ -40,7 +40,7 @@ export class MainMenuComponent implements OnInit, OnDestroy {
   public logoFileName: string;
   public groupedThemes: SelectItemGroup[];
   public menuItems: MenuItem[];
-  public networkForm: FormGroup;
+  public networkForm: UntypedFormGroup;
   public changeNetwork: boolean;
 
   toolTip = '';
@@ -59,7 +59,7 @@ export class MainMenuComponent implements OnInit, OnDestroy {
     private electronService: ElectronService,
     public apiService: ApiService,
     private zone: NgZone,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     public modalService: ModalService,
   ) {
 

@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormGroup, Validators, FormBuilder } from '@angular/forms';
+import { UntypedFormGroup, Validators, UntypedFormBuilder } from '@angular/forms';
 import { Router } from '@angular/router';
 import { DialogService } from 'primeng/dynamicdialog';
 import { ApiService } from '../../shared/services/api.service';
@@ -35,7 +35,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private globalService: GlobalService,
     public dialogService: DialogService,
     private router: Router,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     public themeService: ThemeService,
     private log: Logger,
     private apiEvents: ApiEvents,
@@ -69,7 +69,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public unconfirmedHotBalance: number;
   public spendableHotBalance: number;
   public hotStakingAccount = 'coldStakingHotAddresses';
-  public stakingForm: FormGroup;
+  public stakingForm: UntypedFormGroup;
   public profileStatus = 0;
   public profileAddress: string;
   public profile: any;

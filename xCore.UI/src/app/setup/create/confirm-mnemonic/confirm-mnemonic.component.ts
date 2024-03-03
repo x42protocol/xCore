@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter, ElementRef, QueryList, ViewChildren } from '@angular/core';
-import { FormGroup, Validators, FormBuilder } from '@angular/forms';
+import { UntypedFormGroup, Validators, UntypedFormBuilder } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiService } from '../../../shared/services/api.service';
 import { WalletCreation } from '../../../shared/models/wallet-creation';
@@ -18,7 +18,7 @@ export class ConfirmMnemonicComponent implements OnInit {
   constructor(
     private apiService: ApiService,
     private router: Router,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     public themeService: ThemeService,
   ) {
     this.buildMnemonicForm();
@@ -29,7 +29,7 @@ export class ConfirmMnemonicComponent implements OnInit {
   @Output() walletCreated: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   private newWallet: WalletCreation;
-  public mnemonicForm: FormGroup;
+  public mnemonicForm: UntypedFormGroup;
   public matchError = '';
   public isCreating: boolean;
   public isDarkTheme = false;

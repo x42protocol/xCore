@@ -6,7 +6,7 @@ import { ThemeService } from '../../shared/services/theme.service';
 import { WalletInfo } from '../../shared/models/wallet-info';
 import { SelectItem } from 'primeng/api';
 import { DynamicDialogRef } from 'primeng/dynamicdialog';
-import { FormGroup, Validators, FormBuilder } from '@angular/forms';
+import { UntypedFormGroup, Validators, UntypedFormBuilder } from '@angular/forms';
 import { debounceTime } from 'rxjs/operators';
 import { CreatePriceLockRequest } from '../../shared/models/xserver-create-pl-request';
 import { VerifyRequest } from '../../shared/models/wallet-verifyrequest';
@@ -24,13 +24,13 @@ export class ReceiveComponent implements OnInit {
     public themeService: ThemeService,
     public ref: DynamicDialogRef,
     private electronService: ElectronService,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
   ) {
     this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
     this.buildCreatePLForm();
   }
 
-  public priceLockForm: FormGroup;
+  public priceLockForm: UntypedFormGroup;
   public address: any = '';
   public qrString: any;
   public copied = false;

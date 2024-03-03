@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormGroup, Validators, FormBuilder } from '@angular/forms';
+import { UntypedFormGroup, Validators, UntypedFormBuilder } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ModalService } from '../shared/services/modal.service';
 import { GlobalService } from '../shared/services/global.service';
@@ -20,7 +20,7 @@ export class LoginComponent implements OnInit {
     private globalService: GlobalService,
     private apiService: ApiService,
     private router: Router,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     public themeService: ThemeService,
     private stakingService: ColdStakingService,
     public appState: ApplicationStateService,
@@ -38,7 +38,7 @@ export class LoginComponent implements OnInit {
   public contextMenuItems: MenuItem[];
   public walletSelected = false;
   public noWalletsFound: Message[] = [{ severity: 'info', summary: 'Create or restore wallet', detail: '<br>' + 'Please use one of the menu items at the top to create or restore a wallet' }];
-  public openWalletForm: FormGroup;
+  public openWalletForm: UntypedFormGroup;
 
   formErrors = {
     password: ''

@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { ApiService } from '../../../../shared/services/api.service';
 import { ApiEvents } from '../../../../shared/services/api.events';
 import { GlobalService } from '../../../../shared/services/global.service';
@@ -18,7 +18,7 @@ export class ResyncComponent implements OnInit, OnDestroy {
     private globalService: GlobalService,
     private apiService: ApiService,
     private genericModalService: ModalService,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private apiEvents: ApiEvents,
   ) { }
 
@@ -31,7 +31,7 @@ export class ResyncComponent implements OnInit, OnDestroy {
   public isSyncing = true;
   public minDate = new Date('2009-08-09');
   public maxDate = new Date();
-  public rescanWalletForm: FormGroup;
+  public rescanWalletForm: UntypedFormGroup;
 
   formErrors = {
     walletDate: ''

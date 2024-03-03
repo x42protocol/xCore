@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { FormGroup, Validators, FormBuilder } from '@angular/forms';
+import { UntypedFormGroup, Validators, UntypedFormBuilder } from '@angular/forms';
 import { DynamicDialogRef } from 'primeng/dynamicdialog';
 import { ApiService } from '../../../../shared/services/api.service';
 import { AddressLabel } from '../../../../shared/models/address-label';
@@ -12,13 +12,13 @@ import { AddressLabel } from '../../../../shared/models/address-label';
 export class AddNewAddressComponent {
   constructor(
     private apiService: ApiService,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     public ref: DynamicDialogRef,
   ) {
     this.buildAddressForm();
   }
 
-  addressForm: FormGroup;
+  addressForm: UntypedFormGroup;
 
   formErrors = {
     label: '',

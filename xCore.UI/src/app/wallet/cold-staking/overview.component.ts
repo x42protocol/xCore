@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
 import { Message } from 'primeng/api';
 import { DialogService } from 'primeng/dynamicdialog';
 import { GlobalService } from '../../shared/services/global.service';
@@ -32,7 +32,7 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
     private globalService: GlobalService,
     private stakingService: ColdStakingService,
     public dialogService: DialogService,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     public themeService: ThemeService,
     private apiEvents: ApiEvents,
     private settingsService: SettingsService,
@@ -59,7 +59,7 @@ export class ColdStakingOverviewComponent implements OnInit, OnDestroy {
   public balanceLoaded: boolean;
   public confirmedColdBalance = 0;
   public confirmedHotBalance = 0;
-  public setupForm: FormGroup;
+  public setupForm: UntypedFormGroup;
 
   public unconfirmedColdBalance: number;
   public unconfirmedHotBalance: number;

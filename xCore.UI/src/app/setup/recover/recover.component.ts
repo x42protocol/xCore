@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormGroup, Validators, FormBuilder } from '@angular/forms';
+import { UntypedFormGroup, Validators, UntypedFormBuilder } from '@angular/forms';
 import { Router } from '@angular/router';
 import { GlobalService } from '../../shared/services/global.service';
 import { ApiService } from '../../shared/services/api.service';
@@ -19,7 +19,7 @@ export class RecoverComponent implements OnInit {
   constructor(
     private apiService: ApiService,
     private router: Router,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     public ref: DynamicDialogRef,
     public themeService: ThemeService,
   ) {
@@ -27,7 +27,7 @@ export class RecoverComponent implements OnInit {
     this.isDarkTheme = themeService.getCurrentTheme().themeType === 'dark';
   }
 
-  public recoverWalletForm: FormGroup;
+  public recoverWalletForm: UntypedFormGroup;
   public creationDate: Date;
   public isRecovering = false;
   public minDate = new Date('2009-08-09');

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormGroup, Validators, FormBuilder } from '@angular/forms';
+import { UntypedFormGroup, Validators, UntypedFormBuilder } from '@angular/forms';
 import { SelectItem } from 'primeng/api';
 import { DialogService } from 'primeng/dynamicdialog';
 import { ApiService } from '../../../../shared/services/api.service';
@@ -21,15 +21,15 @@ export class SignVerifyComponent implements OnInit {
   constructor(
     private apiService: ApiService,
     private globalService: GlobalService,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     public dialogService: DialogService
   ) {
     this.buildSignatureForm();
     this.buildVerificationForm();
   }
 
-  public signatureForm: FormGroup;
-  public verifyForm: FormGroup;
+  public signatureForm: UntypedFormGroup;
+  public verifyForm: UntypedFormGroup;
   public allAddresses: SelectItem[];
   public showUnusedAddresses = false;
 

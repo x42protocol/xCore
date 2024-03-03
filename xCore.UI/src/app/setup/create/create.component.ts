@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { FormGroup, Validators, FormBuilder } from '@angular/forms';
+import { UntypedFormGroup, Validators, UntypedFormBuilder } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiService } from '../../shared/services/api.service';
 import { PasswordValidationDirective } from '../../shared/directives/password-validation.directive';
@@ -17,7 +17,7 @@ export class CreateComponent implements OnInit {
   constructor(
     private apiService: ApiService,
     private router: Router,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     public ref: DynamicDialogRef,
   ) { }
 
@@ -25,7 +25,7 @@ export class CreateComponent implements OnInit {
   @Input() filename: string;
   @Output() isCreated: EventEmitter<boolean> = new EventEmitter<boolean>();
 
-  public createWalletForm: FormGroup;
+  public createWalletForm: UntypedFormGroup;
   public displayMnemonic = false;
   public displayMnemonicConfirm = false;
   public queryParams: object;

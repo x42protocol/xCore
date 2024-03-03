@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormGroup, Validators, FormBuilder } from '@angular/forms';
+import { UntypedFormGroup, Validators, UntypedFormBuilder } from '@angular/forms';
 import { ApiService } from '../../../../shared/services/api.service';
 import { GlobalService } from '../../../../shared/services/global.service';
 import { WalletInfo } from '../../../../shared/models/wallet-info';
@@ -15,12 +15,12 @@ export class GenerateAddressesComponent implements OnInit {
   constructor(
     private apiService: ApiService,
     private globalService: GlobalService,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
   ) {
     this.buildGenerateAddressesForm();
   }
 
-  public generateAddressesForm: FormGroup;
+  public generateAddressesForm: UntypedFormGroup;
   public addresses: string[];
   public pageNumber = 1;
   public copyType: SelectItem[];

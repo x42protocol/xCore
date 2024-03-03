@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, Input } from '@angular/core';
-import { FormGroup, Validators, FormBuilder, AbstractControl } from '@angular/forms';
+import { UntypedFormGroup, Validators, UntypedFormBuilder, AbstractControl } from '@angular/forms';
 import { DynamicDialogRef, DynamicDialogConfig, DialogService } from 'primeng/dynamicdialog';
 import { ApiService } from '../../../shared/services/api.service';
 import { ApiEvents } from '../../../shared/services/api.events';
@@ -35,7 +35,7 @@ export class ColdStakingWithdrawComponent implements OnInit, OnDestroy {
     public activeModal: DynamicDialogRef,
     public config: DynamicDialogConfig,
     public dialogService: DialogService,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private stakingService: ColdStakingService,
     public themeService: ThemeService,
     private apiEvents: ApiEvents,
@@ -47,7 +47,7 @@ export class ColdStakingWithdrawComponent implements OnInit, OnDestroy {
   }
 
   public balanceLoaded: boolean;
-  public sendForm: FormGroup;
+  public sendForm: UntypedFormGroup;
   public hasOpReturn: boolean;
   public coinUnit: string;
   public isSending = false;

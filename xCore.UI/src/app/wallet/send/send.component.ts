@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormGroup, Validators, FormBuilder, AbstractControl } from '@angular/forms';
+import { UntypedFormGroup, Validators, UntypedFormBuilder, AbstractControl } from '@angular/forms';
 
 import { ApiService } from '../../shared/services/api.service';
 import { ApiEvents } from '../../shared/services/api.events';
@@ -36,7 +36,7 @@ export class SendComponent implements OnInit, OnDestroy {
   constructor(
     private apiService: ApiService,
     private globalService: GlobalService,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     public dialogService: DialogService,
     public ref: DynamicDialogRef,
     public config: DynamicDialogConfig,
@@ -52,9 +52,9 @@ export class SendComponent implements OnInit, OnDestroy {
   private accountMaxBalanceSubscription: Subscription;
 
   public balanceLoaded: boolean;
-  public sendForm: FormGroup;
-  public paymentForm: FormGroup;
-  public sendToSidechainForm: FormGroup;
+  public sendForm: UntypedFormGroup;
+  public paymentForm: UntypedFormGroup;
+  public sendToSidechainForm: UntypedFormGroup;
   public sidechainEnabled: boolean;
   public hasOpReturn: boolean;
   public coinUnit: string;

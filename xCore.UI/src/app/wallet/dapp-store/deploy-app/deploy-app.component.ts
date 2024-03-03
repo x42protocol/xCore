@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormGroup, Validators, FormBuilder } from '@angular/forms';
+import { UntypedFormGroup, Validators, UntypedFormBuilder } from '@angular/forms';
 import { ApiService } from '../../../shared/services/api.service';
 import { ApiEvents } from '../../../shared/services/api.events';
 import { GlobalService } from '../../../shared/services/global.service';
@@ -45,7 +45,7 @@ export class DeployAppComponent implements OnInit, OnDestroy {
   keyAddress: string;
   selectNode = false;
   selectedRecord = '';
-  form = new FormGroup({});
+  form = new UntypedFormGroup({});
   model = {};
   fields = [{
     type: 'flex-layout',
@@ -87,7 +87,7 @@ export class DeployAppComponent implements OnInit, OnDestroy {
   constructor(
     private apiService: ApiService,
     private globalService: GlobalService,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     public dialogService: DialogService,
     public ref: DynamicDialogRef,
     public config: DynamicDialogConfig,
@@ -102,7 +102,7 @@ export class DeployAppComponent implements OnInit, OnDestroy {
   private accountBalanceSubscription: Subscription;
 
   public balanceLoaded = false;
-  public paymentForm: FormGroup;
+  public paymentForm: UntypedFormGroup;
   public coinUnit: string;
   public isSending = false;
   public isDarkTheme = false;

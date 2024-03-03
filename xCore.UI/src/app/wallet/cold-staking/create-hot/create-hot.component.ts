@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { FormGroup, Validators, FormBuilder } from '@angular/forms';
+import { UntypedFormGroup, Validators, UntypedFormBuilder } from '@angular/forms';
 import { SelectItem } from 'primeng/api';
 import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { GlobalService } from '../../../shared/services/global.service';
@@ -24,7 +24,7 @@ export class ColdStakingCreateHotComponent {
     private stakingService: ColdStakingService,
     public activeModal: DynamicDialogRef,
     public config: DynamicDialogConfig,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     public themeService: ThemeService,
   ) {
     this.buildSendForm();
@@ -32,7 +32,7 @@ export class ColdStakingCreateHotComponent {
   }
 
   public isDarkTheme = false;
-  public sendForm: FormGroup;
+  public sendForm: UntypedFormGroup;
   public apiError: string;
   public isSending = false;
   public address: string;
