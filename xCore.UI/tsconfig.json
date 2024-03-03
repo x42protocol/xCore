@@ -10,7 +10,7 @@
     "module": "esnext",
     "moduleResolution": "node",
     "importHelpers": true,
-    "target": "es2020",
+    "target": "ES2022",
     "resolveJsonModule": true,
     "typeRoots": [
       "node_modules/@types"
@@ -26,7 +26,8 @@
       "exceljs": [
         "node_modules/exceljs/dist/exceljs.min"
       ]
-    }
+    },
+    "useDefineForClassFields": false
   },
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true,
