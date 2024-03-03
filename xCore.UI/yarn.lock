@@ -10837,10 +10837,12 @@ ngx-image-cropper@^3.2.1:
   dependencies:
     tslib "^1.9.0"
 
-ngx-material-file-input@^2.1.1:
-  version "2.1.1"
-  resolved "https://registry.npmjs.org/ngx-material-file-input/-/ngx-material-file-input-2.1.1.tgz"
-  integrity sha512-FbaIjiJnL6BZtZYWLvMSn9aSaM62AZaJegloTUphmLz5jopXPzE5W+3aC+dsf9h1IIqHSCLcyv0w+qH0ypBhMA==
+ngx-material-file-input@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.npmjs.org/ngx-material-file-input/-/ngx-material-file-input-4.0.1.tgz"
+  integrity sha512-syYvwlAdbiUkXFRQENfJSYErQLzRY0xnUIIDgwMeOw8uIZp+FyuTrFpOqA2yBVumi/EKdi4afv6fSHrNwrKvbg==
+  dependencies:
+    tslib "^2.3.0"
 
 "ngx-window-token@>=4.0.0 <6.0.0":
   version "5.0.0"
@@ -15120,6 +15122,8 @@ strip-ansi@^7.0.1:
 
 strip-ansi@~4.0.0:
   version "4.0.0"
+  resolved "https://registry.npmjs.org/strip-ansi/-/strip-ansi-4.0.0.tgz"
+  integrity sha512-4XaJ2zQdCzROZDivEVIDPkcQn8LMFSa8kj8Gxb/Lnwzv9A8VctNZ+lfivC/sV3ivW8ElJTERXZoPBRrZKkNKow==
   dependencies:
     ansi-regex "^3.0.0"
 

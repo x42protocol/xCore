@@ -93,7 +93,7 @@
     "lodash": "^4.17.21",
     "ng2-simple-timer": "^11.2.9",
     "ngx-image-cropper": "^3.2.1",
-    "ngx-material-file-input": "^2.1.1",
+    "ngx-material-file-input": "^4.0.1",
     "npm-check-updates": "^10.0.0",
     "primeflex": "2.0.0",
     "primeicons": "4.0.0",
