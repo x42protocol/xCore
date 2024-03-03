@@ -39,6 +39,7 @@ import { ContextMenuModule } from 'primeng/contextmenu';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { ToolbarModule } from 'primeng/toolbar';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { ElectronService } from 'ngx-electron';
 
 @NgModule({
   imports: [
@@ -84,6 +85,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
     DialogService,
     { provide: APP_TITLE, useValue: 'xCore' },
     SimpleTimer,
+    ElectronService
   ],
   bootstrap: [AppComponent]
 })
